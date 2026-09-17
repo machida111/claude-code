@@ -542,7 +542,7 @@ function initMap(){
   leafletMap = L.map('mapCanvas', {
     maxBounds: OSAKA_BOUNDS, maxBoundsViscosity:1.0, maxZoom:17, scrollWheelZoom:true
   });
-  L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
+  L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
     attribution:'<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地図: 国土地理院</a>',
     maxZoom:18
   }).addTo(leafletMap);
