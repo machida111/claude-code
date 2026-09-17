@@ -79,12 +79,6 @@ h1,h2,h3,h4{font-family:var(--font-display); margin:0; text-wrap:balance;}
 }
 .header-title h2{font-size:17px;}
 .header-title p{margin:2px 0 0; font-size:12px; color:var(--ink-muted);}
-.header-actions{display:flex; align-items:center; gap:10px;}
-.user-pill{
-  display:flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px;
-  background:var(--surface-2); font-size:12px; color:var(--ink-muted);
-}
-.user-pill b{color:var(--ink); font-weight:600;}
 
 .view{padding:22px 24px 40px; overflow-y:auto; flex:1;}
 .view[hidden]{display:none;}
@@ -277,7 +271,7 @@ svg.leaflet-zoom-animated{will-change:transform;}
       </div>
     </div>
     <div id="navItems"></div>
-    <div class="nav-foot">統計値：e-Stat実データ<br>本番はSupabase接続に切替</div>
+    <div class="nav-foot">統計値：e-Stat実データ</div>
   </nav>
 
   <div class="main-col">
@@ -285,9 +279,6 @@ svg.leaflet-zoom-animated{will-change:transform;}
       <div class="header-title">
         <h2 id="viewTitle">地域課題マップ</h2>
         <p id="viewSubtitle">大阪府内市町村の8指標を俯瞰します</p>
-      </div>
-      <div class="header-actions">
-        <div class="user-pill">👤 <b>振興課 職員</b>（デモログイン）</div>
       </div>
     </header>
 
