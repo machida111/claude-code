@@ -1,0 +1,1128 @@
+<title>地域課題カルテ</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --surface-2:#EAEEF3; --surface-3:#DEE4EC;
+  --border:#D7DEE8; --ink:#19222F; --ink-muted:#5C6779; --ink-faint:#8993A3;
+  --accent:#1F5C99; --accent-ink:#123E6B; --accent-soft:#E3ECF8;
+  --sev1:#3E8E7E; --sev2:#7FA65C; --sev3:#D9A544; --sev4:#C1702B; --sev5:#B23A32;
+  --good:#2E7D5B; --warn:#C77D12; --crit:#B23A32;
+  --shadow:0 1px 2px rgba(20,30,50,.07),0 6px 16px rgba(20,30,50,.07);
+  --font-display:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;
+  --font-body:'Noto Sans JP','Zen Kaku Gothic New',sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141920; --surface:#1B222C; --surface-2:#232B37; --surface-3:#2C3542;
+    --border:#39424F; --ink:#EAEDF2; --ink-muted:#A7B0BE; --ink-faint:#748094;
+    --accent:#5B9BDB; --accent-ink:#BFDBFF; --accent-soft:#20344A;
+    --sev1:#4CA894; --sev2:#8FB86B; --sev3:#E0B457; --sev4:#D28546; --sev5:#CC5147;
+    --good:#4CA894; --warn:#D9A544; --crit:#CC5147;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 20px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141920; --surface:#1B222C; --surface-2:#232B37; --surface-3:#2C3542;
+  --border:#39424F; --ink:#EAEDF2; --ink-muted:#A7B0BE; --ink-faint:#748094;
+  --accent:#5B9BDB; --accent-ink:#BFDBFF; --accent-soft:#20344A;
+  --sev1:#4CA894; --sev2:#8FB86B; --sev3:#E0B457; --sev4:#D28546; --sev5:#CC5147;
+  --good:#4CA894; --warn:#D9A544; --crit:#CC5147;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 20px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box;}
+body{
+  background:var(--bg); color:var(--ink); font-family:var(--font-body);
+  margin:0; height:100%; overflow:hidden;
+}
+html{height:100%;}
+button,input,select,textarea{font-family:inherit; color:inherit;}
+h1,h2,h3,h4{font-family:var(--font-display); margin:0; text-wrap:balance;}
+.mono{font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--surface-3);border-radius:6px;}
+:focus-visible{outline:2px solid var(--accent); outline-offset:2px; border-radius:4px;}
+
+.app-shell{
+  display:grid; grid-template-columns:220px 1fr; height:100%;
+}
+.sidebar{
+  background:var(--surface); border-right:1px solid var(--border);
+  display:flex; flex-direction:column; padding:16px 12px; gap:4px; overflow-y:auto;
+}
+.brand{
+  display:flex; align-items:center; gap:10px; padding:6px 8px 16px;
+}
+.brand-mark{
+  width:34px;height:34px;border-radius:9px;background:var(--accent);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex:none;
+}
+.brand-text h1{font-size:14px; font-weight:700; line-height:1.3;}
+.brand-text span{font-size:11px; color:var(--ink-muted);}
+.nav-item{
+  display:flex; align-items:center; gap:10px; padding:9px 10px; border-radius:8px;
+  color:var(--ink-muted); font-size:13px; font-weight:500; cursor:pointer; border:none;
+  background:transparent; text-align:left; width:100%;
+}
+.nav-item svg{width:18px;height:18px;flex:none;}
+.nav-item:hover{background:var(--surface-2); color:var(--ink);}
+.nav-item.active{background:var(--accent-soft); color:var(--accent-ink); font-weight:700;}
+.nav-foot{margin-top:auto; padding:10px 8px; font-size:11px; color:var(--ink-faint); border-top:1px solid var(--border);}
+
+.main-col{display:flex; flex-direction:column; height:100%; overflow:hidden;}
+.header-bar{
+  display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:14px 24px; border-bottom:1px solid var(--border); background:var(--surface); flex:none;
+}
+.header-title h2{font-size:17px;}
+.header-title p{margin:2px 0 0; font-size:12px; color:var(--ink-muted);}
+.header-actions{display:flex; align-items:center; gap:10px;}
+.user-pill{
+  display:flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px;
+  background:var(--surface-2); font-size:12px; color:var(--ink-muted);
+}
+.user-pill b{color:var(--ink); font-weight:600;}
+
+.view{padding:22px 24px 40px; overflow-y:auto; flex:1;}
+.view[hidden]{display:none;}
+.view-head{display:flex; align-items:flex-end; justify-content:space-between; gap:12px; margin-bottom:18px; flex-wrap:wrap;}
+.view-head h3{font-size:19px;}
+.view-head p{margin:4px 0 0; font-size:13px; color:var(--ink-muted); max-width:640px;}
+
+.btn{
+  display:inline-flex; align-items:center; gap:6px; padding:8px 14px; border-radius:8px;
+  border:1px solid var(--border); background:var(--surface); color:var(--ink);
+  font-size:13px; font-weight:600; cursor:pointer; white-space:nowrap;
+}
+.btn:hover{background:var(--surface-2);}
+.btn-primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+.btn-primary:hover{background:var(--accent-ink); border-color:var(--accent-ink);}
+.btn-ghost{border-color:transparent; background:transparent;}
+.btn-ghost:hover{background:var(--surface-2);}
+.btn-sm{padding:5px 10px; font-size:12px;}
+.btn[disabled]{opacity:.5; cursor:not-allowed;}
+
+.card{background:var(--surface); border:1px solid var(--border); border-radius:14px; box-shadow:var(--shadow); padding:18px;}
+.card + .card{margin-top:16px;}
+.grid{display:grid; gap:16px;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.grid-3{grid-template-columns:1fr 1fr 1fr;}
+@media (max-width:1000px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+.section-title{font-size:14px; font-weight:700; margin:0 0 12px; display:flex; align-items:center; gap:8px;}
+.section-title .count{font-size:11px; font-weight:600; color:var(--ink-faint); background:var(--surface-2); padding:2px 8px; border-radius:999px;}
+
+.input,.select,.textarea{
+  width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px;
+  background:var(--bg); color:var(--ink); font-size:13px;
+}
+.textarea{resize:vertical; min-height:80px; font-family:var(--font-body);}
+label.field{display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--ink-muted); font-weight:600;}
+
+.badge{display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:700;}
+.badge-dot{width:7px;height:7px;border-radius:50%;flex:none;}
+.status-badge[data-s="対応中"]{background:#FDECD2; color:#8A5300;}
+.status-badge[data-s="完了"]{background:#DCF0E4; color:#1F6B44;}
+.status-badge[data-s="フォローアップ予定"]{background:#E3ECF8; color:var(--accent-ink);}
+:root[data-theme="dark"] .status-badge,
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .status-badge{filter:brightness(1.15) saturate(.9);}}
+
+.table-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:10px;}
+table{width:100%; border-collapse:collapse; font-size:12.5px; min-width:640px;}
+th{text-align:left; padding:10px 12px; background:var(--surface-2); color:var(--ink-muted); font-weight:700; font-size:11.5px; letter-spacing:.02em; white-space:nowrap; position:sticky; top:0;}
+td{padding:9px 12px; border-top:1px solid var(--border); vertical-align:top;}
+tr:hover td{background:var(--surface-2);}
+
+/* ---- map ---- */
+.map-toolbar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+.zone-grid{
+  display:grid; gap:14px;
+  grid-template-columns:1fr 1fr 1fr;
+  grid-template-areas:
+    "kita kita kitakawachi"
+    "osaka nakakawachi nakakawachi"
+    "senhoku sennan minami";
+}
+@media (max-width:900px){
+  .zone-grid{grid-template-columns:1fr; grid-template-areas:"kita" "kitakawachi" "osaka" "nakakawachi" "senhoku" "minami" "sennan";}
+}
+.zone{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:10px;}
+.zone-head{display:flex; align-items:center; justify-content:space-between; gap:8px;}
+.zone-head h4{font-size:13px;}
+.zone-bubbles{display:flex; flex-wrap:wrap; gap:10px;}
+.bubble-btn{display:flex; flex-direction:column; align-items:center; gap:4px; width:64px; background:none; border:none; cursor:pointer; padding:2px;}
+.bubble{width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,.2); border:2px solid rgba(255,255,255,.5);}
+.bubble-btn span{font-size:10.5px; color:var(--ink-muted); text-align:center; line-height:1.2;}
+.bubble-btn:hover .bubble{transform:scale(1.08);}
+.legend{display:flex; align-items:center; gap:14px; font-size:11.5px; color:var(--ink-muted); flex-wrap:wrap;}
+.legend-scale{display:flex; align-items:center; gap:4px;}
+.legend-scale i{width:14px;height:14px;border-radius:4px;display:inline-block;}
+
+/* ---- karte ---- */
+.karte-header{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;}
+.stat-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:10px;}
+@media (max-width:700px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-tile{background:var(--surface-2); border-radius:10px; padding:12px;}
+.stat-tile .l{font-size:11px; color:var(--ink-muted); font-weight:600;}
+.stat-tile .v{font-family:var(--font-mono); font-size:18px; font-weight:600; margin-top:4px;}
+.stat-tile .v small{font-size:11px; color:var(--ink-muted); font-weight:500;}
+.issue-row{display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--border);}
+.issue-row:first-child{border-top:none;}
+.issue-row .name{flex:1; font-size:13px; font-weight:600;}
+.issue-bar-track{width:120px; height:7px; border-radius:999px; background:var(--surface-3); overflow:hidden;}
+.issue-bar-fill{height:100%; border-radius:999px;}
+.muni-pick-grid{display:flex; flex-wrap:wrap; gap:8px;}
+.muni-chip{padding:7px 12px; border-radius:999px; border:1px solid var(--border); background:var(--surface); font-size:12.5px; font-weight:600; cursor:pointer;}
+.muni-chip:hover{background:var(--surface-2);}
+
+/* ---- modal ---- */
+.modal-backdrop{position:fixed; inset:0; background:rgba(15,20,28,.5); display:flex; align-items:center; justify-content:center; padding:20px; z-index:50;}
+.modal-backdrop[hidden]{display:none;}
+.modal{background:var(--surface); border-radius:16px; padding:22px; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,.3);}
+.modal h3{font-size:16px; margin-bottom:14px;}
+.modal-grid{display:grid; gap:12px;}
+
+.toast{position:fixed; bottom:24px; right:24px; background:var(--ink); color:var(--bg); padding:10px 16px; border-radius:10px; font-size:12.5px; font-weight:600; box-shadow:var(--shadow); z-index:60; transition:opacity .3s, transform .3s;}
+.toast[hidden]{opacity:0; transform:translateY(8px); pointer-events:none;}
+
+.chart-box{position:relative; height:280px;}
+.chart-box.sm{height:220px;}
+.kv-list{display:flex; flex-direction:column; gap:6px; font-size:12.5px;}
+.kv-list .r{display:flex; justify-content:space-between; gap:10px;}
+.kv-list .r b{font-family:var(--font-mono);}
+.empty{color:var(--ink-faint); font-size:13px; padding:20px 0; text-align:center;}
+.ai-report h4{font-size:13px; margin:16px 0 8px; color:var(--accent-ink); display:flex; align-items:center; gap:6px;}
+.ai-report h4:first-child{margin-top:0;}
+.ai-report ul{margin:0; padding-left:18px; font-size:13px; line-height:1.7;}
+.tag-row{display:flex; gap:6px; flex-wrap:wrap;}
+.tag{font-size:11px; font-weight:700; background:var(--accent-soft); color:var(--accent-ink); padding:3px 9px; border-radius:999px;}
+
+@media (max-width:780px){
+  .app-shell{grid-template-columns:1fr; grid-template-rows:auto 1fr;}
+  .sidebar{
+    flex-direction:row; overflow-x:auto; overflow-y:hidden; align-items:center;
+    border-right:none; border-bottom:1px solid var(--border); padding:10px 12px; gap:6px;
+  }
+  .brand{padding:0 8px 0 0;}
+  .brand-text span{display:none;}
+  .nav-item{flex-direction:column; gap:3px; font-size:10.5px; padding:6px 10px; flex:none;}
+  .nav-foot{display:none;}
+  .header-bar{padding:12px 16px;}
+  .view{padding:16px;}
+}
+</style>
+
+<div class="app-shell">
+  <nav class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">🗺️</div>
+      <div class="brand-text">
+        <h1>地域課題カルテ</h1>
+        <span>大阪府 市町村局振興課</span>
+      </div>
+    </div>
+    <div id="navItems"></div>
+    <div class="nav-foot">サンプルデータ運用中<br>本番はSupabase接続に切替</div>
+  </nav>
+
+  <div class="main-col">
+    <header class="header-bar">
+      <div class="header-title">
+        <h2 id="viewTitle">地域課題マップ</h2>
+        <p id="viewSubtitle">大阪府内市町村の8指標を俯瞰します</p>
+      </div>
+      <div class="header-actions">
+        <div class="user-pill">👤 <b>振興課 職員</b>（デモログイン）</div>
+      </div>
+    </header>
+
+    <!-- MAP -->
+    <section class="view" id="view-map">
+      <div class="view-head">
+        <div>
+          <h3>地域課題マップ</h3>
+          <p>市町村を8つの指標でスコア化し、地域ブロック単位で色分け表示します。バブルをクリックすると市町村カルテに移動します。</p>
+        </div>
+      </div>
+      <div class="map-toolbar">
+        <label class="field" style="width:220px;">
+          <span>表示する指標</span>
+          <select class="select" id="mapCategorySelect"></select>
+        </label>
+        <div class="legend" id="mapLegend" style="margin-left:auto;"></div>
+      </div>
+      <div class="zone-grid" id="zoneGrid"></div>
+    </section>
+
+    <!-- DASHBOARD -->
+    <section class="view" id="view-dashboard" hidden>
+      <div class="view-head">
+        <div>
+          <h3>ダッシュボード</h3>
+          <p>府内市町村の課題傾向・相談対応状況を一覧できます。</p>
+        </div>
+      </div>
+      <div class="grid grid-2">
+        <div class="card">
+          <div class="section-title">市町村別課題ランキング <span class="count">総合スコア上位10</span></div>
+          <div id="rankIssues"></div>
+        </div>
+        <div class="card">
+          <div class="section-title">相談件数ランキング <span class="count">直近全期間</span></div>
+          <div id="rankConsult"></div>
+        </div>
+      </div>
+      <div class="grid grid-2" style="margin-top:16px;">
+        <div class="card">
+          <div class="section-title">課題分布（府内平均プロファイル）</div>
+          <div class="chart-box"><canvas id="chartDistribution"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="section-title">地域別比較</div>
+          <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <select class="select" id="cmpRegionA"></select>
+            <select class="select" id="cmpRegionB"></select>
+          </div>
+          <div class="chart-box"><canvas id="chartCompare"></canvas></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- KARTE -->
+    <section class="view" id="view-karte" hidden>
+      <div id="karteBody"></div>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="view" id="view-history" hidden>
+      <div class="view-head">
+        <div>
+          <h3>相談・訪問履歴管理</h3>
+          <p>市町村とのやり取りを記録し、検索・振り返りができます。</p>
+        </div>
+        <button class="btn btn-primary" id="btnNewRecord">＋ 履歴を登録</button>
+      </div>
+      <div class="card">
+        <div class="grid grid-3" style="margin-bottom:14px;">
+          <label class="field"><span>キーワード検索</span><input class="input" id="fSearch" placeholder="内容・アクションで検索"></label>
+          <label class="field"><span>市町村</span><select class="select" id="fMuni"></select></label>
+          <label class="field"><span>対応状況</span><select class="select" id="fStatus">
+            <option value="">すべて</option><option>対応中</option><option>完了</option><option>フォローアップ予定</option>
+          </select></label>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>日時</th><th>市町村</th><th>担当者</th><th>内容</th><th>対応状況</th><th>今後のアクション</th><th></th></tr></thead>
+            <tbody id="historyRows"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- SURVEY -->
+    <section class="view" id="view-survey" hidden>
+      <div class="view-head">
+        <div>
+          <h3>アンケート結果分析</h3>
+          <p>Excelファイル（.xlsx/.csv）をアップロードして単純集計・クロス集計・自由記述の傾向を確認します。</p>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn" id="btnSampleData">サンプルデータを読込</button>
+          <label class="btn btn-primary" style="cursor:pointer;">
+            ファイルを選択<input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
+          </label>
+        </div>
+      </div>
+      <div id="surveyEmpty" class="card empty">まだデータがありません。右上からExcel/CSVをアップロード、またはサンプルデータを読み込んでください。</div>
+      <div id="surveyBody" hidden>
+        <div class="card">
+          <div class="section-title">単純集計 <span class="count" id="surveyN"></span></div>
+          <div class="grid grid-2">
+            <label class="field"><span>集計する項目</span><select class="select" id="tallyCol"></select></label>
+            <div class="chart-box sm"><canvas id="chartTally"></canvas></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="section-title">クロス集計</div>
+          <div class="grid grid-2" style="margin-bottom:12px;">
+            <label class="field"><span>項目A（行）</span><select class="select" id="crossColA"></select></label>
+            <label class="field"><span>項目B（列）</span><select class="select" id="crossColB"></select></label>
+          </div>
+          <div class="table-wrap"><table id="crossTable"></table></div>
+        </div>
+        <div class="card">
+          <div class="section-title">自由記述の傾向（簡易キーワード集計）</div>
+          <label class="field" style="max-width:320px; margin-bottom:12px;"><span>自由記述の項目</span><select class="select" id="freeCol"></select></label>
+          <div id="freeKeywords" class="tag-row"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AI -->
+    <section class="view" id="view-ai" hidden>
+      <div class="view-head">
+        <div>
+          <h3>AI分析</h3>
+          <p>対象範囲を選び「分析を生成」を押すと、共通課題・特徴的な課題・支援方針・広域連携の可能性をまとめます。</p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="grid grid-3">
+          <label class="field"><span>対象範囲</span><select class="select" id="aiScopeType">
+            <option value="all">大阪府全域</option>
+            <option value="region">地域ブロック</option>
+            <option value="muni">個別市町村</option>
+          </select></label>
+          <label class="field" id="aiScopeTargetWrap"><span>対象を選択</span><select class="select" id="aiScopeTarget"></select></label>
+          <div style="display:flex; align-items:flex-end;"><button class="btn btn-primary" id="btnGenAi" style="width:100%;">分析を生成</button></div>
+        </div>
+      </div>
+      <div class="card" id="aiResult" hidden></div>
+      <div class="card empty" id="aiEmpty">対象範囲を選び「分析を生成」を押してください。</div>
+    </section>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="recordModalBackdrop" hidden>
+  <form class="modal" id="recordForm">
+    <h3>相談・訪問履歴の登録</h3>
+    <div class="modal-grid">
+      <label class="field"><span>日時</span><input class="input" type="datetime-local" id="rDate" required></label>
+      <label class="field"><span>市町村</span><select class="select" id="rMuni" required></select></label>
+      <label class="field"><span>担当者</span><input class="input" id="rStaff" placeholder="例：山本 久美子" required></label>
+      <label class="field"><span>内容</span><textarea class="textarea" id="rContent" required placeholder="相談・訪問の内容を記入"></textarea></label>
+      <label class="field"><span>対応状況</span><select class="select" id="rStatus"><option>対応中</option><option>完了</option><option>フォローアップ予定</option></select></label>
+      <label class="field"><span>今後のアクション</span><textarea class="textarea" id="rAction" placeholder="次のアクションを記入（任意）"></textarea></label>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:18px;">
+      <button type="button" class="btn" id="btnCancelRecord">キャンセル</button>
+      <button type="submit" class="btn btn-primary">登録する</button>
+    </div>
+  </form>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ===================== ユーティリティ ===================== */
+function hashStr(s){
+  var h=0; for(var i=0;i<s.length;i++){h=(h*31 + s.charCodeAt(i))>>>0;}
+  return (h % 1000)/1000;
+}
+function clampRound(v){ return Math.max(1, Math.min(5, Math.round(v))); }
+function fmtNum(n){ return Number(n).toLocaleString('ja-JP'); }
+function el(html){ var d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
+function toast(msg){
+  var t=document.getElementById('toast'); t.textContent=msg; t.hidden=false;
+  clearTimeout(t._h); t._h=setTimeout(function(){t.hidden=true;}, 2400);
+}
+function save(key,val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
+function load(key,fallback){ try{ var v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch(e){ return fallback; } }
+
+var SEV_COLORS=['','var(--sev1)','var(--sev2)','var(--sev3)','var(--sev4)','var(--sev5)'];
+var SEV_HEX=['','#3E8E7E','#7FA65C','#D9A544','#C1702B','#B23A32'];
+
+var CATEGORIES=[
+  {key:'population', label:'人口減少'},
+  {key:'aging', label:'高齢化'},
+  {key:'vacant', label:'空き家'},
+  {key:'transit', label:'公共交通'},
+  {key:'community', label:'地域コミュニティ'},
+  {key:'successor', label:'担い手不足'},
+  {key:'disaster', label:'防災'},
+  {key:'dx', label:'DX'}
+];
+function catLabel(key){ var c=CATEGORIES.filter(function(c){return c.key===key;})[0]; return c?c.label:key; }
+
+var REGIONS={
+  'osaka-city':{label:'大阪市域', area:'osaka'},
+  'kita':{label:'北大阪地域', area:'kita'},
+  'kita-kawachi':{label:'北河内地域', area:'kitakawachi'},
+  'naka-kawachi':{label:'中河内地域', area:'nakakawachi'},
+  'minami-kawachi':{label:'南河内地域', area:'minami'},
+  'sen-hoku':{label:'泉北地域', area:'senhoku'},
+  'sen-nan':{label:'泉南地域', area:'sennan'}
+};
+
+/* ===================== 市町村データ =====================
+   [id, 名称, 地域, 緯度, 経度, 人口, 人口増減率%, 高齢化率%, 面積km2, 世帯数, 財政力指数] */
+var RAW=[
+['osaka','大阪市','osaka-city',34.6937,135.5023,2750000,-0.1,27.5,225.30,1450000,1.02],
+['sakai','堺市','sen-hoku',34.5732,135.4830,826000,-0.4,28.9,149.85,380000,0.89],
+['ikeda','池田市','kita',34.8167,135.4308,102000,-0.5,28.2,22.14,47000,0.85],
+['toyonaka','豊中市','kita',34.7815,135.4695,406000,0.1,26.8,36.36,190000,0.97],
+['suita','吹田市','kita',34.7617,135.5158,385000,0.6,24.9,36.09,185000,1.01],
+['takatsuki','高槻市','kita',34.8467,135.6178,349000,-0.6,28.7,105.29,160000,0.83],
+['ibaraki','茨木市','kita',34.8156,135.5686,288000,0.3,25.6,76.52,130000,0.92],
+['minoh','箕面市','kita',34.8256,135.4700,137000,0.4,26.1,47.88,60000,0.88],
+['settsu','摂津市','kita',34.7736,135.5661,86000,0.2,24.3,14.88,39000,0.90],
+['toyono','豊能町','kita',34.9264,135.4581,19000,-2.5,41.0,34.35,8500,0.42],
+['nose','能勢町','kita',34.9694,135.4231,9000,-3.0,46.5,98.68,4300,0.28],
+['moriguchi','守口市','kita-kawachi',34.7377,135.5697,140000,-0.8,27.9,12.73,68000,0.79],
+['hirakata','枚方市','kita-kawachi',34.8153,135.6567,400000,-0.5,27.3,65.08,185000,0.85],
+['neyagawa','寝屋川市','kita-kawachi',34.7642,135.6283,228000,-1.0,28.5,24.72,108000,0.78],
+['daito','大東市','kita-kawachi',34.7136,135.6197,119000,-0.7,27.1,18.27,55000,0.80],
+['kadoma','門真市','kita-kawachi',34.7369,135.5789,121000,-0.6,27.6,12.30,60000,0.82],
+['shijonawate','四條畷市','kita-kawachi',34.7378,135.6478,54000,-1.2,28.8,18.61,24000,0.65],
+['katano','交野市','kita-kawachi',34.7692,135.6667,46000,-1.1,28.0,25.56,20000,0.68],
+['yao','八尾市','naka-kawachi',34.6247,135.6003,264000,-0.7,27.4,41.72,122000,0.83],
+['kashiwara','柏原市','naka-kawachi',34.5789,135.6444,68000,-1.3,29.6,15.60,31000,0.66],
+['higashiosaka','東大阪市','naka-kawachi',34.6797,135.6008,473000,-0.9,28.3,61.78,224000,0.80],
+['tondabayashi','富田林市','minami-kawachi',34.5000,135.5983,107000,-1.1,29.0,39.66,47000,0.72],
+['kawachinagano','河内長野市','minami-kawachi',34.4581,135.5686,97000,-1.4,32.5,109.84,42000,0.63],
+['matsubara','松原市','minami-kawachi',34.5772,135.5442,119000,-0.9,28.6,16.66,56000,0.75],
+['habikino','羽曳野市','minami-kawachi',34.5561,135.6100,107000,-1.0,29.2,26.61,47000,0.71],
+['fujiidera','藤井寺市','minami-kawachi',34.5697,135.5983,62000,-0.8,28.4,8.89,28000,0.74],
+['osakasayama','大阪狭山市','minami-kawachi',34.5133,135.5683,57000,-0.6,27.9,14.62,24000,0.76],
+['taishi','太子町','minami-kawachi',34.5061,135.6394,13000,-2.0,33.5,14.17,5300,0.45],
+['kanan','河南町','minami-kawachi',34.4881,135.6486,14500,-2.2,34.8,25.30,6000,0.40],
+['chihayaakasaka','千早赤阪村','minami-kawachi',34.4494,135.6394,3700,-3.5,42.0,37.30,1600,0.22],
+['izumiotsu','泉大津市','sen-hoku',34.5033,135.4106,42000,-0.9,29.5,13.25,19000,0.68],
+['izumi','和泉市','sen-hoku',34.4839,135.4181,183000,-0.3,26.9,84.98,78000,0.78],
+['takaishi','高石市','sen-hoku',34.5225,135.4344,57000,-0.7,28.1,11.35,25000,0.72],
+['tadaoka','忠岡町','sen-hoku',34.4989,135.4319,15500,-1.0,29.3,4.06,6800,0.55],
+['kishiwada','岸和田市','sen-nan',34.4614,135.3719,184000,-0.6,27.8,72.72,82000,0.76],
+['kaizuka','貝塚市','sen-nan',34.4339,135.3486,85000,-1.0,29.0,43.99,36000,0.65],
+['izumisano','泉佐野市','sen-nan',34.4067,135.3097,99000,-0.4,27.2,55.11,44000,0.71],
+['sennan','泉南市','sen-nan',34.3833,135.2822,59000,-1.5,30.3,31.56,26000,0.55],
+['hannan','阪南市','sen-nan',34.3489,135.2244,52000,-1.7,31.8,36.16,22000,0.52],
+['kumatori','熊取町','sen-nan',34.4083,135.3489,40000,-0.5,27.5,15.88,17000,0.58],
+['tajiri','田尻町','sen-nan',34.4142,135.3125,7500,-0.6,26.0,5.12,3100,0.65],
+['misaki','岬町','sen-nan',34.3181,135.1461,14000,-2.5,38.5,40.53,6500,0.38]
+];
+
+var DISASTER_BASE={'sen-nan':3.4,'minami-kawachi':3.6,'kita-kawachi':3.2,'naka-kawachi':3.0,'kita':2.8,'sen-hoku':2.9,'osaka-city':2.6};
+
+var MUNIS = RAW.map(function(r){
+  return {
+    id:r[0], name:r[1], region:r[2], lat:r[3], lng:r[4],
+    population:r[5], popChangeRate:r[6], agingRate:r[7], areaKm2:r[8], households:r[9], fiscalIndex:r[10],
+    memoDefault: ''
+  };
+});
+var MUNI_BY_ID={}; MUNIS.forEach(function(m){ MUNI_BY_ID[m.id]=m; });
+
+function noise(m,key,scale){ return (hashStr(m.name+key)-0.5)*(scale==null?1.2:scale); }
+
+function computeScores(m){
+  var dens = m.population / m.areaKm2;
+  var depop = clampRound(3 - m.popChangeRate*1.1 + noise(m,'depop'));
+  var aging = clampRound((m.agingRate-15)/5.5 + noise(m,'aging'));
+  var vacant = clampRound(depop*0.5 + aging*0.5 + noise(m,'vacant',1.6));
+  var transit = clampRound(6 - Math.log10(dens) + noise(m,'transit'));
+  var community = clampRound((depop+aging)/2 + noise(m,'community',1.3));
+  var successor = clampRound(aging*0.6 + (1-m.fiscalIndex)*3*0.4 + noise(m,'successor'));
+  var base = DISASTER_BASE[m.region] || 3.0;
+  if(dens<150) base += 0.5;
+  var disaster = clampRound(base + noise(m,'disaster',1.5));
+  var dx = clampRound(4.2 - m.fiscalIndex*2.4 - Math.log10(dens)*0.15 + noise(m,'dx'));
+  return {population:depop, aging:aging, vacant:vacant, transit:transit, community:community, successor:successor, disaster:disaster, dx:dx};
+}
+MUNIS.forEach(function(m){
+  m.scores = computeScores(m);
+  var sum=0,n=0; CATEGORIES.forEach(function(c){ sum+=m.scores[c.key]; n++; });
+  m.composite = sum/n;
+});
+
+function sevColor(score){
+  var b = Math.round(Math.max(1,Math.min(5,score)));
+  return SEV_COLORS[b];
+}
+function sevHex(score){
+  var b = Math.round(Math.max(1,Math.min(5,score)));
+  return SEV_HEX[b];
+}
+
+/* ===================== 相談・訪問履歴（localStorageで永続化） ===================== */
+var STAFF=['山本 久美子','田中 亮','佐藤 直樹','中村 美咲','小林 健太','渡辺 真由美'];
+function seedHistory(){
+  var seedDefs=[
+    ['chihayaakasaka','2025-10-14T10:00','山本 久美子','人口減少対策の補助制度について相談。移住促進パンフレットの改訂を依頼された。','完了','改訂版パンフレットのドラフトを11月上旬に送付予定。'],
+    ['nose','2025-10-28T13:30','田中 亮','空き家バンク登録件数が伸び悩んでいる件でヒアリング。','対応中','近隣市町村の成功事例を収集して共有する。'],
+    ['higashiosaka','2025-11-05T09:30','佐藤 直樹','中小企業の担い手不足について商工会と合同相談。','フォローアップ予定','来年度の人材マッチング事業の予算要望を確認する。'],
+    ['hannan','2025-11-12T14:00','中村 美咲','防災訓練の広域連携について現地訪問。','完了','近隣3市町合同訓練の日程調整済み。'],
+    ['toyono','2025-11-20T11:00','小林 健太','公共交通（コミュニティバス）の利用率低下について相談。','対応中','運行ルート見直しのデータ提供を依頼した。'],
+    ['izumisano','2025-12-02T10:30','渡辺 真由美','DX推進（窓口手続きのオンライン化）の進捗確認訪問。','完了','来年度も継続支援を行うことで合意。'],
+    ['kawachinagano','2025-12-10T15:00','山本 久美子','高齢化に伴う買い物支援サービスについて相談。','フォローアップ予定','移動販売事業者とのマッチングを検討する。'],
+    ['sennan','2026-01-08T09:00','田中 亮','空き家対策の補助金活用について相談。次回、現地調査に同行予定。','対応中','2月上旬に現地調査を実施。'],
+    ['taishi','2026-01-20T13:00','佐藤 直樹','地域コミュニティ活動の担い手育成について意見交換。','完了','地域おこし協力隊の募集要項を共有した。'],
+    ['moriguchi','2026-02-04T10:00','中村 美咲','浸水想定区域の見直しに伴う防災計画の相談。','対応中','府の河川担当課との調整を進める。'],
+    ['kanan','2026-02-18T14:30','小林 健太','移住定住促進策について庁内検討会に出席。','フォローアップ予定','次回検討会で具体策を提示する。'],
+    ['izumiotsu','2026-03-03T11:30','渡辺 真由美','空き家の老朽化に伴う危険家屋対応について訪問。','完了','法務担当と連携し対応方針を確定。'],
+    ['katano','2026-04-15T10:00','山本 久美子','コミュニティバスの再編案についてヒアリング。','対応中','住民説明会の実施時期を検討中。'],
+    ['habikino','2026-05-09T13:00','田中 亮','DX人材確保の相談。中間支援組織の紹介を実施。','完了','紹介先との初回面談が完了した。'],
+    ['hirakata','2026-06-20T10:30','佐藤 直樹','高齢化率上昇に伴う地域包括ケアの相談。','フォローアップ予定','庁内関係課との合同会議を設定する。'],
+    ['misaki','2026-07-14T09:30','中村 美咲','過疎地域の指定要件について確認訪問。','完了','必要書類のチェックリストを提供した。'],
+    ['kishiwada','2026-08-05T14:00','小林 健太','商店街の担い手不足について合同相談。','対応中','後継者育成セミナーの企画を検討中。'],
+    ['toyonaka','2026-08-25T11:00','渡辺 真由美','DX推進計画のレビュー会議に出席。','完了','次年度計画への反映事項を整理した。'],
+    ['tondabayashi','2026-09-02T10:00','山本 久美子','空き家活用と移住促進の連携事業について相談。','対応中','関係3課との調整会議を来月設定。'],
+    ['sakai','2026-09-10T15:30','田中 亮','広域防災拠点の整備について打合せ。','フォローアップ予定','近隣市との共同整備案を次回提示する。']
+  ];
+  return seedDefs.map(function(d,i){
+    return {id:'h'+(i+1), muniId:d[0], datetime:d[1], staff:d[2], content:d[3], status:d[4], action:d[5]};
+  });
+}
+var history = load('rc_history', null) || seedHistory();
+if(!load('rc_history',null)) save('rc_history', history);
+
+/* ===================== 職員メモ ===================== */
+var memos = load('rc_memos', {});
+
+/* ===================== ルーティング／状態 ===================== */
+var NAV=[
+  {key:'map', label:'地域課題マップ', icon:'🗺️'},
+  {key:'dashboard', label:'ダッシュボード', icon:'📊'},
+  {key:'karte', label:'市町村カルテ', icon:'🗂️'},
+  {key:'history', label:'相談・訪問履歴', icon:'📝'},
+  {key:'survey', label:'アンケート分析', icon:'📈'},
+  {key:'ai', label:'AI分析', icon:'✨'}
+];
+var TITLES={
+  map:['地域課題マップ','大阪府内市町村の8指標を俯瞰します'],
+  dashboard:['ダッシュボード','課題ランキングと相談対応状況の全体像'],
+  karte:['市町村カルテ','市町村ごとの詳細プロファイル'],
+  history:['相談・訪問履歴','市町村とのやり取りの記録・検索'],
+  survey:['アンケート結果分析','単純集計・クロス集計・自由記述の傾向分析'],
+  ai:['AI分析','課題の要約と支援方針のドラフト生成']
+};
+var state={ view:'map', selectedMuni:null, mapCategory:'composite', surveyRows:null, surveyHeaders:[] };
+
+function setView(v){
+  state.view=v;
+  NAV.forEach(function(n){});
+  document.querySelectorAll('.view').forEach(function(s){ s.hidden = (s.id !== 'view-'+v); });
+  document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.toggle('active', b.dataset.view===v); });
+  document.getElementById('viewTitle').textContent = TITLES[v][0];
+  document.getElementById('viewSubtitle').textContent = TITLES[v][1];
+  if(v==='karte') renderKarte();
+  if(v==='dashboard') renderDashboard();
+  if(v==='history') renderHistory();
+  if(v==='ai') renderAi();
+}
+
+function buildNav(){
+  var wrap=document.getElementById('navItems');
+  wrap.innerHTML='';
+  NAV.forEach(function(n){
+    var b=document.createElement('button');
+    b.className='nav-item'; b.dataset.view=n.key;
+    b.innerHTML='<span aria-hidden="true">'+n.icon+'</span><span>'+n.label+'</span>';
+    b.addEventListener('click', function(){ setView(n.key); });
+    wrap.appendChild(b);
+  });
+}
+
+/* ===================== 地図（地域ブロック×バブル） ===================== */
+function buildMapCategorySelect(){
+  var sel=document.getElementById('mapCategorySelect');
+  sel.innerHTML='<option value="composite">総合スコア</option>' + CATEGORIES.map(function(c){return '<option value="'+c.key+'">'+c.label+'</option>';}).join('');
+  sel.addEventListener('change', function(){ state.mapCategory=sel.value; renderMap(); });
+}
+function renderMapLegend(){
+  var wrap=document.getElementById('mapLegend');
+  wrap.innerHTML =
+    '<span>課題の度合い：</span>' +
+    '<span class="legend-scale"><i style="background:'+SEV_HEX[1]+'"></i>低い</span>' +
+    '<span class="legend-scale"><i style="background:'+SEV_HEX[2]+'"></i></span>' +
+    '<span class="legend-scale"><i style="background:'+SEV_HEX[3]+'"></i></span>' +
+    '<span class="legend-scale"><i style="background:'+SEV_HEX[4]+'"></i></span>' +
+    '<span class="legend-scale"><i style="background:'+SEV_HEX[5]+'"></i>高い</span>';
+}
+function renderMap(){
+  var grid=document.getElementById('zoneGrid');
+  grid.innerHTML='';
+  Object.keys(REGIONS).forEach(function(rid){
+    var region=REGIONS[rid];
+    var munis=MUNIS.filter(function(m){ return m.region===rid; });
+    var avg = munis.reduce(function(s,m){ return s+(state.mapCategory==='composite'?m.composite:m.scores[state.mapCategory]); },0)/munis.length;
+    var zone=document.createElement('div');
+    zone.className='zone'; zone.style.gridArea=region.area;
+    var bubbles = munis.map(function(m){
+      var v = state.mapCategory==='composite'?m.composite:m.scores[state.mapCategory];
+      var short = m.name.length>4? m.name.slice(0,4):m.name;
+      return '<button class="bubble-btn" data-muni="'+m.id+'" title="'+m.name+'">'+
+        '<span class="bubble" style="background:'+sevHex(v)+'">'+v.toFixed(1)+'</span>'+
+        '<span>'+m.name+'</span></button>';
+    }).join('');
+    zone.innerHTML =
+      '<div class="zone-head"><h4>'+region.label+'</h4><span class="badge" style="background:var(--surface-2); color:var(--ink-muted);">平均 '+avg.toFixed(1)+'</span></div>'+
+      '<div class="zone-bubbles">'+bubbles+'</div>';
+    grid.appendChild(zone);
+  });
+  grid.querySelectorAll('[data-muni]').forEach(function(b){
+    b.addEventListener('click', function(){
+      state.selectedMuni=b.dataset.muni;
+      setView('karte');
+    });
+  });
+}
+
+/* ===================== 市町村カルテ ===================== */
+function renderKarte(){
+  var body=document.getElementById('karteBody');
+  if(!state.selectedMuni){
+    body.innerHTML =
+      '<div class="card">'+
+      '<div class="section-title">市町村を選択してください <span class="count">'+MUNIS.length+'市町村</span></div>'+
+      '<div class="muni-pick-grid" id="muniPickGrid"></div>'+
+      '</div>';
+    var g=document.getElementById('muniPickGrid');
+    MUNIS.slice().sort(function(a,b){return a.id.localeCompare(b.id);}).forEach(function(m){
+      var c=document.createElement('button');
+      c.className='muni-chip'; c.textContent=m.name;
+      c.addEventListener('click', function(){ state.selectedMuni=m.id; renderKarte(); });
+      g.appendChild(c);
+    });
+    return;
+  }
+  var m=MUNI_BY_ID[state.selectedMuni];
+  var relatedHistory = history.filter(function(h){ return h.muniId===m.id; }).sort(function(a,b){ return b.datetime.localeCompare(a.datetime); });
+  var topIssues = CATEGORIES.map(function(c){ return {label:c.label, key:c.key, score:m.scores[c.key]}; }).sort(function(a,b){return b.score-a.score;});
+
+  body.innerHTML =
+    '<div class="karte-header" style="margin-bottom:16px;">'+
+      '<div><button class="btn btn-ghost btn-sm" id="backToMap">← 地図に戻る</button>'+
+      '<h3 style="margin-top:8px;">'+m.name+'</h3>'+
+      '<p style="color:var(--ink-muted); font-size:13px;">'+REGIONS[m.region].label+' ・ 総合スコア <b class="mono">'+m.composite.toFixed(1)+'</b> / 5.0</p></div>'+
+      '<div style="display:flex; gap:8px;"><button class="btn" id="karteToHistory">相談履歴を見る</button><button class="btn btn-primary" id="karteToAi">AI分析を見る</button></div>'+
+    '</div>'+
+    '<div class="grid grid-2">'+
+      '<div class="card">'+
+        '<div class="section-title">基本指標</div>'+
+        '<div class="stat-grid">'+
+          statTile('人口', fmtNum(m.population)+'人')+
+          statTile('人口増減率', (m.popChangeRate>0?'+':'')+m.popChangeRate.toFixed(1)+'%')+
+          statTile('高齢化率', m.agingRate.toFixed(1)+'%')+
+          statTile('面積', m.areaKm2.toFixed(2)+' km²')+
+          statTile('世帯数', fmtNum(m.households)+'世帯')+
+          statTile('財政力指数', m.fiscalIndex.toFixed(2))+
+        '</div>'+
+      '</div>'+
+      '<div class="card">'+
+        '<div class="section-title">課題スコア（8指標）</div>'+
+        '<div class="chart-box sm"><canvas id="chartKarteRadar"></canvas></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="grid grid-2" style="margin-top:16px;">'+
+      '<div class="card">'+
+        '<div class="section-title">主な地域課題</div>'+
+        topIssues.map(function(t){
+          return '<div class="issue-row"><span class="name">'+t.label+'</span>'+
+            '<div class="issue-bar-track"><div class="issue-bar-fill" style="width:'+(t.score/5*100)+'%; background:'+sevHex(t.score)+'"></div></div>'+
+            '<span class="mono" style="width:22px;text-align:right;">'+t.score+'</span></div>';
+        }).join('')+
+      '</div>'+
+      '<div class="card">'+
+        '<div class="section-title">担当者メモ</div>'+
+        '<textarea class="textarea" id="karteMemo" placeholder="この市町村に関する所感・引継ぎ事項などを記録">'+(memos[m.id]||'')+'</textarea>'+
+        '<p style="font-size:11px; color:var(--ink-faint); margin-top:6px;">入力内容は自動保存されます（ブラウザ内保存）。</p>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card" style="margin-top:16px;">'+
+      '<div class="section-title">関連する相談・訪問履歴 <span class="count">'+relatedHistory.length+'件</span></div>'+
+      (relatedHistory.length===0 ? '<div class="empty">まだ記録がありません。</div>' :
+        '<div class="table-wrap"><table><thead><tr><th>日時</th><th>担当者</th><th>内容</th><th>状況</th></tr></thead><tbody>'+
+        relatedHistory.slice(0,5).map(function(h){
+          return '<tr><td class="mono">'+h.datetime.replace('T',' ')+'</td><td>'+h.staff+'</td><td>'+h.content+'</td>'+
+            '<td><span class="badge status-badge" data-s="'+h.status+'">'+h.status+'</span></td></tr>';
+        }).join('')+'</tbody></table></div>')+
+    '</div>';
+
+  document.getElementById('backToMap').addEventListener('click', function(){ setView('map'); });
+  document.getElementById('karteToHistory').addEventListener('click', function(){ setView('history'); document.getElementById('fMuni').value=m.id; filterHistory(); });
+  document.getElementById('karteToAi').addEventListener('click', function(){
+    setView('ai');
+    document.getElementById('aiScopeType').value='muni';
+    updateAiScopeTargetOptions();
+    document.getElementById('aiScopeTarget').value=m.id;
+  });
+  var memoEl=document.getElementById('karteMemo');
+  var t=null;
+  memoEl.addEventListener('input', function(){
+    clearTimeout(t);
+    t=setTimeout(function(){ memos[m.id]=memoEl.value; save('rc_memos', memos); toast('メモを保存しました'); }, 500);
+  });
+
+  var ctx=document.getElementById('chartKarteRadar');
+  new Chart(ctx, {
+    type:'radar',
+    data:{
+      labels:CATEGORIES.map(function(c){return c.label;}),
+      datasets:[{
+        label:m.name,
+        data:CATEGORIES.map(function(c){return m.scores[c.key];}),
+        backgroundColor:'rgba(31,92,153,.18)', borderColor:'#1F5C99', pointBackgroundColor:'#1F5C99', borderWidth:2
+      }]
+    },
+    options:radarOptions()
+  });
+}
+function statTile(label,value){
+  return '<div class="stat-tile"><div class="l">'+label+'</div><div class="v">'+value+'</div></div>';
+}
+function radarOptions(){
+  var gridColor=getComputedStyle(document.body).getPropertyValue('--border').trim();
+  var textColor=getComputedStyle(document.body).getPropertyValue('--ink-muted').trim();
+  return {
+    responsive:true, maintainAspectRatio:false,
+    scales:{ r:{ min:0, max:5, ticks:{stepSize:1, color:textColor, backdropColor:'transparent'}, grid:{color:gridColor}, angleLines:{color:gridColor}, pointLabels:{color:textColor, font:{size:11}} } },
+    plugins:{ legend:{ labels:{color:textColor} } }
+  };
+}
+
+/* ===================== ダッシュボード ===================== */
+var chartRefs={};
+function destroyChart(key){ if(chartRefs[key]){ chartRefs[key].destroy(); delete chartRefs[key]; } }
+
+function renderDashboard(){
+  var byComposite = MUNIS.slice().sort(function(a,b){return b.composite-a.composite;}).slice(0,10);
+  document.getElementById('rankIssues').innerHTML = byComposite.map(function(m,i){
+    return rankRow(i+1, m.name, m.composite, 5);
+  }).join('');
+
+  var counts={};
+  history.forEach(function(h){ counts[h.muniId]=(counts[h.muniId]||0)+1; });
+  var byConsult = Object.keys(counts).map(function(id){ return {name:MUNI_BY_ID[id]?MUNI_BY_ID[id].name:id, n:counts[id]}; })
+    .sort(function(a,b){return b.n-a.n;}).slice(0,10);
+  var maxN = byConsult.length? byConsult[0].n : 1;
+  document.getElementById('rankConsult').innerHTML = byConsult.length? byConsult.map(function(c,i){
+    return rankRow(i+1, c.name, c.n, maxN, true);
+  }).join('') : '<div class="empty">履歴データがありません。</div>';
+
+  var avgByCat = CATEGORIES.map(function(c){
+    return MUNIS.reduce(function(s,m){return s+m.scores[c.key];},0)/MUNIS.length;
+  });
+  destroyChart('dist');
+  chartRefs.dist = new Chart(document.getElementById('chartDistribution'), {
+    type:'radar',
+    data:{ labels:CATEGORIES.map(function(c){return c.label;}), datasets:[{label:'府内平均', data:avgByCat, backgroundColor:'rgba(31,92,153,.18)', borderColor:'#1F5C99', pointBackgroundColor:'#1F5C99', borderWidth:2}] },
+    options:radarOptions()
+  });
+
+  var regionSelA=document.getElementById('cmpRegionA'), regionSelB=document.getElementById('cmpRegionB');
+  var optHtml=Object.keys(REGIONS).map(function(rid){return '<option value="'+rid+'">'+REGIONS[rid].label+'</option>';}).join('');
+  regionSelA.innerHTML=optHtml; regionSelB.innerHTML=optHtml;
+  regionSelA.value='osaka-city'; regionSelB.value='minami-kawachi';
+  regionSelA.onchange=renderCompareChart; regionSelB.onchange=renderCompareChart;
+  renderCompareChart();
+}
+function rankRow(rank, name, value, max, isCount){
+  var pct = Math.max(4, value/max*100);
+  var display = isCount? value+'件' : value.toFixed(1);
+  return '<div class="issue-row"><span style="width:20px; color:var(--ink-faint); font-weight:700; font-size:12px;">'+rank+'</span>'+
+    '<span class="name">'+name+'</span>'+
+    '<div class="issue-bar-track" style="width:140px;"><div class="issue-bar-fill" style="width:'+pct+'%; background:'+(isCount?'var(--accent)':sevHex(value))+'"></div></div>'+
+    '<span class="mono" style="width:44px; text-align:right;">'+display+'</span></div>';
+}
+function renderCompareChart(){
+  var a=document.getElementById('cmpRegionA').value, b=document.getElementById('cmpRegionB').value;
+  function avgFor(rid){
+    var ms=MUNIS.filter(function(m){return m.region===rid;});
+    return CATEGORIES.map(function(c){ return ms.reduce(function(s,m){return s+m.scores[c.key];},0)/ms.length; });
+  }
+  destroyChart('cmp');
+  chartRefs.cmp = new Chart(document.getElementById('chartCompare'), {
+    type:'radar',
+    data:{ labels:CATEGORIES.map(function(c){return c.label;}), datasets:[
+      {label:REGIONS[a].label, data:avgFor(a), backgroundColor:'rgba(31,92,153,.18)', borderColor:'#1F5C99', pointBackgroundColor:'#1F5C99', borderWidth:2},
+      {label:REGIONS[b].label, data:avgFor(b), backgroundColor:'rgba(178,58,50,.15)', borderColor:'#B23A32', pointBackgroundColor:'#B23A32', borderWidth:2}
+    ]},
+    options:radarOptions()
+  });
+}
+
+/* ===================== 相談・訪問履歴 ===================== */
+function buildMuniSelect(selectEl, withAll){
+  var opts = (withAll? '<option value="">すべての市町村</option>':'') +
+    MUNIS.slice().sort(function(a,b){return a.id.localeCompare(b.id);}).map(function(m){return '<option value="'+m.id+'">'+m.name+'</option>';}).join('');
+  selectEl.innerHTML=opts;
+}
+function renderHistory(){
+  buildMuniSelect(document.getElementById('fMuni'), true);
+  filterHistory();
+}
+function filterHistory(){
+  var kw=document.getElementById('fSearch').value.trim();
+  var muni=document.getElementById('fMuni').value;
+  var status=document.getElementById('fStatus').value;
+  var rows = history.filter(function(h){
+    if(muni && h.muniId!==muni) return false;
+    if(status && h.status!==status) return false;
+    if(kw && (h.content+h.action).indexOf(kw)===-1) return false;
+    return true;
+  }).sort(function(a,b){return b.datetime.localeCompare(a.datetime);});
+  var tbody=document.getElementById('historyRows');
+  tbody.innerHTML = rows.length? rows.map(function(h){
+    var mn = MUNI_BY_ID[h.muniId]? MUNI_BY_ID[h.muniId].name : h.muniId;
+    return '<tr><td class="mono">'+h.datetime.replace('T',' ')+'</td><td>'+mn+'</td><td>'+h.staff+'</td>'+
+      '<td style="max-width:260px;">'+h.content+'</td>'+
+      '<td><span class="badge status-badge" data-s="'+h.status+'">'+h.status+'</span></td>'+
+      '<td style="max-width:220px; color:var(--ink-muted);">'+(h.action||'—')+'</td>'+
+      '<td><button class="btn btn-ghost btn-sm" data-del="'+h.id+'">削除</button></td></tr>';
+  }).join('') : '<tr><td colspan="7"><div class="empty">条件に一致する履歴がありません。</div></td></tr>';
+  tbody.querySelectorAll('[data-del]').forEach(function(b){
+    b.addEventListener('click', function(){
+      history = history.filter(function(h){return h.id!==b.dataset.del;});
+      save('rc_history', history);
+      filterHistory();
+      toast('履歴を削除しました');
+    });
+  });
+}
+
+/* ===================== アンケート結果分析 ===================== */
+var SAMPLE_SURVEY=(function(){
+  var munisample=['大阪市','堺市','東大阪市','枚方市','岸和田市','河内長野市','豊中市','泉佐野市'];
+  var ages=['20代','30代','40代','50代','60代以上'];
+  var freeTexts=[
+    '空き家対策の情報がもっと分かりやすいと助かります',
+    'コミュニティバスの本数を増やしてほしい',
+    '高齢者の見守り体制を強化してほしい',
+    '窓口手続きをオンラインでできるようにしてほしい',
+    '防災訓練の周知をもっと早くしてほしい',
+    '子育て支援と移住相談を一体で案内してほしい',
+    '地域の担い手不足が深刻で活動が続けられない',
+    '公共交通の乗り換えが不便で困っている',
+    'DX化が進んで手続きが楽になった',
+    '空き家の相談窓口が分かりにくい'
+  ];
+  var rows=[];
+  for(var i=0;i<48;i++){
+    rows.push({
+      '居住市町村': munisample[i%munisample.length],
+      '年代': ages[(i*3)%ages.length],
+      '性別': i%2===0?'男性':'女性',
+      '満足度': (i%5)+1,
+      '自由記述': freeTexts[i%freeTexts.length]
+    });
+  }
+  return rows;
+})();
+
+function setSurveyData(rows){
+  if(!rows || !rows.length){ toast('データを読み取れませんでした'); return; }
+  state.surveyRows=rows; state.surveyHeaders=Object.keys(rows[0]);
+  document.getElementById('surveyEmpty').hidden=true;
+  document.getElementById('surveyBody').hidden=false;
+  document.getElementById('surveyN').textContent = rows.length+'件の回答';
+  ['tallyCol','crossColA','crossColB','freeCol'].forEach(function(id){
+    var sel=document.getElementById(id);
+    sel.innerHTML = state.surveyHeaders.map(function(h){return '<option>'+h+'</option>';}).join('');
+  });
+  document.getElementById('crossColB').selectedIndex = Math.min(1, state.surveyHeaders.length-1);
+  renderTally(); renderCross(); renderFreeText();
+}
+function renderTally(){
+  var col=document.getElementById('tallyCol').value;
+  var counts={};
+  state.surveyRows.forEach(function(r){ var v=String(r[col]); counts[v]=(counts[v]||0)+1; });
+  var labels=Object.keys(counts);
+  destroyChart('tally');
+  chartRefs.tally = new Chart(document.getElementById('chartTally'), {
+    type:'bar',
+    data:{ labels:labels, datasets:[{ label:col, data:labels.map(function(l){return counts[l];}), backgroundColor:'#1F5C99' }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{precision:0}} } }
+  });
+}
+function renderCross(){
+  var colA=document.getElementById('crossColA').value, colB=document.getElementById('crossColB').value;
+  var bVals=Array.from(new Set(state.surveyRows.map(function(r){return String(r[colB]);})));
+  var aVals=Array.from(new Set(state.surveyRows.map(function(r){return String(r[colA]);})));
+  var matrix={};
+  aVals.forEach(function(a){ matrix[a]={}; bVals.forEach(function(b){ matrix[a][b]=0; }); });
+  state.surveyRows.forEach(function(r){ matrix[String(r[colA])][String(r[colB])]++; });
+  var table=document.getElementById('crossTable');
+  table.innerHTML = '<thead><tr><th>'+colA+' ＼ '+colB+'</th>'+bVals.map(function(b){return '<th>'+b+'</th>';}).join('')+'<th>合計</th></tr></thead>'+
+    '<tbody>'+aVals.map(function(a){
+      var rowSum=0; bVals.forEach(function(b){rowSum+=matrix[a][b];});
+      return '<tr><td><b>'+a+'</b></td>'+bVals.map(function(b){return '<td class="mono">'+matrix[a][b]+'</td>';}).join('')+'<td class="mono"><b>'+rowSum+'</b></td></tr>';
+    }).join('')+'</tbody>';
+}
+var STOPWORDS=['こと','ため','よう','の','に','を','は','が','で','と','も','し','て','た','です','ます','ので','から','もっと','ほしい','ください'];
+function renderFreeText(){
+  var col=document.getElementById('freeCol').value;
+  var freq={};
+  state.surveyRows.forEach(function(r){
+    var text=String(r[col]||'');
+    var tokens=text.split(/[\s、。,.\/！!？?「」『』（）()]+/).filter(function(t){return t.length>=2 && STOPWORDS.indexOf(t)===-1;});
+    tokens.forEach(function(t){ freq[t]=(freq[t]||0)+1; });
+  });
+  var top=Object.keys(freq).map(function(k){return {k:k,n:freq[k]};}).sort(function(a,b){return b.n-a.n;}).slice(0,15);
+  var wrap=document.getElementById('freeKeywords');
+  wrap.innerHTML = top.length? top.map(function(t){return '<span class="tag">'+t.k+' ×'+t.n+'</span>';}).join('') : '<span class="empty">キーワードを抽出できませんでした。</span>';
+}
+
+/* ===================== AI分析（ルールベース生成デモ） ===================== */
+function updateAiScopeTargetOptions(){
+  var type=document.getElementById('aiScopeType').value;
+  var sel=document.getElementById('aiScopeTarget');
+  var wrap=document.getElementById('aiScopeTargetWrap');
+  if(type==='all'){ wrap.style.display='none'; sel.innerHTML=''; return; }
+  wrap.style.display='flex';
+  if(type==='region'){
+    sel.innerHTML = Object.keys(REGIONS).map(function(rid){return '<option value="'+rid+'">'+REGIONS[rid].label+'</option>';}).join('');
+  } else {
+    sel.innerHTML = MUNIS.slice().sort(function(a,b){return a.id.localeCompare(b.id);}).map(function(m){return '<option value="'+m.id+'">'+m.name+'</option>';}).join('');
+  }
+}
+function scopeMunis(){
+  var type=document.getElementById('aiScopeType').value;
+  var target=document.getElementById('aiScopeTarget').value;
+  if(type==='all') return {label:'大阪府全域', list:MUNIS};
+  if(type==='region') return {label:REGIONS[target].label, list:MUNIS.filter(function(m){return m.region===target;})};
+  var m=MUNI_BY_ID[target];
+  return {label:m.name, list:[m]};
+}
+function generateReport(scope){
+  var list=scope.list;
+  var avg={}; CATEGORIES.forEach(function(c){ avg[c.key]=list.reduce(function(s,m){return s+m.scores[c.key];},0)/list.length; });
+  var sortedAvg=CATEGORIES.map(function(c){return {key:c.key,label:c.label,v:avg[c.key]};}).sort(function(a,b){return b.v-a.v;});
+  var common = sortedAvg.filter(function(c){return c.v>=3.3;}).slice(0,3);
+  if(!common.length) common=sortedAvg.slice(0,2);
+
+  var distinctive=[];
+  CATEGORIES.forEach(function(c){
+    var maxM=list.slice().sort(function(a,b){return b.scores[c.key]-a.scores[c.key];})[0];
+    if(maxM && maxM.scores[c.key]>=4 && (maxM.scores[c.key]-avg[c.key])>=1){
+      distinctive.push(maxM.name+'は「'+c.label+'」課題が特に高い水準（スコア'+maxM.scores[c.key]+'）。');
+    }
+  });
+  if(!distinctive.length && list.length>1){
+    var topOne=list.slice().sort(function(a,b){return b.composite-a.composite;})[0];
+    distinctive.push(topOne.name+'は総合スコアが域内で最も高く、重点的な支援対象として検討の余地がある。');
+  }
+  if(list.length===1){
+    distinctive=sortedAvg.slice(0,2).map(function(c){return '「'+c.label+'」のスコアが'+c.v.toFixed(1)+'と高く、他指標に比べ優先度が高い。';});
+  }
+
+  var direction = common.map(function(c){
+    var actionMap={
+      population:'転入促進・関係人口創出策の強化と、既存住民の定住満足度向上策の両輪で推進する。',
+      aging:'地域包括ケア体制の強化と、生活支援サービス（買い物・移動支援等）の充実を図る。',
+      vacant:'空き家バンクの活用促進と、危険家屋の除却・活用支援制度の周知を強化する。',
+      transit:'コミュニティバス・デマンド交通の再編検討と、広域路線との接続改善を進める。',
+      community:'地域おこし協力隊等の外部人材活用と、自治会・NPOへの活動支援を拡充する。',
+      successor:'事業承継支援や地域人材マッチング事業と連携し、担い手育成を進める。',
+      disaster:'避難計画の再点検と、要配慮者支援体制・広域応援協定の強化を図る。',
+      dx:'窓口手続きのオンライン化と、職員のDXリテラシー向上研修を優先的に実施する。'
+    };
+    return actionMap[c.key];
+  });
+
+  var coop=[];
+  sortedAvg.slice(0,2).forEach(function(c){
+    var coopMap={
+      population:'近隣市町村と合同の移住・定住促進キャンペーンを検討する余地がある。',
+      aging:'医療・介護資源を近隣市町村と共同利用する広域連携が有効。',
+      vacant:'空き家バンクのプラットフォームを近隣市町村と共通化し、利便性を高める。',
+      transit:'広域幹線路線と各市町村のコミュニティ交通を接続する広域交通計画を検討する。',
+      community:'地域活動人材の合同育成講座を近隣市町村と共催する余地がある。',
+      successor:'商工会・農業団体と連携した広域の人材マッチング事業を検討する。',
+      disaster:'近隣市町村間の相互応援協定・合同防災訓練の拡充が有効。',
+      dx:'システム・電子申請基盤の共同利用によりコスト効率を高める余地がある。'
+    };
+    coop.push(coopMap[c.key]);
+  });
+
+  return {
+    common: common.map(function(c){return '「'+c.label+'」の平均スコアが'+c.v.toFixed(1)+'と高く、域内の共通課題として挙げられる。';}),
+    distinctive: distinctive,
+    direction: direction,
+    cooperation: Array.from(new Set(coop))
+  };
+}
+function renderAi(){
+  updateAiScopeTargetOptions();
+}
+function runAiAnalysis(){
+  var scope=scopeMunis();
+  var report=generateReport(scope);
+  document.getElementById('aiEmpty').hidden=true;
+  var box=document.getElementById('aiResult');
+  box.hidden=false;
+  box.innerHTML =
+    '<div class="section-title">分析結果：'+scope.label+' <span class="count">'+scope.list.length+'市町村</span></div>'+
+    '<div class="ai-report">'+
+      aiBlock('🔷 共通課題', report.common)+
+      aiBlock('🔶 特徴的な課題', report.distinctive)+
+      aiBlock('🧭 今後の支援の方向性', report.direction)+
+      aiBlock('🤝 広域連携の可能性', report.cooperation)+
+    '</div>'+
+    '<p style="font-size:11px; color:var(--ink-faint); margin-top:14px;">※本デモは内部ロジックによる自動生成です。本番運用ではSupabase Edge Function経由でOpenAI APIを呼び出し、同様の構造でレポートを生成する設計とします。</p>';
+}
+function aiBlock(title, items){
+  return '<h4>'+title+'</h4><ul>'+items.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul>';
+}
+
+/* ===================== モーダル：履歴登録 ===================== */
+function openRecordModal(){
+  buildMuniSelect(document.getElementById('rMuni'), false);
+  var now=new Date(); now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
+  document.getElementById('rDate').value=now.toISOString().slice(0,16);
+  document.getElementById('rContent').value=''; document.getElementById('rAction').value=''; document.getElementById('rStaff').value='';
+  document.getElementById('recordModalBackdrop').hidden=false;
+}
+function closeRecordModal(){ document.getElementById('recordModalBackdrop').hidden=true; }
+
+/* ===================== 初期化 ===================== */
+function init(){
+  buildNav();
+  buildMapCategorySelect();
+  renderMapLegend();
+  renderMap();
+  setView('map');
+
+  document.getElementById('btnNewRecord').addEventListener('click', openRecordModal);
+  document.getElementById('btnCancelRecord').addEventListener('click', closeRecordModal);
+  document.getElementById('recordModalBackdrop').addEventListener('click', function(e){ if(e.target.id==='recordModalBackdrop') closeRecordModal(); });
+  document.getElementById('recordForm').addEventListener('submit', function(e){
+    e.preventDefault();
+    var rec={
+      id:'h'+Date.now(),
+      muniId:document.getElementById('rMuni').value,
+      datetime:document.getElementById('rDate').value,
+      staff:document.getElementById('rStaff').value,
+      content:document.getElementById('rContent').value,
+      status:document.getElementById('rStatus').value,
+      action:document.getElementById('rAction').value
+    };
+    history.unshift(rec); save('rc_history', history);
+    closeRecordModal(); filterHistory(); toast('履歴を登録しました');
+  });
+
+  ['fSearch','fMuni','fStatus'].forEach(function(id){
+    document.getElementById(id).addEventListener('input', filterHistory);
+    document.getElementById(id).addEventListener('change', filterHistory);
+  });
+
+  document.getElementById('btnSampleData').addEventListener('click', function(){ setSurveyData(SAMPLE_SURVEY); toast('サンプルデータを読み込みました'); });
+  document.getElementById('fileInput').addEventListener('change', function(e){
+    var file=e.target.files[0]; if(!file) return;
+    var reader=new FileReader();
+    reader.onload=function(evt){
+      try{
+        var wb=XLSX.read(evt.target.result, {type:'array'});
+        var sheet=wb.Sheets[wb.SheetNames[0]];
+        var rows=XLSX.utils.sheet_to_json(sheet, {defval:''});
+        setSurveyData(rows);
+        toast(file.name+' を読み込みました');
+      }catch(err){ toast('読み込みに失敗しました：'+err.message); }
+    };
+    reader.readAsArrayBuffer(file);
+  });
+  ['tallyCol'].forEach(function(id){ document.getElementById(id).addEventListener('change', renderTally); });
+  ['crossColA','crossColB'].forEach(function(id){ document.getElementById(id).addEventListener('change', renderCross); });
+  document.getElementById('freeCol').addEventListener('change', renderFreeText);
+
+  document.getElementById('aiScopeType').addEventListener('change', updateAiScopeTargetOptions);
+  document.getElementById('btnGenAi').addEventListener('click', runAiAnalysis);
+}
+document.addEventListener('DOMContentLoaded', init);
+})();
+</script>
