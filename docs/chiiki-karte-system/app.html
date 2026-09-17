@@ -2,7 +2,6 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root{
   --bg:#F2F4F8; --surface:#FFFFFF; --surface-2:#EAEEF3; --surface-3:#DEE4EC;
@@ -125,22 +124,17 @@ label.field{display:flex; flex-direction:column; gap:5px; font-size:12px; color:
 
 .badge{display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:700;}
 
-.table-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:10px;}
-table{width:100%; border-collapse:collapse; font-size:12.5px; min-width:480px;}
-th{text-align:left; padding:10px 12px; background:var(--surface-2); color:var(--ink-muted); font-weight:700; font-size:11.5px; letter-spacing:.02em; white-space:nowrap; position:sticky; top:0;}
-td{padding:9px 12px; border-top:1px solid var(--border); vertical-align:top;}
-tr:hover td{background:var(--surface-2);}
-
 /* ---- map ---- */
 .map-toolbar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
 .legend{display:flex; align-items:center; gap:14px; font-size:11.5px; color:var(--ink-muted); flex-wrap:wrap;}
 .legend-scale{display:flex; align-items:center; gap:4px;}
 .legend-scale i{width:14px;height:14px;border-radius:4px;display:inline-block;}
 .map-box{
-  height:min(66vh,620px); min-height:360px; border-radius:14px; overflow:hidden;
+  width:min(560px,100%); aspect-ratio:2/3; max-height:760px; min-height:420px; margin:0 auto;
+  border-radius:14px; overflow:hidden;
   border:1px solid var(--border); box-shadow:var(--shadow); background:var(--surface-2);
 }
-.map-note{margin:10px 0 0; font-size:11px; color:var(--ink-faint);}
+.map-note{margin:10px 0 0; font-size:11px; color:var(--ink-faint); text-align:center;}
 .leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface); color:var(--ink); box-shadow:0 6px 20px rgba(0,0,0,.25);}
 .leaflet-container{background:var(--surface-2); font-family:var(--font-body);}
 .leaflet-bar a{background:var(--surface); color:var(--ink); border-bottom-color:var(--border);}
@@ -178,8 +172,6 @@ tr:hover td{background:var(--surface-2);}
 .ai-report h4{font-size:13px; margin:16px 0 8px; color:var(--accent-ink); display:flex; align-items:center; gap:6px;}
 .ai-report h4:first-child{margin-top:0;}
 .ai-report ul{margin:0; padding-left:18px; font-size:13px; line-height:1.7;}
-.tag-row{display:flex; gap:6px; flex-wrap:wrap;}
-.tag{font-size:11px; font-weight:700; background:var(--accent-soft); color:var(--accent-ink); padding:3px 9px; border-radius:999px;}
 
 @media (max-width:780px){
   .app-shell{grid-template-columns:1fr; grid-template-rows:auto 1fr;}
@@ -321,45 +313,6 @@ svg.leaflet-zoom-animated{will-change:transform;}
     <!-- KARTE -->
     <section class="view" id="view-karte" hidden>
       <div id="karteBody"></div>
-    </section>
-
-    <!-- SURVEY -->
-    <section class="view" id="view-survey" hidden>
-      <div class="view-head">
-        <div>
-          <h3>アンケート結果分析</h3>
-          <p>Excelファイル（.xlsx/.csv）をアップロードして単純集計・クロス集計・自由記述の傾向を確認します。</p>
-        </div>
-        <div style="display:flex; gap:8px;">
-          <button class="btn" id="btnSampleData">サンプルデータを読込</button>
-          <label class="btn btn-primary" style="cursor:pointer;">
-            ファイルを選択<input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none;">
-          </label>
-        </div>
-      </div>
-      <div id="surveyEmpty" class="card empty">まだデータがありません。右上からExcel/CSVをアップロード、またはサンプルデータを読み込んでください。</div>
-      <div id="surveyBody" hidden>
-        <div class="card">
-          <div class="section-title">単純集計 <span class="count" id="surveyN"></span></div>
-          <div class="grid grid-2">
-            <label class="field"><span>集計する項目</span><select class="select" id="tallyCol"></select></label>
-            <div class="chart-box sm"><canvas id="chartTally"></canvas></div>
-          </div>
-        </div>
-        <div class="card">
-          <div class="section-title">クロス集計</div>
-          <div class="grid grid-2" style="margin-bottom:12px;">
-            <label class="field"><span>項目A（行）</span><select class="select" id="crossColA"></select></label>
-            <label class="field"><span>項目B（列）</span><select class="select" id="crossColB"></select></label>
-          </div>
-          <div class="table-wrap"><table id="crossTable"></table></div>
-        </div>
-        <div class="card">
-          <div class="section-title">自由記述の傾向（簡易キーワード集計）</div>
-          <label class="field" style="max-width:320px; margin-bottom:12px;"><span>自由記述の項目</span><select class="select" id="freeCol"></select></label>
-          <div id="freeKeywords" class="tag-row"></div>
-        </div>
-      </div>
     </section>
 
     <!-- AI -->
@@ -522,16 +475,14 @@ var memos = load('rc_memos', {});
 var NAV=[
   {key:'map', label:'地域課題マップ', icon:'🗺️'},
   {key:'karte', label:'市町村カルテ', icon:'🗂️'},
-  {key:'survey', label:'アンケート分析', icon:'📈'},
   {key:'ai', label:'AI分析', icon:'✨'}
 ];
 var TITLES={
   map:['地域課題マップ','大阪府内市町村の8指標を俯瞰します'],
   karte:['市町村カルテ','市町村ごとの詳細プロファイル'],
-  survey:['アンケート結果分析','単純集計・クロス集計・自由記述の傾向分析'],
   ai:['AI分析','課題の要約と支援方針のドラフト生成']
 };
-var state={ view:'map', selectedMuni:null, mapCategory:'composite', surveyRows:null, surveyHeaders:[] };
+var state={ view:'map', selectedMuni:null, mapCategory:'composite' };
 
 function setView(v){
   state.view=v;
@@ -585,9 +536,12 @@ function popupHtml(m){
     '<button type="button" data-goto="'+m.id+'">市町村カルテを見る</button>'+
     '</div>';
 }
+var OSAKA_BOUNDS = L.latLngBounds([34.22,135.02],[35.02,135.76]);
 function initMap(){
   if(leafletMap) return;
-  leafletMap = L.map('mapCanvas', { minZoom:8, maxZoom:17, scrollWheelZoom:true });
+  leafletMap = L.map('mapCanvas', {
+    maxBounds: OSAKA_BOUNDS, maxBoundsViscosity:1.0, maxZoom:17, scrollWheelZoom:true
+  });
   L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
     attribution:'<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地図: 国土地理院</a>',
     maxZoom:18
@@ -607,7 +561,9 @@ function initMap(){
     markerById[m.id]=marker;
     bounds.push([m.lat, m.lng]);
   });
-  leafletMap.fitBounds(bounds, {padding:[24,24]});
+  leafletMap.fitBounds(bounds, {padding:[20,20]});
+  // 初期表示ズームを大阪府の外形にほぼ固定し、隣接府県が大きく見えないようにする
+  leafletMap.setMinZoom(leafletMap.getZoom());
 }
 function recolorMarkers(){
   MUNIS.forEach(function(m){
@@ -718,91 +674,6 @@ function radarOptions(){
     scales:{ r:{ min:0, max:5, ticks:{stepSize:1, color:textColor, backdropColor:'transparent'}, grid:{color:gridColor}, angleLines:{color:gridColor}, pointLabels:{color:textColor, font:{size:11}} } },
     plugins:{ legend:{ labels:{color:textColor} } }
   };
-}
-
-/* ===================== アンケート結果分析 ===================== */
-var chartRefs={};
-function destroyChart(key){ if(chartRefs[key]){ chartRefs[key].destroy(); delete chartRefs[key]; } }
-
-var SAMPLE_SURVEY=(function(){
-  var munisample=['大阪市','堺市','東大阪市','枚方市','岸和田市','河内長野市','豊中市','泉佐野市'];
-  var ages=['20代','30代','40代','50代','60代以上'];
-  var freeTexts=[
-    '空き家対策の情報がもっと分かりやすいと助かります',
-    'コミュニティバスの本数を増やしてほしい',
-    '高齢者の見守り体制を強化してほしい',
-    '窓口手続きをオンラインでできるようにしてほしい',
-    '防災訓練の周知をもっと早くしてほしい',
-    '子育て支援と移住相談を一体で案内してほしい',
-    '地域の担い手不足が深刻で活動が続けられない',
-    '公共交通の乗り換えが不便で困っている',
-    'DX化が進んで手続きが楽になった',
-    '空き家の相談窓口が分かりにくい'
-  ];
-  var rows=[];
-  for(var i=0;i<48;i++){
-    rows.push({
-      '居住市町村': munisample[i%munisample.length],
-      '年代': ages[(i*3)%ages.length],
-      '性別': i%2===0?'男性':'女性',
-      '満足度': (i%5)+1,
-      '自由記述': freeTexts[i%freeTexts.length]
-    });
-  }
-  return rows;
-})();
-
-function setSurveyData(rows){
-  if(!rows || !rows.length){ toast('データを読み取れませんでした'); return; }
-  state.surveyRows=rows; state.surveyHeaders=Object.keys(rows[0]);
-  document.getElementById('surveyEmpty').hidden=true;
-  document.getElementById('surveyBody').hidden=false;
-  document.getElementById('surveyN').textContent = rows.length+'件の回答';
-  ['tallyCol','crossColA','crossColB','freeCol'].forEach(function(id){
-    var sel=document.getElementById(id);
-    sel.innerHTML = state.surveyHeaders.map(function(h){return '<option>'+h+'</option>';}).join('');
-  });
-  document.getElementById('crossColB').selectedIndex = Math.min(1, state.surveyHeaders.length-1);
-  renderTally(); renderCross(); renderFreeText();
-}
-function renderTally(){
-  var col=document.getElementById('tallyCol').value;
-  var counts={};
-  state.surveyRows.forEach(function(r){ var v=String(r[col]); counts[v]=(counts[v]||0)+1; });
-  var labels=Object.keys(counts);
-  destroyChart('tally');
-  chartRefs.tally = new Chart(document.getElementById('chartTally'), {
-    type:'bar',
-    data:{ labels:labels, datasets:[{ label:col, data:labels.map(function(l){return counts[l];}), backgroundColor:'#1F5C99' }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{ y:{beginAtZero:true, ticks:{precision:0}} } }
-  });
-}
-function renderCross(){
-  var colA=document.getElementById('crossColA').value, colB=document.getElementById('crossColB').value;
-  var bVals=Array.from(new Set(state.surveyRows.map(function(r){return String(r[colB]);})));
-  var aVals=Array.from(new Set(state.surveyRows.map(function(r){return String(r[colA]);})));
-  var matrix={};
-  aVals.forEach(function(a){ matrix[a]={}; bVals.forEach(function(b){ matrix[a][b]=0; }); });
-  state.surveyRows.forEach(function(r){ matrix[String(r[colA])][String(r[colB])]++; });
-  var table=document.getElementById('crossTable');
-  table.innerHTML = '<thead><tr><th>'+colA+' ＼ '+colB+'</th>'+bVals.map(function(b){return '<th>'+b+'</th>';}).join('')+'<th>合計</th></tr></thead>'+
-    '<tbody>'+aVals.map(function(a){
-      var rowSum=0; bVals.forEach(function(b){rowSum+=matrix[a][b];});
-      return '<tr><td><b>'+a+'</b></td>'+bVals.map(function(b){return '<td class="mono">'+matrix[a][b]+'</td>';}).join('')+'<td class="mono"><b>'+rowSum+'</b></td></tr>';
-    }).join('')+'</tbody>';
-}
-var STOPWORDS=['こと','ため','よう','の','に','を','は','が','で','と','も','し','て','た','です','ます','ので','から','もっと','ほしい','ください'];
-function renderFreeText(){
-  var col=document.getElementById('freeCol').value;
-  var freq={};
-  state.surveyRows.forEach(function(r){
-    var text=String(r[col]||'');
-    var tokens=text.split(/[\s、。,.\/！!？?「」『』（）()]+/).filter(function(t){return t.length>=2 && STOPWORDS.indexOf(t)===-1;});
-    tokens.forEach(function(t){ freq[t]=(freq[t]||0)+1; });
-  });
-  var top=Object.keys(freq).map(function(k){return {k:k,n:freq[k]};}).sort(function(a,b){return b.n-a.n;}).slice(0,15);
-  var wrap=document.getElementById('freeKeywords');
-  wrap.innerHTML = top.length? top.map(function(t){return '<span class="tag">'+t.k+' ×'+t.n+'</span>';}).join('') : '<span class="empty">キーワードを抽出できませんでした。</span>';
 }
 
 /* ===================== AI分析（ルールベース生成デモ） ===================== */
@@ -916,25 +787,6 @@ function init(){
   buildMapCategorySelect();
   renderMapLegend();
   setView('map');
-
-  document.getElementById('btnSampleData').addEventListener('click', function(){ setSurveyData(SAMPLE_SURVEY); toast('サンプルデータを読み込みました'); });
-  document.getElementById('fileInput').addEventListener('change', function(e){
-    var file=e.target.files[0]; if(!file) return;
-    var reader=new FileReader();
-    reader.onload=function(evt){
-      try{
-        var wb=XLSX.read(evt.target.result, {type:'array'});
-        var sheet=wb.Sheets[wb.SheetNames[0]];
-        var rows=XLSX.utils.sheet_to_json(sheet, {defval:''});
-        setSurveyData(rows);
-        toast(file.name+' を読み込みました');
-      }catch(err){ toast('読み込みに失敗しました：'+err.message); }
-    };
-    reader.readAsArrayBuffer(file);
-  });
-  document.getElementById('tallyCol').addEventListener('change', renderTally);
-  ['crossColA','crossColB'].forEach(function(id){ document.getElementById(id).addEventListener('change', renderCross); });
-  document.getElementById('freeCol').addEventListener('change', renderFreeText);
 
   document.getElementById('aiScopeType').addEventListener('change', updateAiScopeTargetOptions);
   document.getElementById('btnGenAi').addEventListener('click', runAiAnalysis);

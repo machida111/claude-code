@@ -3,7 +3,7 @@
 大阪府 市町村局振興課 内部職員向け業務システムの設計ドキュメントと実装コードです。
 `app.html` を直接ブラウザで開くとそのまま動作する実装（プロトタイプ）が確認できます。
 
-**スコープ**：地域課題マップ／市町村カルテ／アンケート結果分析／AI分析の4機能を対象とします（相談・訪問履歴管理、ダッシュボードは対象外）。
+**スコープ**：地域課題マップ／市町村カルテ／AI分析の3機能を対象とします（相談・訪問履歴管理、ダッシュボード、アンケート結果分析は対象外）。
 
 ---
 
@@ -23,11 +23,9 @@
                                  │ Supabase JS Client / REST
 ┌───────────────────────────────▼──────────────────────────────────┐
 │  Backend : Supabase                                                │
-│   ├─ PostgreSQL（市町村・スコア・アンケート等）                      │
+│   ├─ PostgreSQL（市町村・スコア等）                                 │
 │   ├─ Auth（職員ログイン・ロール管理）                                │
-│   ├─ Storage（アップロードExcel）                                   │
 │   ├─ Edge Functions                                                │
-│   │    ├─ survey-import：Excel解析・集計                            │
 │   │    └─ ai-analyze：OpenAI API呼び出し（APIキーはサーバー側で保持）  │
 │   └─ Row Level Security（職員／管理職の権限分離）                     │
 └───────────────────────────────┬──────────────────────────────────┘
@@ -39,7 +37,8 @@
 
 **ポイント**
 - 地図は**国土地理院の地理院タイル**（標準地図：`https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png`）をLeafletで表示する。利用は無償・APIキー不要だが、地理院タイルの利用規約に従い「地図：国土地理院」の出典表示を行う（本実装ではLeafletの地図帰属コントロールに常時表示）。
-- 市町村ごとの円（Circle Marker）は緯度・経度の実座標に配置し、選択した指標のスコアで色分けする。本番実装では大阪府市町村境界のGeoJSONに切り替え、面（ポリゴン）での色分けに拡張できる。
+- 地図の表示範囲は大阪府の緯度経度バウンディングボックスに`maxBounds`で固定し、地図コンテナのアスペクト比も大阪府の南北に長い形状（おおむね幅:高さ=2:3）に合わせている。これにより初期表示・パン・ズームのいずれでも近隣府県が大きく映り込まず、大阪府内に視点が留まる。
+- 市町村ごとの円（Circle Marker）は緯度・経度の実座標に配置し、選択した指標のスコアで色分けする。本番実装では大阪府市町村境界のGeoJSONに切り替え、面（ポリゴン）での色分け・府境でのクリップ表示に拡張できる。
 - OpenAI APIキーはクライアントに置かず、Supabase Edge Function経由で呼び出す（本ドキュメント末尾の実装コードはブラウザ単体で動くデモのため、AI分析はルールベースのローカル生成に代替している）。
 - 検索速度重視のため、市町村マスタ・スコアはPostgreSQLに正規化しつつ、マップ表示用に集計済みビュー（`v_muni_scores`）を用意する。
 
@@ -50,12 +49,10 @@
 | # | 画面名 | 概要 | 主利用者 |
 |---|---|---|---|
 | 1 | ログイン | 職員認証（Supabase Auth） | 全員 |
-| 2 | 地域課題マップ | 国土地理院地図上に市町村を配置し、8指標でスコア化・色分け表示 | 全員 |
+| 2 | 地域課題マップ | 国土地理院地図（大阪府内に表示範囲を固定）上に市町村を配置し、8指標でスコア化・色分け表示 | 全員 |
 | 3 | 市町村カルテ | 市町村ごとの基礎情報・課題・メモ | 全員 |
-| 4 | アンケート分析（アップロード） | Excel/CSVアップロード | 担当者 |
-| 5 | アンケート分析（結果） | 単純集計・クロス集計・自由記述傾向 | 全員 |
-| 6 | AI分析 | 範囲選択→分析生成 | 管理職／担当者 |
-| 7 | 設定（将来拡張） | ユーザー管理・課題指標の重み設定 | 管理職 |
+| 4 | AI分析 | 範囲選択→分析生成 | 管理職／担当者 |
+| 5 | 設定（将来拡張） | ユーザー管理・課題指標の重み設定 | 管理職 |
 
 ---
 
@@ -68,8 +65,6 @@
 [地域課題マップ] ──円をクリック（ポップアップ）──▶ [市町村カルテ]
    │  ▲                                              │
    │  └──────────────戻る────────────────────────────┘  └─▶ [AI分析（市町村指定）]
-   │
-   ├─▶ [アンケート分析：アップロード] ──解析完了──▶ [アンケート分析：結果]
    │
    └─▶ [AI分析：範囲選択] ──生成──▶ [AI分析：結果表示]
 ```
@@ -101,7 +96,7 @@
 | category | text | population/aging/vacant/transit/community/successor/disaster/dx |
 | score | numeric(3,1) | 1.0〜5.0 |
 | scored_at | date | スコア算出日 |
-| source | text | manual / calculated / survey |
+| source | text | manual / calculated |
 
 ### 4.3 `staff`（職員）
 | id (PK, = auth.users.id) | name | role（staff/manager） | section |
@@ -109,11 +104,7 @@
 ### 4.4 `municipality_notes`（担当者メモ）
 | id | municipality_id (FK) | staff_id (FK) | body | updated_at |
 
-### 4.5 `surveys` / `survey_responses`
-| surveys: id, title, uploaded_by, uploaded_at, file_path(Storage) |
-| survey_responses: id, survey_id (FK), row_json (jsonb) … 列構造が可変のため jsonb で保持 |
-
-### 4.6 `ai_reports`（AI分析結果の保存・履歴化）
+### 4.5 `ai_reports`（AI分析結果の保存・履歴化）
 | id | scope_type（all/region/municipality） | scope_value | common_issues jsonb | distinctive_issues jsonb | directions jsonb | cooperation jsonb | generated_at | generated_by |
 
 **インデックス方針**：`issue_scores(municipality_id, category, scored_at desc)` に複合インデックスを付与し、マップ・カルテ表示時の最新スコア取得を高速化する。
@@ -127,7 +118,6 @@ erDiagram
   MUNICIPALITIES ||--o{ ISSUE_SCORES : has
   MUNICIPALITIES ||--o{ MUNICIPALITY_NOTES : has
   STAFF ||--o{ MUNICIPALITY_NOTES : writes
-  SURVEYS ||--o{ SURVEY_RESPONSES : contains
   MUNICIPALITIES ||--o{ AI_REPORTS : "scope (optional)"
 
   MUNICIPALITIES {
@@ -151,16 +141,6 @@ erDiagram
     uuid municipality_id
     uuid staff_id
     text body
-  }
-  SURVEYS {
-    uuid id
-    text title
-    timestamptz uploaded_at
-  }
-  SURVEY_RESPONSES {
-    uuid id
-    uuid survey_id
-    jsonb row_json
   }
   AI_REPORTS {
     uuid id
@@ -186,15 +166,12 @@ app/
 │   ├─ layout.tsx                 # サイドバー＋ヘッダーのシェル
 │   ├─ map/page.tsx                # 地域課題マップ
 │   ├─ karte/[municipalityId]/page.tsx
-│   ├─ survey/page.tsx
 │   └─ ai/page.tsx
 ├─ api/
-│   ├─ ai-analyze/route.ts         # Edge Function呼び出しプロキシ（任意）
-│   └─ survey-import/route.ts
+│   └─ ai-analyze/route.ts         # Edge Function呼び出しプロキシ（任意）
 components/
-├─ map/GsiTileMap.tsx, MuniMarker.tsx, MapLegend.tsx
+├─ map/GsiTileMap.tsx, MuniMarker.tsx, MapLegend.tsx  # maxBoundsで大阪府に表示範囲を固定
 ├─ karte/StatGrid.tsx, IssueRadarChart.tsx, MemoEditor.tsx
-├─ survey/UploadDropzone.tsx, TallyChart.tsx, CrossTabTable.tsx
 ├─ ai/ScopeSelector.tsx, ReportView.tsx
 └─ ui/ (shadcn/ui 生成コンポーネント)
 lib/
@@ -204,7 +181,6 @@ lib/
 supabase/
 ├─ migrations/*.sql
 └─ functions/
-    ├─ survey-import/index.ts
     └─ ai-analyze/index.ts
 ```
 
@@ -217,8 +193,6 @@ supabase/
 | GET | `/rest/v1/municipalities` | 市町村一覧（+スコアはビュー結合、地図描画用の緯度経度を含む） |
 | GET | `/rest/v1/municipalities?id=eq.{id}` | 市町村カルテ詳細 |
 | GET/PATCH | `/rest/v1/municipality_notes?municipality_id=eq.{id}` | 担当者メモの取得・更新 |
-| POST | `/functions/v1/survey-import` | Excelアップロード→解析→`surveys`/`survey_responses`へ保存 |
-| GET | `/rest/v1/survey_responses?survey_id=eq.{id}` | 集計用データ取得 |
 | POST | `/functions/v1/ai-analyze` | `{scope_type, scope_value}` を受け取り、対象市町村の指標を集計してOpenAI APIへ渡し、`ai_reports`に保存して結果を返す |
 | GET | `/rest/v1/ai_reports?...` | 過去のAI分析結果の再取得 |
 
@@ -231,11 +205,10 @@ supabase/
 1. Supabaseプロジェクト作成、`municipalities`等のテーブルをマイグレーションで作成し、大阪府42市町村相当のマスタデータ（緯度経度含む）を投入。
 2. Supabase Authで職員ログインを実装し、RLSポリシー（メモ編集は担当課、閲覧は全職員可）を設定。
 3. Next.jsプロジェクトを作成し、shadcn/uiを導入、共通レイアウト（サイドバー・ヘッダー）を実装。
-4. 地域課題マップ画面：Leaflet + 地理院タイル（標準地図）を表示し、`v_muni_scores`ビューを参照してCircle Markerを色分け。将来的に大阪府市町村GeoJSONへ切替可能な構造にする。
+4. 地域課題マップ画面：Leaflet + 地理院タイル（標準地図）を表示し、`maxBounds`とコンテナのアスペクト比を大阪府の外形に合わせて表示範囲を固定。`v_muni_scores`ビューを参照してCircle Markerを色分け。将来的に大阪府市町村GeoJSONへ切替可能な構造にする。
 5. 市町村カルテ画面：基本指標・レーダーチャート（Chart.js）・メモ編集（自動保存）を実装。
-6. アンケート分析：アップロードUI→Edge Function `survey-import`でExcel解析（xlsxライブラリ）→単純集計・クロス集計・自由記述キーワード集計をフロントで表示。
-7. AI分析：`ai-analyze` Edge Functionを実装し、OpenAI APIキーをSupabaseのSecretsに登録。フロントは範囲選択→生成→結果表示のみ。
-8. レスポンシブ調整・アクセシビリティ確認・権限（一般職員／管理職）別の表示制御を実装し、ステージング環境でUAT。
+6. AI分析：`ai-analyze` Edge Functionを実装し、OpenAI APIキーをSupabaseのSecretsに登録。フロントは範囲選択→生成→結果表示のみ。
+7. レスポンシブ調整・アクセシビリティ確認・権限（一般職員／管理職）別の表示制御を実装し、ステージング環境でUAT。
 
 ---
 
@@ -244,10 +217,9 @@ supabase/
 | フェーズ | 期間目安 | スコープ |
 |---|---|---|
 | Phase 0 | 1週 | Supabase/Next.js雛形、認証、市町村マスタ投入 |
-| Phase 1（MVP） | 2〜3週 | 地域課題マップ（地理院タイル＋Circle Marker）、市町村カルテ（基本指標＋レーダーチャート＋メモ） |
-| Phase 2 | 1〜2週 | アンケート分析（アップロード・単純集計・クロス集計・自由記述キーワード） |
-| Phase 3 | 1〜2週 | AI分析（Edge Function経由のOpenAI連携）、レポート保存 |
-| Phase 4 | 継続 | 権限管理の精緻化、GeoJSONポリゴン地図への切替、指標重み設定のUI化等の拡張 |
+| Phase 1（MVP） | 2〜3週 | 地域課題マップ（地理院タイル＋大阪府内固定表示＋Circle Marker）、市町村カルテ（基本指標＋レーダーチャート＋メモ） |
+| Phase 2 | 1〜2週 | AI分析（Edge Function経由のOpenAI連携）、レポート保存 |
+| Phase 3 | 継続 | 権限管理の精緻化、GeoJSONポリゴン地図への切替（府境での正確なクリップ表示）、指標重み設定のUI化等の拡張 |
 
 MVP（Phase 1まで）で「地域課題の可視化」「カルテによる一元管理」という属人化解消の核心価値を先行提供し、以降のフェーズで分析機能を積み上げる。
 
@@ -255,9 +227,9 @@ MVP（Phase 1まで）で「地域課題の可視化」「カルテによる一�
 
 ## 10. 実装コード一式
 
-`app.html`（同ディレクトリ）に、上記設計を反映した**単体HTMLで動作するプロトタイプ実装**を格納しています。ブラウザで直接開くだけで、地域課題マップ（国土地理院地図＋Leaflet）／市町村カルテ／アンケート結果分析／AI分析（ルールベース生成デモ）が一通り動作します。
+`app.html`（同ディレクトリ）に、上記設計を反映した**単体HTMLで動作するプロトタイプ実装**を格納しています。ブラウザで直接開くだけで、地域課題マップ（国土地理院地図＋Leaflet、大阪府内に表示範囲固定）／市町村カルテ／AI分析（ルールベース生成デモ）が一通り動作します。
 
-- 地図は実際に国土地理院の地理院タイル（標準地図）を読み込みます。市町村は緯度経度の実座標にCircle Markerとして配置し、選択した指標のスコアで色分けします。円をクリックするとポップアップから市町村カルテに遷移します。
+- 地図は実際に国土地理院の地理院タイル（標準地図）を読み込みます。表示範囲は大阪府のバウンディングボックスに`maxBounds`で固定し、地図コンテナも大阪府の形状（南北に長い）に合わせたアスペクト比にしているため、パン・ズームをしても近隣府県が大きく画面を占めません。市町村は緯度経度の実座標にCircle Markerとして配置し、選択した指標のスコアで色分けします。円をクリックするとポップアップから市町村カルテに遷移します。
 - データはすべて内蔵のサンプルデータ（府内42市町村相当の人口・高齢化率等の推計値）。
 - 担当者メモはブラウザの`localStorage`に保存されます（Supabase未接続のスタンドアロン版のため）。
 - 本番実装（Next.js＋Supabase）へ移行する際は、`lib/scoring.ts`にスコア計算式を移し、`app.html`内の`computeScores`関数のロジックをそのまま利用できます。
