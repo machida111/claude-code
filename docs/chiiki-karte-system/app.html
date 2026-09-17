@@ -1,5 +1,6 @@
 <title>地域課題カルテ</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -123,43 +124,34 @@ h1,h2,h3,h4{font-family:var(--font-display); margin:0; text-wrap:balance;}
 label.field{display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--ink-muted); font-weight:600;}
 
 .badge{display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:700;}
-.badge-dot{width:7px;height:7px;border-radius:50%;flex:none;}
-.status-badge[data-s="対応中"]{background:#FDECD2; color:#8A5300;}
-.status-badge[data-s="完了"]{background:#DCF0E4; color:#1F6B44;}
-.status-badge[data-s="フォローアップ予定"]{background:#E3ECF8; color:var(--accent-ink);}
-:root[data-theme="dark"] .status-badge,
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .status-badge{filter:brightness(1.15) saturate(.9);}}
 
 .table-wrap{overflow-x:auto; border:1px solid var(--border); border-radius:10px;}
-table{width:100%; border-collapse:collapse; font-size:12.5px; min-width:640px;}
+table{width:100%; border-collapse:collapse; font-size:12.5px; min-width:480px;}
 th{text-align:left; padding:10px 12px; background:var(--surface-2); color:var(--ink-muted); font-weight:700; font-size:11.5px; letter-spacing:.02em; white-space:nowrap; position:sticky; top:0;}
 td{padding:9px 12px; border-top:1px solid var(--border); vertical-align:top;}
 tr:hover td{background:var(--surface-2);}
 
 /* ---- map ---- */
-.map-toolbar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
-.zone-grid{
-  display:grid; gap:14px;
-  grid-template-columns:1fr 1fr 1fr;
-  grid-template-areas:
-    "kita kita kitakawachi"
-    "osaka nakakawachi nakakawachi"
-    "senhoku sennan minami";
-}
-@media (max-width:900px){
-  .zone-grid{grid-template-columns:1fr; grid-template-areas:"kita" "kitakawachi" "osaka" "nakakawachi" "senhoku" "minami" "sennan";}
-}
-.zone{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:14px; box-shadow:var(--shadow); display:flex; flex-direction:column; gap:10px;}
-.zone-head{display:flex; align-items:center; justify-content:space-between; gap:8px;}
-.zone-head h4{font-size:13px;}
-.zone-bubbles{display:flex; flex-wrap:wrap; gap:10px;}
-.bubble-btn{display:flex; flex-direction:column; align-items:center; gap:4px; width:64px; background:none; border:none; cursor:pointer; padding:2px;}
-.bubble{width:38px; height:38px; border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; font-size:11px; font-weight:700; box-shadow:0 1px 3px rgba(0,0,0,.2); border:2px solid rgba(255,255,255,.5);}
-.bubble-btn span{font-size:10.5px; color:var(--ink-muted); text-align:center; line-height:1.2;}
-.bubble-btn:hover .bubble{transform:scale(1.08);}
+.map-toolbar{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:14px;}
 .legend{display:flex; align-items:center; gap:14px; font-size:11.5px; color:var(--ink-muted); flex-wrap:wrap;}
 .legend-scale{display:flex; align-items:center; gap:4px;}
 .legend-scale i{width:14px;height:14px;border-radius:4px;display:inline-block;}
+.map-box{
+  height:min(66vh,620px); min-height:360px; border-radius:14px; overflow:hidden;
+  border:1px solid var(--border); box-shadow:var(--shadow); background:var(--surface-2);
+}
+.map-note{margin:10px 0 0; font-size:11px; color:var(--ink-faint);}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface); color:var(--ink); box-shadow:0 6px 20px rgba(0,0,0,.25);}
+.leaflet-container{background:var(--surface-2); font-family:var(--font-body);}
+.leaflet-bar a{background:var(--surface); color:var(--ink); border-bottom-color:var(--border);}
+.leaflet-bar a:hover{background:var(--surface-2);}
+.leaflet-control-attribution{background:rgba(255,255,255,.82); font-size:10.5px;}
+.muni-popup{min-width:150px;}
+.muni-popup h5{font-size:13px; margin:0 0 4px; font-family:var(--font-display);}
+.muni-popup .region{font-size:11px; color:var(--ink-muted); margin-bottom:8px;}
+.muni-popup .score-row{display:flex; align-items:center; gap:8px; font-size:12px; margin-bottom:2px;}
+.muni-popup .dot{width:9px;height:9px;border-radius:50%;flex:none;}
+.muni-popup button{margin-top:8px; width:100%; padding:6px 10px; border-radius:7px; border:1px solid var(--accent); background:var(--accent); color:#fff; font-size:12px; font-weight:600; cursor:pointer;}
 
 /* ---- karte ---- */
 .karte-header{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; flex-wrap:wrap;}
@@ -168,7 +160,6 @@ tr:hover td{background:var(--surface-2);}
 .stat-tile{background:var(--surface-2); border-radius:10px; padding:12px;}
 .stat-tile .l{font-size:11px; color:var(--ink-muted); font-weight:600;}
 .stat-tile .v{font-family:var(--font-mono); font-size:18px; font-weight:600; margin-top:4px;}
-.stat-tile .v small{font-size:11px; color:var(--ink-muted); font-weight:500;}
 .issue-row{display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--border);}
 .issue-row:first-child{border-top:none;}
 .issue-row .name{flex:1; font-size:13px; font-weight:600;}
@@ -178,21 +169,11 @@ tr:hover td{background:var(--surface-2);}
 .muni-chip{padding:7px 12px; border-radius:999px; border:1px solid var(--border); background:var(--surface); font-size:12.5px; font-weight:600; cursor:pointer;}
 .muni-chip:hover{background:var(--surface-2);}
 
-/* ---- modal ---- */
-.modal-backdrop{position:fixed; inset:0; background:rgba(15,20,28,.5); display:flex; align-items:center; justify-content:center; padding:20px; z-index:50;}
-.modal-backdrop[hidden]{display:none;}
-.modal{background:var(--surface); border-radius:16px; padding:22px; width:100%; max-width:520px; max-height:90vh; overflow-y:auto; box-shadow:0 20px 50px rgba(0,0,0,.3);}
-.modal h3{font-size:16px; margin-bottom:14px;}
-.modal-grid{display:grid; gap:12px;}
-
 .toast{position:fixed; bottom:24px; right:24px; background:var(--ink); color:var(--bg); padding:10px 16px; border-radius:10px; font-size:12.5px; font-weight:600; box-shadow:var(--shadow); z-index:60; transition:opacity .3s, transform .3s;}
 .toast[hidden]{opacity:0; transform:translateY(8px); pointer-events:none;}
 
 .chart-box{position:relative; height:280px;}
 .chart-box.sm{height:220px;}
-.kv-list{display:flex; flex-direction:column; gap:6px; font-size:12.5px;}
-.kv-list .r{display:flex; justify-content:space-between; gap:10px;}
-.kv-list .r b{font-family:var(--font-mono);}
 .empty{color:var(--ink-faint); font-size:13px; padding:20px 0; text-align:center;}
 .ai-report h4{font-size:13px; margin:16px 0 8px; color:var(--accent-ink); display:flex; align-items:center; gap:6px;}
 .ai-report h4:first-child{margin-top:0;}
@@ -213,6 +194,85 @@ tr:hover td{background:var(--surface-2);}
   .header-bar{padding:12px 16px;}
   .view{padding:16px;}
 }
+
+/* ---- leaflet (vendored, trimmed) ---- */
+.leaflet-pane,.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-tile-container,.leaflet-pane>svg,.leaflet-pane>canvas,.leaflet-zoom-box,.leaflet-image-layer,.leaflet-layer{position:absolute;left:0;top:0;}
+.leaflet-container{overflow:hidden;}
+.leaflet-tile,.leaflet-marker-icon,.leaflet-marker-shadow{-webkit-user-select:none;-moz-user-select:none;user-select:none;-webkit-user-drag:none;}
+.leaflet-tile::selection{background:transparent;}
+.leaflet-safari .leaflet-tile{image-rendering:-webkit-optimize-contrast;}
+.leaflet-safari .leaflet-tile-container{width:1600px;height:1600px;-webkit-transform-origin:0 0;}
+.leaflet-marker-icon,.leaflet-marker-shadow{display:block;}
+.leaflet-container .leaflet-overlay-pane svg{max-width:none!important;max-height:none!important;}
+.leaflet-container .leaflet-marker-pane img,.leaflet-container .leaflet-shadow-pane img,.leaflet-container .leaflet-tile-pane img,.leaflet-container img.leaflet-image-layer,.leaflet-container .leaflet-tile{max-width:none!important;max-height:none!important;width:auto;padding:0;}
+.leaflet-container img.leaflet-tile{mix-blend-mode:plus-lighter;}
+.leaflet-container.leaflet-touch-zoom{-ms-touch-action:pan-x pan-y;touch-action:pan-x pan-y;}
+.leaflet-container.leaflet-touch-drag{-ms-touch-action:pinch-zoom;touch-action:none;touch-action:pinch-zoom;}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom{-ms-touch-action:none;touch-action:none;}
+.leaflet-container{-webkit-tap-highlight-color:transparent;}
+.leaflet-container a{-webkit-tap-highlight-color:rgba(51,181,229,.4);}
+.leaflet-tile{filter:inherit;visibility:hidden;}
+.leaflet-tile-loaded{visibility:inherit;}
+.leaflet-zoom-box{width:0;height:0;box-sizing:border-box;z-index:800;}
+.leaflet-overlay-pane svg{-moz-user-select:none;}
+.leaflet-pane{z-index:400;}
+.leaflet-tile-pane{z-index:200;}
+.leaflet-overlay-pane{z-index:400;}
+.leaflet-shadow-pane{z-index:500;}
+.leaflet-marker-pane{z-index:600;}
+.leaflet-tooltip-pane{z-index:650;}
+.leaflet-popup-pane{z-index:700;}
+.leaflet-map-pane canvas{z-index:100;}
+.leaflet-map-pane svg{z-index:200;}
+.leaflet-vml-shape{width:1px;height:1px;}
+.lvml{behavior:url(#default#VML);display:inline-block;position:absolute;}
+.leaflet-control{position:relative;z-index:800;pointer-events:visiblePainted;pointer-events:auto;}
+.leaflet-top,.leaflet-bottom{position:absolute;z-index:1000;pointer-events:none;}
+.leaflet-top{top:0;}
+.leaflet-right{right:0;}
+.leaflet-bottom{bottom:0;}
+.leaflet-left{left:0;}
+.leaflet-control{float:left;clear:both;}
+.leaflet-right .leaflet-control{float:right;}
+.leaflet-top .leaflet-control{margin-top:10px;}
+.leaflet-bottom .leaflet-control{margin-bottom:10px;}
+.leaflet-left .leaflet-control{margin-left:10px;}
+.leaflet-right .leaflet-control{margin-right:10px;}
+.leaflet-fade-anim .leaflet-popup{opacity:0;transition:opacity .2s linear;}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup{opacity:1;}
+.leaflet-zoom-animated{transform-origin:0 0;}
+svg.leaflet-zoom-animated{will-change:transform;}
+.leaflet-zoom-anim .leaflet-zoom-animated{transition:transform .25s cubic-bezier(0,0,.25,1);}
+.leaflet-zoom-anim .leaflet-tile,.leaflet-pan-anim .leaflet-tile{transition:none;}
+.leaflet-zoom-anim .leaflet-zoom-hide{visibility:hidden;}
+.leaflet-interactive{cursor:pointer;}
+.leaflet-grab{cursor:grab;}
+.leaflet-crosshair,.leaflet-crosshair .leaflet-interactive{cursor:crosshair;}
+.leaflet-popup-pane,.leaflet-control{cursor:auto;}
+.leaflet-dragging .leaflet-grab,.leaflet-dragging .leaflet-grab .leaflet-interactive,.leaflet-dragging .leaflet-marker-draggable{cursor:grabbing;}
+.leaflet-marker-icon,.leaflet-marker-shadow,.leaflet-image-layer,.leaflet-pane>svg path,.leaflet-tile-container{pointer-events:none;}
+.leaflet-marker-icon.leaflet-interactive,.leaflet-image-layer.leaflet-interactive,.leaflet-pane>svg path.leaflet-interactive,svg.leaflet-image-layer.leaflet-interactive path{pointer-events:visiblePainted;pointer-events:auto;}
+.leaflet-zoom-box{border:2px dotted #38f;background:rgba(255,255,255,.5);}
+.leaflet-container{font-family:"Helvetica Neue",Arial,Helvetica,sans-serif;font-size:12px;line-height:1.5;}
+.leaflet-bar{box-shadow:0 1px 5px rgba(0,0,0,.4);border-radius:4px;}
+.leaflet-bar a{border-bottom:1px solid var(--border);width:28px;height:28px;line-height:28px;display:block;text-align:center;text-decoration:none;font:bold 16px sans-serif;}
+.leaflet-bar a:first-child{border-top-left-radius:4px;border-top-right-radius:4px;}
+.leaflet-bar a:last-child{border-bottom-left-radius:4px;border-bottom-right-radius:4px;border-bottom:none;}
+.leaflet-bar a.leaflet-disabled{cursor:default;color:#bbb;}
+.leaflet-touch .leaflet-bar a{width:30px;height:30px;line-height:30px;}
+.leaflet-control-attribution,.leaflet-control-scale-line{padding:0 6px;font-size:10.5px;line-height:1.6;}
+.leaflet-control-attribution a{text-decoration:none;}
+.leaflet-control-attribution a:hover{text-decoration:underline;}
+.leaflet-popup{position:absolute;text-align:center;margin-bottom:20px;}
+.leaflet-popup-content-wrapper{padding:1px;text-align:left;border-radius:12px;}
+.leaflet-popup-content{margin:12px 16px;line-height:1.4;font-size:13px;min-height:1px;}
+.leaflet-popup-tip-container{width:40px;height:20px;position:absolute;left:50%;margin-top:-1px;margin-left:-20px;overflow:hidden;pointer-events:none;}
+.leaflet-popup-tip{width:17px;height:17px;padding:1px;margin:-10px auto 0;pointer-events:auto;transform:rotate(45deg);}
+.leaflet-container a.leaflet-popup-close-button{position:absolute;top:0;right:0;border:none;text-align:center;width:24px;height:24px;font:16px/24px Tahoma,Verdana,sans-serif;color:var(--ink-muted);text-decoration:none;background:transparent;}
+.leaflet-popup-scrolled{overflow:auto;}
+.leaflet-div-icon{background:#fff;border:1px solid #666;}
+.leaflet-tooltip{position:absolute;padding:6px;background:var(--surface);border:1px solid var(--border);border-radius:5px;color:var(--ink);white-space:nowrap;pointer-events:none;box-shadow:0 1px 3px rgba(0,0,0,.3);}
+.leaflet-tooltip.leaflet-interactive{cursor:pointer;pointer-events:auto;}
 </style>
 
 <div class="app-shell">
@@ -244,7 +304,7 @@ tr:hover td{background:var(--surface-2);}
       <div class="view-head">
         <div>
           <h3>地域課題マップ</h3>
-          <p>市町村を8つの指標でスコア化し、地域ブロック単位で色分け表示します。バブルをクリックすると市町村カルテに移動します。</p>
+          <p>国土地理院の地図上に市町村を配置し、選択した指標のスコアで色分け表示します。円をクリックすると市町村カルテに移動します。</p>
         </div>
       </div>
       <div class="map-toolbar">
@@ -254,72 +314,13 @@ tr:hover td{background:var(--surface-2);}
         </label>
         <div class="legend" id="mapLegend" style="margin-left:auto;"></div>
       </div>
-      <div class="zone-grid" id="zoneGrid"></div>
-    </section>
-
-    <!-- DASHBOARD -->
-    <section class="view" id="view-dashboard" hidden>
-      <div class="view-head">
-        <div>
-          <h3>ダッシュボード</h3>
-          <p>府内市町村の課題傾向・相談対応状況を一覧できます。</p>
-        </div>
-      </div>
-      <div class="grid grid-2">
-        <div class="card">
-          <div class="section-title">市町村別課題ランキング <span class="count">総合スコア上位10</span></div>
-          <div id="rankIssues"></div>
-        </div>
-        <div class="card">
-          <div class="section-title">相談件数ランキング <span class="count">直近全期間</span></div>
-          <div id="rankConsult"></div>
-        </div>
-      </div>
-      <div class="grid grid-2" style="margin-top:16px;">
-        <div class="card">
-          <div class="section-title">課題分布（府内平均プロファイル）</div>
-          <div class="chart-box"><canvas id="chartDistribution"></canvas></div>
-        </div>
-        <div class="card">
-          <div class="section-title">地域別比較</div>
-          <div style="display:flex; gap:10px; margin-bottom:10px;">
-            <select class="select" id="cmpRegionA"></select>
-            <select class="select" id="cmpRegionB"></select>
-          </div>
-          <div class="chart-box"><canvas id="chartCompare"></canvas></div>
-        </div>
-      </div>
+      <div class="map-box" id="mapCanvas"></div>
+      <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地理院タイル</a>）</p>
     </section>
 
     <!-- KARTE -->
     <section class="view" id="view-karte" hidden>
       <div id="karteBody"></div>
-    </section>
-
-    <!-- HISTORY -->
-    <section class="view" id="view-history" hidden>
-      <div class="view-head">
-        <div>
-          <h3>相談・訪問履歴管理</h3>
-          <p>市町村とのやり取りを記録し、検索・振り返りができます。</p>
-        </div>
-        <button class="btn btn-primary" id="btnNewRecord">＋ 履歴を登録</button>
-      </div>
-      <div class="card">
-        <div class="grid grid-3" style="margin-bottom:14px;">
-          <label class="field"><span>キーワード検索</span><input class="input" id="fSearch" placeholder="内容・アクションで検索"></label>
-          <label class="field"><span>市町村</span><select class="select" id="fMuni"></select></label>
-          <label class="field"><span>対応状況</span><select class="select" id="fStatus">
-            <option value="">すべて</option><option>対応中</option><option>完了</option><option>フォローアップ予定</option>
-          </select></label>
-        </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>日時</th><th>市町村</th><th>担当者</th><th>内容</th><th>対応状況</th><th>今後のアクション</th><th></th></tr></thead>
-            <tbody id="historyRows"></tbody>
-          </table>
-        </div>
-      </div>
     </section>
 
     <!-- SURVEY -->
@@ -386,24 +387,6 @@ tr:hover td{background:var(--surface-2);}
   </div>
 </div>
 
-<div class="modal-backdrop" id="recordModalBackdrop" hidden>
-  <form class="modal" id="recordForm">
-    <h3>相談・訪問履歴の登録</h3>
-    <div class="modal-grid">
-      <label class="field"><span>日時</span><input class="input" type="datetime-local" id="rDate" required></label>
-      <label class="field"><span>市町村</span><select class="select" id="rMuni" required></select></label>
-      <label class="field"><span>担当者</span><input class="input" id="rStaff" placeholder="例：山本 久美子" required></label>
-      <label class="field"><span>内容</span><textarea class="textarea" id="rContent" required placeholder="相談・訪問の内容を記入"></textarea></label>
-      <label class="field"><span>対応状況</span><select class="select" id="rStatus"><option>対応中</option><option>完了</option><option>フォローアップ予定</option></select></label>
-      <label class="field"><span>今後のアクション</span><textarea class="textarea" id="rAction" placeholder="次のアクションを記入（任意）"></textarea></label>
-    </div>
-    <div style="display:flex; justify-content:flex-end; gap:8px; margin-top:18px;">
-      <button type="button" class="btn" id="btnCancelRecord">キャンセル</button>
-      <button type="submit" class="btn btn-primary">登録する</button>
-    </div>
-  </form>
-</div>
-
 <div class="toast" id="toast" hidden></div>
 
 <script>
@@ -417,7 +400,6 @@ function hashStr(s){
 }
 function clampRound(v){ return Math.max(1, Math.min(5, Math.round(v))); }
 function fmtNum(n){ return Number(n).toLocaleString('ja-JP'); }
-function el(html){ var d=document.createElement('div'); d.innerHTML=html.trim(); return d.firstChild; }
 function toast(msg){
   var t=document.getElementById('toast'); t.textContent=msg; t.hidden=false;
   clearTimeout(t._h); t._h=setTimeout(function(){t.hidden=true;}, 2400);
@@ -425,7 +407,6 @@ function toast(msg){
 function save(key,val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
 function load(key,fallback){ try{ var v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch(e){ return fallback; } }
 
-var SEV_COLORS=['','var(--sev1)','var(--sev2)','var(--sev3)','var(--sev4)','var(--sev5)'];
 var SEV_HEX=['','#3E8E7E','#7FA65C','#D9A544','#C1702B','#B23A32'];
 
 var CATEGORIES=[
@@ -438,16 +419,15 @@ var CATEGORIES=[
   {key:'disaster', label:'防災'},
   {key:'dx', label:'DX'}
 ];
-function catLabel(key){ var c=CATEGORIES.filter(function(c){return c.key===key;})[0]; return c?c.label:key; }
 
 var REGIONS={
-  'osaka-city':{label:'大阪市域', area:'osaka'},
-  'kita':{label:'北大阪地域', area:'kita'},
-  'kita-kawachi':{label:'北河内地域', area:'kitakawachi'},
-  'naka-kawachi':{label:'中河内地域', area:'nakakawachi'},
-  'minami-kawachi':{label:'南河内地域', area:'minami'},
-  'sen-hoku':{label:'泉北地域', area:'senhoku'},
-  'sen-nan':{label:'泉南地域', area:'sennan'}
+  'osaka-city':{label:'大阪市域'},
+  'kita':{label:'北大阪地域'},
+  'kita-kawachi':{label:'北河内地域'},
+  'naka-kawachi':{label:'中河内地域'},
+  'minami-kawachi':{label:'南河内地域'},
+  'sen-hoku':{label:'泉北地域'},
+  'sen-nan':{label:'泉南地域'}
 };
 
 /* ===================== 市町村データ =====================
@@ -502,8 +482,7 @@ var DISASTER_BASE={'sen-nan':3.4,'minami-kawachi':3.6,'kita-kawachi':3.2,'naka-k
 var MUNIS = RAW.map(function(r){
   return {
     id:r[0], name:r[1], region:r[2], lat:r[3], lng:r[4],
-    population:r[5], popChangeRate:r[6], agingRate:r[7], areaKm2:r[8], households:r[9], fiscalIndex:r[10],
-    memoDefault: ''
+    population:r[5], popChangeRate:r[6], agingRate:r[7], areaKm2:r[8], households:r[9], fiscalIndex:r[10]
   };
 });
 var MUNI_BY_ID={}; MUNIS.forEach(function(m){ MUNI_BY_ID[m.id]=m; });
@@ -530,46 +509,11 @@ MUNIS.forEach(function(m){
   m.composite = sum/n;
 });
 
-function sevColor(score){
-  var b = Math.round(Math.max(1,Math.min(5,score)));
-  return SEV_COLORS[b];
-}
 function sevHex(score){
   var b = Math.round(Math.max(1,Math.min(5,score)));
   return SEV_HEX[b];
 }
-
-/* ===================== 相談・訪問履歴（localStorageで永続化） ===================== */
-var STAFF=['山本 久美子','田中 亮','佐藤 直樹','中村 美咲','小林 健太','渡辺 真由美'];
-function seedHistory(){
-  var seedDefs=[
-    ['chihayaakasaka','2025-10-14T10:00','山本 久美子','人口減少対策の補助制度について相談。移住促進パンフレットの改訂を依頼された。','完了','改訂版パンフレットのドラフトを11月上旬に送付予定。'],
-    ['nose','2025-10-28T13:30','田中 亮','空き家バンク登録件数が伸び悩んでいる件でヒアリング。','対応中','近隣市町村の成功事例を収集して共有する。'],
-    ['higashiosaka','2025-11-05T09:30','佐藤 直樹','中小企業の担い手不足について商工会と合同相談。','フォローアップ予定','来年度の人材マッチング事業の予算要望を確認する。'],
-    ['hannan','2025-11-12T14:00','中村 美咲','防災訓練の広域連携について現地訪問。','完了','近隣3市町合同訓練の日程調整済み。'],
-    ['toyono','2025-11-20T11:00','小林 健太','公共交通（コミュニティバス）の利用率低下について相談。','対応中','運行ルート見直しのデータ提供を依頼した。'],
-    ['izumisano','2025-12-02T10:30','渡辺 真由美','DX推進（窓口手続きのオンライン化）の進捗確認訪問。','完了','来年度も継続支援を行うことで合意。'],
-    ['kawachinagano','2025-12-10T15:00','山本 久美子','高齢化に伴う買い物支援サービスについて相談。','フォローアップ予定','移動販売事業者とのマッチングを検討する。'],
-    ['sennan','2026-01-08T09:00','田中 亮','空き家対策の補助金活用について相談。次回、現地調査に同行予定。','対応中','2月上旬に現地調査を実施。'],
-    ['taishi','2026-01-20T13:00','佐藤 直樹','地域コミュニティ活動の担い手育成について意見交換。','完了','地域おこし協力隊の募集要項を共有した。'],
-    ['moriguchi','2026-02-04T10:00','中村 美咲','浸水想定区域の見直しに伴う防災計画の相談。','対応中','府の河川担当課との調整を進める。'],
-    ['kanan','2026-02-18T14:30','小林 健太','移住定住促進策について庁内検討会に出席。','フォローアップ予定','次回検討会で具体策を提示する。'],
-    ['izumiotsu','2026-03-03T11:30','渡辺 真由美','空き家の老朽化に伴う危険家屋対応について訪問。','完了','法務担当と連携し対応方針を確定。'],
-    ['katano','2026-04-15T10:00','山本 久美子','コミュニティバスの再編案についてヒアリング。','対応中','住民説明会の実施時期を検討中。'],
-    ['habikino','2026-05-09T13:00','田中 亮','DX人材確保の相談。中間支援組織の紹介を実施。','完了','紹介先との初回面談が完了した。'],
-    ['hirakata','2026-06-20T10:30','佐藤 直樹','高齢化率上昇に伴う地域包括ケアの相談。','フォローアップ予定','庁内関係課との合同会議を設定する。'],
-    ['misaki','2026-07-14T09:30','中村 美咲','過疎地域の指定要件について確認訪問。','完了','必要書類のチェックリストを提供した。'],
-    ['kishiwada','2026-08-05T14:00','小林 健太','商店街の担い手不足について合同相談。','対応中','後継者育成セミナーの企画を検討中。'],
-    ['toyonaka','2026-08-25T11:00','渡辺 真由美','DX推進計画のレビュー会議に出席。','完了','次年度計画への反映事項を整理した。'],
-    ['tondabayashi','2026-09-02T10:00','山本 久美子','空き家活用と移住促進の連携事業について相談。','対応中','関係3課との調整会議を来月設定。'],
-    ['sakai','2026-09-10T15:30','田中 亮','広域防災拠点の整備について打合せ。','フォローアップ予定','近隣市との共同整備案を次回提示する。']
-  ];
-  return seedDefs.map(function(d,i){
-    return {id:'h'+(i+1), muniId:d[0], datetime:d[1], staff:d[2], content:d[3], status:d[4], action:d[5]};
-  });
-}
-var history = load('rc_history', null) || seedHistory();
-if(!load('rc_history',null)) save('rc_history', history);
+function scoreOf(m){ return state.mapCategory==='composite' ? m.composite : m.scores[state.mapCategory]; }
 
 /* ===================== 職員メモ ===================== */
 var memos = load('rc_memos', {});
@@ -577,17 +521,13 @@ var memos = load('rc_memos', {});
 /* ===================== ルーティング／状態 ===================== */
 var NAV=[
   {key:'map', label:'地域課題マップ', icon:'🗺️'},
-  {key:'dashboard', label:'ダッシュボード', icon:'📊'},
   {key:'karte', label:'市町村カルテ', icon:'🗂️'},
-  {key:'history', label:'相談・訪問履歴', icon:'📝'},
   {key:'survey', label:'アンケート分析', icon:'📈'},
   {key:'ai', label:'AI分析', icon:'✨'}
 ];
 var TITLES={
   map:['地域課題マップ','大阪府内市町村の8指標を俯瞰します'],
-  dashboard:['ダッシュボード','課題ランキングと相談対応状況の全体像'],
   karte:['市町村カルテ','市町村ごとの詳細プロファイル'],
-  history:['相談・訪問履歴','市町村とのやり取りの記録・検索'],
   survey:['アンケート結果分析','単純集計・クロス集計・自由記述の傾向分析'],
   ai:['AI分析','課題の要約と支援方針のドラフト生成']
 };
@@ -595,15 +535,13 @@ var state={ view:'map', selectedMuni:null, mapCategory:'composite', surveyRows:n
 
 function setView(v){
   state.view=v;
-  NAV.forEach(function(n){});
   document.querySelectorAll('.view').forEach(function(s){ s.hidden = (s.id !== 'view-'+v); });
   document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.toggle('active', b.dataset.view===v); });
   document.getElementById('viewTitle').textContent = TITLES[v][0];
   document.getElementById('viewSubtitle').textContent = TITLES[v][1];
   if(v==='karte') renderKarte();
-  if(v==='dashboard') renderDashboard();
-  if(v==='history') renderHistory();
   if(v==='ai') renderAi();
+  if(v==='map'){ initMap(); if(leafletMap) setTimeout(function(){ leafletMap.invalidateSize(); }, 0); }
 }
 
 function buildNav(){
@@ -618,11 +556,14 @@ function buildNav(){
   });
 }
 
-/* ===================== 地図（地域ブロック×バブル） ===================== */
+/* ===================== 地図（国土地理院タイル + Leaflet） ===================== */
+var leafletMap=null;
+var markerById={};
+
 function buildMapCategorySelect(){
   var sel=document.getElementById('mapCategorySelect');
   sel.innerHTML='<option value="composite">総合スコア</option>' + CATEGORIES.map(function(c){return '<option value="'+c.key+'">'+c.label+'</option>';}).join('');
-  sel.addEventListener('change', function(){ state.mapCategory=sel.value; renderMap(); });
+  sel.addEventListener('change', function(){ state.mapCategory=sel.value; recolorMarkers(); });
 }
 function renderMapLegend(){
   var wrap=document.getElementById('mapLegend');
@@ -634,32 +575,46 @@ function renderMapLegend(){
     '<span class="legend-scale"><i style="background:'+SEV_HEX[4]+'"></i></span>' +
     '<span class="legend-scale"><i style="background:'+SEV_HEX[5]+'"></i>高い</span>';
 }
-function renderMap(){
-  var grid=document.getElementById('zoneGrid');
-  grid.innerHTML='';
-  Object.keys(REGIONS).forEach(function(rid){
-    var region=REGIONS[rid];
-    var munis=MUNIS.filter(function(m){ return m.region===rid; });
-    var avg = munis.reduce(function(s,m){ return s+(state.mapCategory==='composite'?m.composite:m.scores[state.mapCategory]); },0)/munis.length;
-    var zone=document.createElement('div');
-    zone.className='zone'; zone.style.gridArea=region.area;
-    var bubbles = munis.map(function(m){
-      var v = state.mapCategory==='composite'?m.composite:m.scores[state.mapCategory];
-      var short = m.name.length>4? m.name.slice(0,4):m.name;
-      return '<button class="bubble-btn" data-muni="'+m.id+'" title="'+m.name+'">'+
-        '<span class="bubble" style="background:'+sevHex(v)+'">'+v.toFixed(1)+'</span>'+
-        '<span>'+m.name+'</span></button>';
-    }).join('');
-    zone.innerHTML =
-      '<div class="zone-head"><h4>'+region.label+'</h4><span class="badge" style="background:var(--surface-2); color:var(--ink-muted);">平均 '+avg.toFixed(1)+'</span></div>'+
-      '<div class="zone-bubbles">'+bubbles+'</div>';
-    grid.appendChild(zone);
-  });
-  grid.querySelectorAll('[data-muni]').forEach(function(b){
-    b.addEventListener('click', function(){
-      state.selectedMuni=b.dataset.muni;
-      setView('karte');
+function popupHtml(m){
+  var v=scoreOf(m);
+  return '<div class="muni-popup">'+
+    '<h5>'+m.name+'</h5>'+
+    '<div class="region">'+REGIONS[m.region].label+'</div>'+
+    '<div class="score-row"><span class="dot" style="background:'+sevHex(v)+'"></span>表示中の指標スコア：<b class="mono">'+v.toFixed(1)+'</b></div>'+
+    '<div class="score-row">総合スコア：<b class="mono">'+m.composite.toFixed(1)+'</b> / 5.0</div>'+
+    '<button type="button" data-goto="'+m.id+'">市町村カルテを見る</button>'+
+    '</div>';
+}
+function initMap(){
+  if(leafletMap) return;
+  leafletMap = L.map('mapCanvas', { minZoom:8, maxZoom:17, scrollWheelZoom:true });
+  L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/std/{z}/{x}/{y}.png', {
+    attribution:'<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地図: 国土地理院</a>',
+    maxZoom:18
+  }).addTo(leafletMap);
+
+  var bounds=[];
+  MUNIS.forEach(function(m){
+    var r = Math.max(6, Math.min(16, Math.sqrt(m.population)/40));
+    var marker = L.circleMarker([m.lat, m.lng], {
+      radius:r, color:'#fff', weight:2, fillColor:sevHex(scoreOf(m)), fillOpacity:.88
+    }).addTo(leafletMap);
+    marker.bindPopup(popupHtml(m));
+    marker.on('popupopen', function(e){
+      var elBtn = e.popup.getElement().querySelector('[data-goto]');
+      if(elBtn){ elBtn.addEventListener('click', function(){ state.selectedMuni=m.id; setView('karte'); }); }
     });
+    markerById[m.id]=marker;
+    bounds.push([m.lat, m.lng]);
+  });
+  leafletMap.fitBounds(bounds, {padding:[24,24]});
+}
+function recolorMarkers(){
+  MUNIS.forEach(function(m){
+    var marker=markerById[m.id];
+    if(!marker) return;
+    marker.setStyle({ fillColor: sevHex(scoreOf(m)) });
+    marker.setPopupContent(popupHtml(m));
   });
 }
 
@@ -682,7 +637,6 @@ function renderKarte(){
     return;
   }
   var m=MUNI_BY_ID[state.selectedMuni];
-  var relatedHistory = history.filter(function(h){ return h.muniId===m.id; }).sort(function(a,b){ return b.datetime.localeCompare(a.datetime); });
   var topIssues = CATEGORIES.map(function(c){ return {label:c.label, key:c.key, score:m.scores[c.key]}; }).sort(function(a,b){return b.score-a.score;});
 
   body.innerHTML =
@@ -690,7 +644,7 @@ function renderKarte(){
       '<div><button class="btn btn-ghost btn-sm" id="backToMap">← 地図に戻る</button>'+
       '<h3 style="margin-top:8px;">'+m.name+'</h3>'+
       '<p style="color:var(--ink-muted); font-size:13px;">'+REGIONS[m.region].label+' ・ 総合スコア <b class="mono">'+m.composite.toFixed(1)+'</b> / 5.0</p></div>'+
-      '<div style="display:flex; gap:8px;"><button class="btn" id="karteToHistory">相談履歴を見る</button><button class="btn btn-primary" id="karteToAi">AI分析を見る</button></div>'+
+      '<div style="display:flex; gap:8px;"><button class="btn btn-primary" id="karteToAi">AI分析を見る</button></div>'+
     '</div>'+
     '<div class="grid grid-2">'+
       '<div class="card">'+
@@ -723,19 +677,9 @@ function renderKarte(){
         '<textarea class="textarea" id="karteMemo" placeholder="この市町村に関する所感・引継ぎ事項などを記録">'+(memos[m.id]||'')+'</textarea>'+
         '<p style="font-size:11px; color:var(--ink-faint); margin-top:6px;">入力内容は自動保存されます（ブラウザ内保存）。</p>'+
       '</div>'+
-    '</div>'+
-    '<div class="card" style="margin-top:16px;">'+
-      '<div class="section-title">関連する相談・訪問履歴 <span class="count">'+relatedHistory.length+'件</span></div>'+
-      (relatedHistory.length===0 ? '<div class="empty">まだ記録がありません。</div>' :
-        '<div class="table-wrap"><table><thead><tr><th>日時</th><th>担当者</th><th>内容</th><th>状況</th></tr></thead><tbody>'+
-        relatedHistory.slice(0,5).map(function(h){
-          return '<tr><td class="mono">'+h.datetime.replace('T',' ')+'</td><td>'+h.staff+'</td><td>'+h.content+'</td>'+
-            '<td><span class="badge status-badge" data-s="'+h.status+'">'+h.status+'</span></td></tr>';
-        }).join('')+'</tbody></table></div>')+
     '</div>';
 
   document.getElementById('backToMap').addEventListener('click', function(){ setView('map'); });
-  document.getElementById('karteToHistory').addEventListener('click', function(){ setView('history'); document.getElementById('fMuni').value=m.id; filterHistory(); });
   document.getElementById('karteToAi').addEventListener('click', function(){
     setView('ai');
     document.getElementById('aiScopeType').value='muni';
@@ -776,107 +720,10 @@ function radarOptions(){
   };
 }
 
-/* ===================== ダッシュボード ===================== */
+/* ===================== アンケート結果分析 ===================== */
 var chartRefs={};
 function destroyChart(key){ if(chartRefs[key]){ chartRefs[key].destroy(); delete chartRefs[key]; } }
 
-function renderDashboard(){
-  var byComposite = MUNIS.slice().sort(function(a,b){return b.composite-a.composite;}).slice(0,10);
-  document.getElementById('rankIssues').innerHTML = byComposite.map(function(m,i){
-    return rankRow(i+1, m.name, m.composite, 5);
-  }).join('');
-
-  var counts={};
-  history.forEach(function(h){ counts[h.muniId]=(counts[h.muniId]||0)+1; });
-  var byConsult = Object.keys(counts).map(function(id){ return {name:MUNI_BY_ID[id]?MUNI_BY_ID[id].name:id, n:counts[id]}; })
-    .sort(function(a,b){return b.n-a.n;}).slice(0,10);
-  var maxN = byConsult.length? byConsult[0].n : 1;
-  document.getElementById('rankConsult').innerHTML = byConsult.length? byConsult.map(function(c,i){
-    return rankRow(i+1, c.name, c.n, maxN, true);
-  }).join('') : '<div class="empty">履歴データがありません。</div>';
-
-  var avgByCat = CATEGORIES.map(function(c){
-    return MUNIS.reduce(function(s,m){return s+m.scores[c.key];},0)/MUNIS.length;
-  });
-  destroyChart('dist');
-  chartRefs.dist = new Chart(document.getElementById('chartDistribution'), {
-    type:'radar',
-    data:{ labels:CATEGORIES.map(function(c){return c.label;}), datasets:[{label:'府内平均', data:avgByCat, backgroundColor:'rgba(31,92,153,.18)', borderColor:'#1F5C99', pointBackgroundColor:'#1F5C99', borderWidth:2}] },
-    options:radarOptions()
-  });
-
-  var regionSelA=document.getElementById('cmpRegionA'), regionSelB=document.getElementById('cmpRegionB');
-  var optHtml=Object.keys(REGIONS).map(function(rid){return '<option value="'+rid+'">'+REGIONS[rid].label+'</option>';}).join('');
-  regionSelA.innerHTML=optHtml; regionSelB.innerHTML=optHtml;
-  regionSelA.value='osaka-city'; regionSelB.value='minami-kawachi';
-  regionSelA.onchange=renderCompareChart; regionSelB.onchange=renderCompareChart;
-  renderCompareChart();
-}
-function rankRow(rank, name, value, max, isCount){
-  var pct = Math.max(4, value/max*100);
-  var display = isCount? value+'件' : value.toFixed(1);
-  return '<div class="issue-row"><span style="width:20px; color:var(--ink-faint); font-weight:700; font-size:12px;">'+rank+'</span>'+
-    '<span class="name">'+name+'</span>'+
-    '<div class="issue-bar-track" style="width:140px;"><div class="issue-bar-fill" style="width:'+pct+'%; background:'+(isCount?'var(--accent)':sevHex(value))+'"></div></div>'+
-    '<span class="mono" style="width:44px; text-align:right;">'+display+'</span></div>';
-}
-function renderCompareChart(){
-  var a=document.getElementById('cmpRegionA').value, b=document.getElementById('cmpRegionB').value;
-  function avgFor(rid){
-    var ms=MUNIS.filter(function(m){return m.region===rid;});
-    return CATEGORIES.map(function(c){ return ms.reduce(function(s,m){return s+m.scores[c.key];},0)/ms.length; });
-  }
-  destroyChart('cmp');
-  chartRefs.cmp = new Chart(document.getElementById('chartCompare'), {
-    type:'radar',
-    data:{ labels:CATEGORIES.map(function(c){return c.label;}), datasets:[
-      {label:REGIONS[a].label, data:avgFor(a), backgroundColor:'rgba(31,92,153,.18)', borderColor:'#1F5C99', pointBackgroundColor:'#1F5C99', borderWidth:2},
-      {label:REGIONS[b].label, data:avgFor(b), backgroundColor:'rgba(178,58,50,.15)', borderColor:'#B23A32', pointBackgroundColor:'#B23A32', borderWidth:2}
-    ]},
-    options:radarOptions()
-  });
-}
-
-/* ===================== 相談・訪問履歴 ===================== */
-function buildMuniSelect(selectEl, withAll){
-  var opts = (withAll? '<option value="">すべての市町村</option>':'') +
-    MUNIS.slice().sort(function(a,b){return a.id.localeCompare(b.id);}).map(function(m){return '<option value="'+m.id+'">'+m.name+'</option>';}).join('');
-  selectEl.innerHTML=opts;
-}
-function renderHistory(){
-  buildMuniSelect(document.getElementById('fMuni'), true);
-  filterHistory();
-}
-function filterHistory(){
-  var kw=document.getElementById('fSearch').value.trim();
-  var muni=document.getElementById('fMuni').value;
-  var status=document.getElementById('fStatus').value;
-  var rows = history.filter(function(h){
-    if(muni && h.muniId!==muni) return false;
-    if(status && h.status!==status) return false;
-    if(kw && (h.content+h.action).indexOf(kw)===-1) return false;
-    return true;
-  }).sort(function(a,b){return b.datetime.localeCompare(a.datetime);});
-  var tbody=document.getElementById('historyRows');
-  tbody.innerHTML = rows.length? rows.map(function(h){
-    var mn = MUNI_BY_ID[h.muniId]? MUNI_BY_ID[h.muniId].name : h.muniId;
-    return '<tr><td class="mono">'+h.datetime.replace('T',' ')+'</td><td>'+mn+'</td><td>'+h.staff+'</td>'+
-      '<td style="max-width:260px;">'+h.content+'</td>'+
-      '<td><span class="badge status-badge" data-s="'+h.status+'">'+h.status+'</span></td>'+
-      '<td style="max-width:220px; color:var(--ink-muted);">'+(h.action||'—')+'</td>'+
-      '<td><button class="btn btn-ghost btn-sm" data-del="'+h.id+'">削除</button></td></tr>';
-  }).join('') : '<tr><td colspan="7"><div class="empty">条件に一致する履歴がありません。</div></td></tr>';
-  tbody.querySelectorAll('[data-del]').forEach(function(b){
-    b.addEventListener('click', function(){
-      history = history.filter(function(h){return h.id!==b.dataset.del;});
-      save('rc_history', history);
-      filterHistory();
-      toast('履歴を削除しました');
-    });
-  });
-}
-
-/* ===================== アンケート結果分析 ===================== */
 var SAMPLE_SURVEY=(function(){
   var munisample=['大阪市','堺市','東大阪市','枚方市','岸和田市','河内長野市','豊中市','泉佐野市'];
   var ages=['20代','30代','40代','50代','60代以上'];
@@ -987,12 +834,15 @@ function generateReport(scope){
   if(!common.length) common=sortedAvg.slice(0,2);
 
   var distinctive=[];
+  var seenMuni={};
   CATEGORIES.forEach(function(c){
     var maxM=list.slice().sort(function(a,b){return b.scores[c.key]-a.scores[c.key];})[0];
-    if(maxM && maxM.scores[c.key]>=4 && (maxM.scores[c.key]-avg[c.key])>=1){
+    if(maxM && maxM.scores[c.key]>=4 && (maxM.scores[c.key]-avg[c.key])>=1 && !seenMuni[maxM.id+c.key]){
       distinctive.push(maxM.name+'は「'+c.label+'」課題が特に高い水準（スコア'+maxM.scores[c.key]+'）。');
+      seenMuni[maxM.id+c.key]=true;
     }
   });
+  distinctive = distinctive.slice(0,4);
   if(!distinctive.length && list.length>1){
     var topOne=list.slice().sort(function(a,b){return b.composite-a.composite;})[0];
     distinctive.push(topOne.name+'は総合スコアが域内で最も高く、重点的な支援対象として検討の余地がある。');
@@ -1060,46 +910,12 @@ function aiBlock(title, items){
   return '<h4>'+title+'</h4><ul>'+items.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul>';
 }
 
-/* ===================== モーダル：履歴登録 ===================== */
-function openRecordModal(){
-  buildMuniSelect(document.getElementById('rMuni'), false);
-  var now=new Date(); now.setMinutes(now.getMinutes()-now.getTimezoneOffset());
-  document.getElementById('rDate').value=now.toISOString().slice(0,16);
-  document.getElementById('rContent').value=''; document.getElementById('rAction').value=''; document.getElementById('rStaff').value='';
-  document.getElementById('recordModalBackdrop').hidden=false;
-}
-function closeRecordModal(){ document.getElementById('recordModalBackdrop').hidden=true; }
-
 /* ===================== 初期化 ===================== */
 function init(){
   buildNav();
   buildMapCategorySelect();
   renderMapLegend();
-  renderMap();
   setView('map');
-
-  document.getElementById('btnNewRecord').addEventListener('click', openRecordModal);
-  document.getElementById('btnCancelRecord').addEventListener('click', closeRecordModal);
-  document.getElementById('recordModalBackdrop').addEventListener('click', function(e){ if(e.target.id==='recordModalBackdrop') closeRecordModal(); });
-  document.getElementById('recordForm').addEventListener('submit', function(e){
-    e.preventDefault();
-    var rec={
-      id:'h'+Date.now(),
-      muniId:document.getElementById('rMuni').value,
-      datetime:document.getElementById('rDate').value,
-      staff:document.getElementById('rStaff').value,
-      content:document.getElementById('rContent').value,
-      status:document.getElementById('rStatus').value,
-      action:document.getElementById('rAction').value
-    };
-    history.unshift(rec); save('rc_history', history);
-    closeRecordModal(); filterHistory(); toast('履歴を登録しました');
-  });
-
-  ['fSearch','fMuni','fStatus'].forEach(function(id){
-    document.getElementById(id).addEventListener('input', filterHistory);
-    document.getElementById(id).addEventListener('change', filterHistory);
-  });
 
   document.getElementById('btnSampleData').addEventListener('click', function(){ setSurveyData(SAMPLE_SURVEY); toast('サンプルデータを読み込みました'); });
   document.getElementById('fileInput').addEventListener('change', function(e){
@@ -1116,7 +932,7 @@ function init(){
     };
     reader.readAsArrayBuffer(file);
   });
-  ['tallyCol'].forEach(function(id){ document.getElementById(id).addEventListener('change', renderTally); });
+  document.getElementById('tallyCol').addEventListener('change', renderTally);
   ['crossColA','crossColB'].forEach(function(id){ document.getElementById(id).addEventListener('change', renderCross); });
   document.getElementById('freeCol').addEventListener('change', renderFreeText);
 
