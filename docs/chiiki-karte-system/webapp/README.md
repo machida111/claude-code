@@ -54,9 +54,10 @@ npm run dev
 
 ## 4. 実装済み・未実装の状態
 
-- ✅ 地域課題マップ：Leafletで国土地理院タイル（淡色地図）を表示。大阪府のバウンディングボックスに
-  `maxBounds`で表示範囲を固定し、市町村を実座標のCircle Markerとしてプロット。データはSupabaseの
-  `municipalities`テーブルからサーバーコンポーネントで取得。
+- ✅ 地域課題マップ：Leafletで国土地理院タイル（淡色地図）を表示し、`public/osaka-municipalities.geojson`
+  （国土数値情報「行政区域データ N03」をシンプル化・大阪市/堺市は区を結合したもの）でコロプレス表示。
+  表示・パン可能範囲はポリゴンの外形にフィットさせて大阪府内に固定する。スコアはSupabaseの
+  `municipalities`テーブルからサーバーコンポーネントで取得した実データから算出。
 - ✅ 市町村カルテ：基礎指標・課題スコア（8指標レーダーチャート）・担当者メモ。メモはServer Action
   経由でSupabaseの`municipality_notes`テーブルに保存（`localStorage`は使用していない）。
 - ✅ 課題スコアはSupabaseから取得した実データ（人口・高齢化率・財政力指数等）から`lib/scoring.ts`で
@@ -64,3 +65,5 @@ npm run dev
 - ⏳ 職員認証（Supabase Auth）：未実装。現在はRLSで匿名キーの読み書きを許可している（開発用設定。
   `supabase/migrations/0001_init.sql`のコメント参照）。
 - ⏳ AI分析・相談訪問履歴・ダッシュボード・アンケート分析：このフェーズでは対象外。
+
+`public/osaka-municipalities.geojson` は国土数値情報「行政区域データ（N03）」由来のポリゴン（[niiyz/JapanCityGeoJSON](https://github.com/niiyz/JapanCityGeoJSON)のミラー経由）を、大阪市・堺市は行政区を結合し、Leafletでの表示に十分な精度まで簡略化（Douglas-Peucker、shapelyの`simplify`）して生成したものです。境界データを更新する場合は、同じ手順（結合→`make_valid`→`simplify`→座標精度を丸めてGeoJSON出力）を再実行してください。

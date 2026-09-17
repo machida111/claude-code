@@ -2,16 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Map as LeafletMap, CircleMarker } from "leaflet";
+import type { Map as LeafletMap, GeoJSON as LeafletGeoJSON, Layer } from "leaflet";
+import type { FeatureCollection } from "geojson";
 import { ISSUE_CATEGORIES, IssueCategoryKey, Municipality, REGION_LABELS } from "@/lib/types";
 import { compositeScore, computeScores, sevHex } from "@/lib/scoring";
-
-// 大阪府のバウンディングボックス。パン・ズームしても近隣府県が大きく映り込まないよう
-// 表示範囲をここに固定する（地図コンテナのアスペクト比も大阪府の南北に長い形状に合わせている）。
-const OSAKA_BOUNDS: [[number, number], [number, number]] = [
-  [34.22, 135.02],
-  [35.02, 135.76],
-];
 
 type CategoryOrComposite = IssueCategoryKey | "composite";
 
@@ -22,7 +16,8 @@ interface Props {
 export function IssueMap({ municipalities }: Props) {
   const mapDivRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
-  const markersRef = useRef<Record<string, CircleMarker>>({});
+  const geoLayerRef = useRef<LeafletGeoJSON | null>(null);
+  const layerByIdRef = useRef<Record<string, Layer>>({});
   const [category, setCategory] = useState<CategoryOrComposite>("composite");
   const router = useRouter();
 
@@ -30,15 +25,16 @@ export function IssueMap({ municipalities }: Props) {
     const scores = computeScores(m);
     return { muni: m, scores, composite: compositeScore(scores) };
   });
+  const byId = new Map(scored.map((s) => [s.muni.id, s]));
 
   function scoreOf(id: string, cat: CategoryOrComposite): number {
-    const entry = scored.find((s) => s.muni.id === id);
+    const entry = byId.get(id);
     if (!entry) return 0;
     return cat === "composite" ? entry.composite : entry.scores[cat];
   }
 
   function popupHtml(id: string, cat: CategoryOrComposite): string {
-    const entry = scored.find((s) => s.muni.id === id);
+    const entry = byId.get(id);
     if (!entry) return "";
     const v = scoreOf(id, cat);
     return `
@@ -55,41 +51,44 @@ export function IssueMap({ municipalities }: Props) {
     let disposed = false;
 
     (async () => {
-      const L = (await import("leaflet")).default;
+      const [L, geojson] = await Promise.all([
+        import("leaflet").then((m) => m.default),
+        fetch("/osaka-municipalities.geojson").then((r) => r.json() as Promise<FeatureCollection>),
+      ]);
       if (disposed || !mapDivRef.current || mapRef.current) return;
 
-      const map = L.map(mapDivRef.current, {
-        maxBounds: L.latLngBounds(OSAKA_BOUNDS),
-        maxBoundsViscosity: 1.0,
-        maxZoom: 17,
-      });
+      const map = L.map(mapDivRef.current, { maxZoom: 17, scrollWheelZoom: true });
       L.tileLayer("https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png", {
         attribution:
           '<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地図: 国土地理院</a>',
         maxZoom: 18,
       }).addTo(map);
 
-      const bounds: [number, number][] = [];
-      scored.forEach(({ muni, composite }) => {
-        const r = Math.max(6, Math.min(16, Math.sqrt(muni.population) / 40));
-        const marker = L.circleMarker([muni.lat, muni.lng], {
-          radius: r,
-          color: "#fff",
-          weight: 2,
-          fillColor: sevHex(composite),
-          fillOpacity: 0.88,
-        }).addTo(map);
-        marker.bindPopup(popupHtml(muni.id, "composite"));
-        marker.on("popupopen", (e) => {
-          const el = e.popup.getElement()?.querySelector<HTMLButtonElement>("[data-goto]");
-          el?.addEventListener("click", () => router.push(`/karte/${muni.id}`));
-        });
-        markersRef.current[muni.id] = marker;
-        bounds.push([muni.lat, muni.lng]);
-      });
+      const geoLayer = L.geoJSON(geojson, {
+        style: (feature) => {
+          const id = feature?.properties?.id as string;
+          return { fillColor: sevHex(scoreOf(id, "composite")), fillOpacity: 0.82, color: "#fff", weight: 1.2 };
+        },
+        onEachFeature: (feature, layer) => {
+          const id = feature.properties.id as string;
+          layer.bindPopup(popupHtml(id, "composite"));
+          layer.on("mouseover", () => (layer as any).setStyle({ weight: 2.4, color: "#1F5C99" }));
+          layer.on("mouseout", () => (layer as any).setStyle({ weight: 1.2, color: "#fff" }));
+          layer.on("popupopen", (e: any) => {
+            const el = e.popup.getElement()?.querySelector("[data-goto]") as HTMLButtonElement | null;
+            el?.addEventListener("click", () => router.push(`/karte/${id}`));
+          });
+          layerByIdRef.current[id] = layer;
+        },
+      }).addTo(map);
 
-      map.fitBounds(bounds, { padding: [20, 20] });
+      // 表示範囲・パン可能範囲を大阪府のポリゴン外形にほぼ固定し、隣接府県が大きく見えないようにする
+      const bounds = geoLayer.getBounds();
+      map.fitBounds(bounds, { padding: [16, 16] });
+      map.setMaxBounds(bounds.pad(0.06));
       map.setMinZoom(map.getZoom());
+
+      geoLayerRef.current = geoLayer;
       mapRef.current = map;
     })();
 
@@ -101,12 +100,12 @@ export function IssueMap({ municipalities }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // カテゴリ変更時にマーカーの色だけ再計算する
+  // カテゴリ変更時に塗り色だけ再計算する
   useEffect(() => {
-    Object.entries(markersRef.current).forEach(([id, marker]) => {
+    Object.entries(layerByIdRef.current).forEach(([id, layer]) => {
       const v = scoreOf(id, category);
-      marker.setStyle({ fillColor: sevHex(v) });
-      marker.setPopupContent(popupHtml(id, category));
+      (layer as any).setStyle({ fillColor: sevHex(v) });
+      (layer as any).bindPopup(popupHtml(id, category));
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category]);
@@ -154,7 +153,7 @@ export function IssueMap({ municipalities }: Props) {
         >
           地理院タイル
         </a>
-        ）
+        ） ／ 行政区域境界：国土数値情報（行政区域データ N03）
       </p>
     </div>
   );
