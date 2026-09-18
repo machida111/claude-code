@@ -978,11 +978,13 @@ function renderKarte(){
   var m=MUNI_BY_ID[state.selectedMuni];
   var topIssues = CATEGORIES.map(function(c){ return {label:c.label, key:c.key, score:m.scores[c.key]}; }).sort(function(a,b){return b.score-a.score;});
 
+  var topResidentIssues = RESIDENT_CATEGORIES.map(function(c){ return {label:c.label, key:c.key, score:m.residentScores[c.key]}; }).sort(function(a,b){return b.score-a.score;});
+
   body.innerHTML =
     '<div class="karte-header" style="margin-bottom:16px;">'+
       '<div><button class="btn btn-ghost btn-sm" id="backToMap">← 地図に戻る</button>'+
       '<h3 style="margin-top:8px;">'+m.name+'</h3>'+
-      '<p style="color:var(--ink-muted); font-size:13px;">'+REGIONS[m.region].label+' ・ 総合スコア <b class="mono">'+m.composite.toFixed(1)+'</b> / 5.0</p></div>'+
+      '<p style="color:var(--ink-muted); font-size:13px;">'+REGIONS[m.region].label+' ・ 地域課題 総合スコア <b class="mono">'+m.composite.toFixed(1)+'</b> / 5.0 ・ 住民目線 総合スコア <b class="mono">'+m.residentComposite.toFixed(1)+'</b> / 5.0</p></div>'+
       '<div style="display:flex; gap:8px;"><button class="btn btn-primary" id="karteToAi">分析レポートを見る</button></div>'+
     '</div>'+
     '<div class="grid grid-2">'+
@@ -998,7 +1000,7 @@ function renderKarte(){
         '</div>'+
       '</div>'+
       '<div class="card">'+
-        '<div class="section-title">課題スコア（8指標）</div>'+
+        '<div class="section-title">課題スコア（地域課題マップ・8指標）</div>'+
         '<div class="chart-box sm"><canvas id="chartKarteRadar"></canvas></div>'+
       '</div>'+
     '</div>'+
@@ -1006,6 +1008,20 @@ function renderKarte(){
       '<div class="card">'+
         '<div class="section-title">主な地域課題</div>'+
         topIssues.map(function(t){
+          return '<div class="issue-row"><span class="name">'+t.label+'</span>'+
+            '<div class="issue-bar-track"><div class="issue-bar-fill" style="width:'+(t.score/5*100)+'%; background:'+sevHex(t.score)+'"></div></div>'+
+            '<span class="mono" style="width:22px;text-align:right;">'+t.score+'</span></div>';
+        }).join('')+
+      '</div>'+
+      '<div class="card">'+
+        '<div class="section-title">課題スコア（住民目線マップ・5指標）</div>'+
+        '<div class="chart-box sm"><canvas id="chartKarteRadarResident"></canvas></div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="grid grid-2" style="margin-top:16px;">'+
+      '<div class="card">'+
+        '<div class="section-title">主な住民目線の課題</div>'+
+        topResidentIssues.map(function(t){
           return '<div class="issue-row"><span class="name">'+t.label+'</span>'+
             '<div class="issue-bar-track"><div class="issue-bar-fill" style="width:'+(t.score/5*100)+'%; background:'+sevHex(t.score)+'"></div></div>'+
             '<span class="mono" style="width:22px;text-align:right;">'+t.score+'</span></div>';
@@ -1041,6 +1057,20 @@ function renderKarte(){
         label:m.name,
         data:CATEGORIES.map(function(c){return m.scores[c.key];}),
         backgroundColor:'rgba(31,92,153,.18)', borderColor:'#1F5C99', pointBackgroundColor:'#1F5C99', borderWidth:2
+      }]
+    },
+    options:radarOptions()
+  });
+
+  var ctxResident=document.getElementById('chartKarteRadarResident');
+  new Chart(ctxResident, {
+    type:'radar',
+    data:{
+      labels:RESIDENT_CATEGORIES.map(function(c){return c.label;}),
+      datasets:[{
+        label:m.name,
+        data:RESIDENT_CATEGORIES.map(function(c){return m.residentScores[c.key];}),
+        backgroundColor:'rgba(199,125,18,.18)', borderColor:'#C77D12', pointBackgroundColor:'#C77D12', borderWidth:2
       }]
     },
     options:radarOptions()
