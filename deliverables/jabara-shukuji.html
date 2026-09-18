@@ -150,13 +150,13 @@
     <div class="cover-fields">
       <div>
         <label class="field-label" for="coverTitle">タイトル（大）</label>
-        <textarea id="coverTitle" rows="3">大東市[だいとうし]　市制[しせい]施行[しこう]七十周年[ななじゅっしゅうねん]記念式典[きねんしきてん]</textarea>
+        <textarea id="coverTitle" rows="3">○○市[まるまるし]　市制[しせい]施行[しこう]○○[まるまる]周年[しゅうねん]記念式典[きねんしきてん]</textarea>
         <div id="coverTitleRuby"></div>
       </div>
       <div>
         <label class="field-label" for="coverSubtitle">サブタイトル（小・日付や会場など）</label>
-        <textarea id="coverSubtitle" rows="3">令和[れいわ]八年[はちねん]四月[しがつ]五日[いつか]（日[にち]）午前[ごぜん]九時半[くじはん]　開式[かいしき]
-大東市立市民会館[だいとうしりつしみんかいかん]　キラリエホール</textarea>
+        <textarea id="coverSubtitle" rows="3">令和[れいわ]○[まる]年[ねん]○月[まるがつ]○日[まるにち]（○[まる]）午前[ごぜん]○[まる]時[じ]　開式[かいしき]
+○○市[まるまるし]　○○会館[まるまるかいかん]</textarea>
         <div id="coverSubtitleRuby"></div>
       </div>
       <div>
@@ -194,6 +194,10 @@
       <div>
         <label class="field-label">A4横幅に入るパネル数</label>
         <div class="idx" style="justify-content:flex-start; height:38px;" id="panelsPerSheetDisplay">—</div>
+      </div>
+      <div>
+        <label class="field-label" for="maxLines">1パネル最大行数</label>
+        <input type="number" id="maxLines" value="3" step="1" min="1"> 行
       </div>
     </div>
     <div class="hint">元のテンプレートと同じく、1枚目の紙の右端から折り幅ぶん測って山折り→谷折りを繰り返します。2枚目以降は前の紙の続きとして同じ折り幅で並びます。余白を小さくしすぎるとプリンターによっては端が印刷されないことがあります（多くの機種は3〜5mm程度が下限）。端が切れる場合は余白を広げてください。</div>
@@ -238,16 +242,17 @@
   var panels = [
     {text:'祝辞'},
     {text:'本日[ほんじつ]、ここに'},
-    {text:'市町村[しちょうそん]振興[しんこう]\n大会[たいかい]を'},
-    {text:'迎[むか]えられました\nことに'},
+    {text:'○○市[まるまるし]　市制[しせい]施行[しこう]\n○○[まるまる]周年[しゅうねん]記念式典[きねんしきてん]が'},
+    {text:'盛大[せいだい]に開催[かいさい]\nされますことを'},
     {text:'心[こころ]よりお慶[よろこ]び\n申[もう]し上[あ]げます'},
-    {text:'令和[れいわ]七年[ななねん]九月[くがつ]'},
-    {text:'大阪府[おおさかふ]\n市町村振興課長[しちょうそんしんこうかちょう]'}
+    {text:'令和[れいわ]○[まる]年[ねん]○月[まるがつ]'},
+    {text:'○○[まるまる]\n○○課長[まるまるかちょう]'}
   ];
 
   var panelWidthInput = document.getElementById('panelWidth');
   var marginInput = document.getElementById('marginCm');
   var fontSizeInput = document.getElementById('fontSize');
+  var maxLinesInput = document.getElementById('maxLines');
   var panelList = document.getElementById('panelList');
   var sheetsRow = document.getElementById('sheetsRow');
   var panelsPerSheetDisplay = document.getElementById('panelsPerSheetDisplay');
@@ -462,19 +467,28 @@
     });
 
     var overflowNums = [];
+    var lineOverNums = [];
     var overflowSet = {};
+    var maxLinesVal = Math.max(1, parseInt(maxLinesInput.value, 10) || 3);
     sheetsRow.querySelectorAll('.panel').forEach(function(panelEl){
       var textEl = panelEl.querySelector('.panel-text');
-      if(textEl.scrollWidth > panelEl.clientWidth + 1){
+      var gi0 = Number(panelEl.dataset.gidx);
+      var srcPanel = panels[gi0];
+      var overflowsBox = textEl.scrollWidth > panelEl.clientWidth + 1;
+      var overLines = srcPanel ? srcPanel.text.split('\n').length > maxLinesVal : false;
+      if(overflowsBox || overLines){
         panelEl.classList.add('overflow-warn');
-        var badge = document.createElement('div'); badge.className='overflow-badge'; badge.textContent='文字数オーバー';
+        var badge = document.createElement('div'); badge.className='overflow-badge';
+        badge.textContent = overLines ? '行数オーバー' : '文字数オーバー';
         panelEl.appendChild(badge);
         var gi = Number(panelEl.dataset.gidx);
-        overflowNums.push(gi + 1);
         overflowSet[gi] = true;
+        if(overLines) lineOverNums.push(gi + 1);
+        else overflowNums.push(gi + 1);
       }
     });
     overflowNums.sort(function(a,b){ return a-b; });
+    lineOverNums.sort(function(a,b){ return a-b; });
     panels.forEach(function(p, idx){
       var countEl = document.getElementById('char-count-'+idx);
       if(countEl) countEl.classList.toggle('warn', !!overflowSet[idx]);
@@ -491,6 +505,7 @@
 
     var msg = '';
     if(overflowNums.length) msg += '⚠ パネル '+overflowNums.join('・')+' は文字があふれています（赤枠）。文字を減らすかパネルを分けてください。';
+    if(lineOverNums.length) msg += (msg?' ':'') + '⚠ パネル '+lineOverNums.join('・')+' は最大'+(parseInt(maxLinesInput.value,10)||3)+'行を超えています（赤枠）。';
     if(coverOverflow) msg += (msg?' ':'') + '⚠ 表紙パネルも文字があふれています。';
     document.getElementById('statusMsg').textContent = msg || '右から順にパネルが並びます。折り線（赤の点線）に沿って山折り・谷折りしてください。';
   }
@@ -509,10 +524,11 @@
     var panelW = parseFloat(panelWidthInput.value) || 5.15;
     var margin = parseFloat(marginInput.value) || 0;
     var fontSize = parseFloat(fontSizeInput.value) || 30;
+    var maxLines = Math.max(1, parseInt(maxLinesInput.value, 10) || 3);
     var usableH = PAGE_H - margin*2;
     var emCm = fontSize * 0.035278; // 1pt ≈ 0.035278cm; vertical text advances ~1em per character
     var rows = Math.max(1, Math.floor(usableH / emCm));
-    var cols = Math.max(1, Math.floor(panelW / emCm));
+    var cols = Math.min(maxLines, Math.max(1, Math.floor(panelW / emCm)));
     return Math.max(4, Math.floor(rows * cols * 0.62)); // safety margin: ruby text takes extra vertical room
   }
 
