@@ -201,7 +201,7 @@
 
   <div class="card">
     <h2>台本を一括入力</h2>
-    <div class="ruby-hint">台本をまとめて貼り付けてください。空行（1行空ける）で区切った1かたまりが1パネルになります。「パネルに反映」を押すと、下のパネル一覧がこの内容で置き換わります。</div>
+    <div class="ruby-hint">台本をそのまま貼り付けてください。現在のパネル幅・文字サイズに収まる文字数を目安に「。」「、」や改行を優先しながら自動でパネルに区切ります（空行を入れた場合はそこで必ず区切ります）。「パネルに反映」を押すと、下のパネル一覧がこの内容で置き換わります。</div>
     <textarea id="bulkInput" rows="8" placeholder="祝辞
 
 本日[ほんじつ]、ここに
@@ -505,9 +505,58 @@
   var bulkArmed = false;
   var bulkArmTimer = null;
 
+  function estimatePanelCapacity(){
+    var panelW = parseFloat(panelWidthInput.value) || 6.8;
+    var margin = parseFloat(marginInput.value) || 0;
+    var fontSize = parseFloat(fontSizeInput.value) || 30;
+    var usableH = PAGE_H - margin*2;
+    var emCm = fontSize * 0.035278; // 1pt ≈ 0.035278cm; vertical text advances ~1em per character
+    var rows = Math.max(1, Math.floor(usableH / emCm));
+    var cols = Math.max(1, Math.floor(panelW / emCm));
+    return Math.max(4, Math.floor(rows * cols * 0.62)); // safety margin: ruby text takes extra vertical room
+  }
+
+  function tokenizeForAutoSplit(block){
+    var tokens = [];
+    var lines = block.split('\n');
+    lines.forEach(function(line, li){
+      var pieces = line.split(/(?<=[。、])/).filter(function(s){ return s; });
+      pieces.forEach(function(p){ tokens.push(p); });
+      if(li < lines.length - 1) tokens.push('\n');
+    });
+    return tokens;
+  }
+
+  function autoSplitScript(raw){
+    var capacity = estimatePanelCapacity();
+    var blocks = raw.split(/\n\s*\n+/).map(function(s){ return s.replace(/^\n+|\n+$/g,''); }).filter(function(s){ return s.trim(); });
+    var result = [];
+    blocks.forEach(function(block){
+      var totalChars = panelCharCount(block);
+      if(totalChars <= capacity){ result.push(block.trim()); return; }
+      var tokens = tokenizeForAutoSplit(block);
+      var idealCount = Math.max(1, Math.ceil(totalChars / capacity));
+      var target = Math.min(capacity, Math.ceil(totalChars / idealCount));
+      var cur = '';
+      tokens.forEach(function(tok){
+        var candidate = cur + tok;
+        var overTarget = panelCharCount(candidate) > target && cur.trim();
+        var overCapacity = panelCharCount(candidate) > capacity;
+        if((overTarget || overCapacity) && cur.trim()){
+          result.push(cur.replace(/^\n+|\n+$/g,''));
+          cur = tok;
+        } else {
+          cur = candidate;
+        }
+      });
+      if(cur.trim()) result.push(cur.replace(/^\n+|\n+$/g,''));
+    });
+    return result;
+  }
+
   function applyBulkInput(){
     var raw = document.getElementById('bulkInput').value;
-    var chunks = raw.split(/\n\s*\n+/).map(function(s){ return s.trim(); }).filter(function(s){ return s; });
+    var chunks = autoSplitScript(raw);
     if(!chunks.length) return;
     panels = chunks.map(function(c){ return {text:c}; });
     renderPanelEditor(); renderSheets();
@@ -521,8 +570,8 @@
     if(hasExisting && !bulkArmed){
       bulkArmed = true;
       bulkApplyBtn.textContent = 'もう一度押すと置き換えます';
-      var chunkCount = raw.split(/\n\s*\n+/).map(function(s){ return s.trim(); }).filter(function(s){ return s; }).length;
-      bulkConfirmMsg.textContent = '今のパネル一覧（'+panels.length+'件）を、この台本の内容（'+chunkCount+'パネル）で置き換えます。';
+      var chunkCount = autoSplitScript(raw).length;
+      bulkConfirmMsg.textContent = '今のパネル一覧（'+panels.length+'件）を、この台本の内容（自動区切りで'+chunkCount+'パネル）で置き換えます。';
       clearTimeout(bulkArmTimer);
       bulkArmTimer = setTimeout(function(){
         bulkArmed = false;
