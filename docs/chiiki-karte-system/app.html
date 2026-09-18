@@ -353,6 +353,25 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
       <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地理院タイル</a>） ／ 行政区域境界：国土数値情報（行政区域データ N03）</p>
     </section>
 
+    <!-- RESIDENT MAP -->
+    <section class="view" id="view-resident" hidden>
+      <div class="view-head">
+        <div>
+          <h3>住民目線マップ</h3>
+          <p>買い物・医療・介護・教育・文化の充実度から見た地域課題です。地域課題マップ（行政の計画指標）とは別の視点として、住民の日常生活に関わる公的統計をコロプレスで表示します。</p>
+        </div>
+      </div>
+      <div class="map-toolbar">
+        <label class="field" style="width:220px;">
+          <span>表示する指標</span>
+          <select class="select" id="residentMapCategorySelect"></select>
+        </label>
+        <div class="legend" id="residentMapLegend" style="margin-left:auto;"></div>
+      </div>
+      <div class="map-box" id="residentMapCanvas"></div>
+      <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地理院タイル</a>） ／ 統計：e-Stat 社会・人口統計体系「市区町村データ」 ／ 行政区域境界：国土数値情報（行政区域データ N03）</p>
+    </section>
+
     <!-- KARTE -->
     <section class="view" id="view-karte" hidden>
       <div id="karteBody"></div>
@@ -387,24 +406,27 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <div class="view-head">
           <div>
             <h3>指標の計算方法とデータについて</h3>
-            <p>地域課題マップ・市町村カルテで表示している8つの課題指標が、どのデータからどう計算されているかをまとめています。判断材料として使う前に、実データに基づく部分と簡易的な推定の部分の違いを確認してください。</p>
+            <p>地域課題マップ（8指標）・住民目線マップ（5指標）で表示している課題指標が、どのデータからどう計算されているかをまとめています。判断材料として使う前に、実データに基づく部分と簡易的な推定の部分の違いを確認してください。</p>
           </div>
         </div>
         <nav class="toc">
           <a href="#sources">1. データソース</a>
-          <a href="#indicators">2. 8指標の計算方法</a>
-          <a href="#composite">3. 総合スコア</a>
-          <a href="#caution">4. 利用上の注意</a>
+          <a href="#indicators">2. 8指標の計算方法（地域課題マップ）</a>
+          <a href="#resident-indicators">3. 5指標の計算方法（住民目線マップ）</a>
+          <a href="#composite">4. 総合スコア</a>
+          <a href="#caution">5. 利用上の注意</a>
         </nav>
 
         <section class="block">
           <div class="k">Overview</div>
           <h2>このツールでできること</h2>
-          <p class="desc">地域課題カルテは3つの画面から構成されています。いずれも表示専用で、統計データは事前に埋め込まれています。</p>
+          <p class="desc">地域課題カルテは5つの画面から構成されています。いずれも表示専用で、統計データは事前に埋め込まれています。</p>
           <div class="screen-grid">
-            <div class="screen-card"><div class="num">01</div><h3>地域課題マップ</h3><p>大阪府43市町村を8指標のいずれかでコロプレス表示。行政区域境界（国土数値情報）を地理院タイル上に塗り分けます。</p></div>
-            <div class="screen-card"><div class="num">02</div><h3>市町村カルテ</h3><p>市町村ごとの基礎情報と8指標のレーダーチャート。担当者メモをブラウザに保存できます。</p></div>
-            <div class="screen-card"><div class="num">03</div><h3>分析レポート</h3><p>全域／地域ブロック／市町村を指定し、指標スコアから共通課題・支援方針をルールベースで文章化します。</p></div>
+            <div class="screen-card"><div class="num">01</div><h3>地域課題マップ</h3><p>大阪府43市町村を8指標（行政の計画視点）のいずれかでコロプレス表示。行政区域境界（国土数値情報）を地理院タイル上に塗り分けます。</p></div>
+            <div class="screen-card"><div class="num">02</div><h3>住民目線マップ</h3><p>買い物・医療・介護・教育・文化という5指標（住民の生活視点）で同じ地図をコロプレス表示します。</p></div>
+            <div class="screen-card"><div class="num">03</div><h3>市町村カルテ</h3><p>市町村ごとの基礎情報と8指標のレーダーチャート。担当者メモをブラウザに保存できます。</p></div>
+            <div class="screen-card"><div class="num">04</div><h3>分析レポート</h3><p>全域／地域ブロック／市町村を指定し、指標スコアから共通課題・支援方針をルールベースで文章化します。</p></div>
+            <div class="screen-card"><div class="num">05</div><h3>指標の計算方法</h3><p>このページ。データソースと13指標すべての算出方法をまとめています。</p></div>
           </div>
         </section>
 
@@ -422,9 +444,20 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
               <tr><td>65歳以上単独世帯率・高齢就業者割合</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">2020年度公表値（2020年国勢調査ベース）。</td></tr>
               <tr><td>マイナンバーカード保有率</td><td class="src">総務省「マイナンバーカードの交付・保有状況」</td><td class="src">令和8年8月末時点。人口に対する保有枚数の割合。</td></tr>
               <tr><td>土砂災害警戒区域数</td><td class="src">大阪府「土砂災害防止法の指定状況」</td><td class="src">土砂災害警戒区域（イエローゾーン）の指定数。市街地中心部は指定なし（0件）の市町村が複数ある。</td></tr>
+              <tr><td>小売店数（買い物）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">人口千人当たり。2021年度公表値（経済センサスベース）。</td></tr>
+              <tr><td>一般診療所数（医療）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">人口10万人当たり。2020年度公表値。</td></tr>
+              <tr><td>介護老人福祉施設数（介護）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">65歳以上人口10万人当たり。2020年度公表値。</td></tr>
+              <tr><td>小学校数（教育）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">可住地面積100km2当たり。2024年度公表値。</td></tr>
+              <tr><td>図書館数（文化）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">人口100万人当たり。2021年度公表値。</td></tr>
               <tr><td>市町村境界</td><td class="src">国土数値情報 行政区域データ（N03）</td><td class="src">大阪市24区・堺市7区は1つの市域ポリゴンに結合。</td></tr>
               <tr><td>地図背景</td><td class="src">国土地理院 地理院タイル（淡色地図）</td><td class="src">出典表示：地図：国土地理院。</td></tr>
             </table>
+          </div>
+          <div class="callout">
+            <div class="mark">!</div>
+            <div>
+              <p>「住民目線マップ」はRESAS（地域経済分析システム）と同種の地域経済・生活データを扱いますが、<b>RESASのAPIは2025年3月に提供終了</b>しているため、直接連携はできません。RESASが使っていたのと同じ系統の公的統計（e-Stat 社会・人口統計体系）から、買い物・医療・介護・教育・文化の5指標を直接取得しています。</p>
+            </div>
           </div>
         </section>
 
@@ -493,22 +526,67 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
           </div>
         </section>
 
+        <section class="block" id="resident-indicators">
+          <div class="k">3 &middot; Scoring (resident view)</div>
+          <h2>5つの住民目線指標の計算方法</h2>
+          <p class="desc">「住民目線マップ」の5指標はすべて、人口・面積当たりの施設数を表す実データです。施設数が少ないほど生活の不便につながるとみなし、値が低いほど課題スコアが高くなるよう反転してスコア化しています（8指標マップと異なり、素点をそのまま使うのではなく統計を反転している点に注意）。</p>
+          <div class="idx-grid">
+            <div class="idx-card">
+              <div class="head"><h4>買い物のしやすさ</h4><span class="badge real">実データ</span></div>
+              <div class="inputs">入力：小売店数（人口千人当たり）</div>
+              <p class="how">中央値5.28店を基準に、0.65店分の差を1点分としています。少ないほど高スコア（課題が大きい）。</p>
+              <div class="formula">score = 3 − (小売店数/千人 − 5.28) / 0.65</div>
+            </div>
+            <div class="idx-card">
+              <div class="head"><h4>医療のかかりやすさ</h4><span class="badge real">実データ</span></div>
+              <div class="inputs">入力：一般診療所数（人口10万人当たり）</div>
+              <p class="how">中央値81.0施設を基準に、10施設分の差を1点分としています。</p>
+              <div class="formula">score = 3 − (診療所数/10万人 − 81.0) / 10</div>
+            </div>
+            <div class="idx-card">
+              <div class="head"><h4>介護のうけやすさ</h4><span class="badge real">実データ</span></div>
+              <div class="inputs">入力：介護老人福祉施設数（65歳以上人口10万人当たり）</div>
+              <p class="how">中央値18.3施設を基準に、4施設分の差を1点分としています。</p>
+              <div class="formula">score = 3 − (介護施設数/高齢者10万人 − 18.3) / 4</div>
+            </div>
+            <div class="idx-card">
+              <div class="head"><h4>子育て・教育環境</h4><span class="badge real">実データ</span></div>
+              <div class="inputs">入力：小学校数（可住地面積100km2当たり）</div>
+              <p class="how">中央値56.5校を基準に、20校分の差を1点分としています。町村部では0校（隣接自治体と共用等）の場合もあります。</p>
+              <div class="formula">score = 3 − (小学校数/100km2 − 56.5) / 20</div>
+            </div>
+            <div class="idx-card">
+              <div class="head"><h4>文化・生きがい施設</h4><span class="badge real">実データ</span></div>
+              <div class="inputs">入力：図書館数（人口100万人当たり）</div>
+              <p class="how">中央値20.1館を基準に、10館分の差を1点分としています。小規模町村では単独の図書館を持たない（0館）場合があります。</p>
+              <div class="formula">score = 3 − (図書館数/100万人 − 20.1) / 10</div>
+            </div>
+          </div>
+          <div class="callout">
+            <div class="mark">!</div>
+            <div>
+              <p>治安・防犯についても検討しましたが、e-Stat上のデータが2005年で更新停止しており、大阪府警の統計ページも本システムからは取得できなかったため、住民目線マップの指標には含めていません。</p>
+            </div>
+          </div>
+        </section>
+
         <section class="block" id="composite">
-          <div class="k">3 &middot; Composite score</div>
+          <div class="k">4 &middot; Composite score</div>
           <h2>総合スコアの算出</h2>
-          <p class="desc">地図の「総合」表示やカルテのレーダーチャートで使う総合スコアは、8指標の単純平均です。重み付けはしていません。</p>
-          <div class="idx-card" style="margin-top:18px; max-width:520px;">
-            <div class="formula">総合スコア = (人口減少 + 高齢化 + 空き家 + 公共交通 + 地域コミュニティ + 担い手不足 + 防災 + DX) / 8</div>
+          <p class="desc">各マップの「総合」表示やカルテのレーダーチャートで使う総合スコアは、それぞれの指標群の単純平均です。重み付けはしていません。</p>
+          <div class="idx-card" style="margin-top:18px; max-width:560px;">
+            <div class="formula">地域課題マップ 総合スコア = (人口減少 + 高齢化 + 空き家 + 公共交通 + 地域コミュニティ + 担い手不足 + 防災 + DX) / 8
+住民目線マップ 総合スコア = (買い物 + 医療 + 介護 + 教育 + 文化) / 5</div>
           </div>
         </section>
 
         <section class="block" id="caution">
-          <div class="k">4 &middot; Caution</div>
+          <div class="k">5 &middot; Caution</div>
           <h2>利用上の注意</h2>
           <div class="callout crit">
             <div class="mark">!</div>
             <div>
-              <p>8指標のうち7指標（人口減少・高齢化・空き家・地域コミュニティ・担い手不足・防災・DX）は、その課題に対応する公的統計を直接スコア化しています。「公共交通」のみ、駅・バス停のカバー圏など交通そのものを全市町村共通で表す統計が見つからなかったため、人口密度からの<b>簡易的な推定</b>です。</p>
+              <p>地域課題マップの8指標のうち7指標（人口減少・高齢化・空き家・地域コミュニティ・担い手不足・防災・DX）と、住民目線マップの5指標はすべて、その課題に対応する公的統計を直接スコア化しています。「公共交通」のみ、駅・バス停のカバー圏など交通そのものを全市町村共通で表す統計が見つからなかったため、人口密度からの<b>簡易的な推定</b>です。</p>
               <p>また「防災」は土砂災害警戒区域数に基づくもので、洪水・高潮・地震などの他の災害リスクは含みません。「DX」はマイナンバーカード保有率に基づくもので、行政デジタル化の一側面（デジタルID普及）を表すにとどまります。各指標は個別の統計を組み合わせた大阪府市町村局振興課によるスコア化であり、<b>国や大阪府による公式な評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
             </div>
           </div>
@@ -643,11 +721,56 @@ MUNIS.forEach(function(m){
   m.composite = sum/n;
 });
 
+/* ===================== 住民目線データ（e-Stat 社会・人口統計体系「市区町村データ」） =====================
+   買い物のしやすさ＝小売店数（人口千人当たり、2021年度）／医療のかかりやすさ＝一般診療所数（人口10万人当たり、2020年度）
+   介護のうけやすさ＝介護老人福祉施設数（65歳以上人口10万人当たり、2020年度）／子育て・教育環境＝小学校数（可住地面積100km2当たり、2024年度）
+   文化・生きがい＝図書館数（人口100万人当たり、2021年度）
+   [買い物, 医療, 介護, 教育, 文化] （値が高いほど充実、課題スコアは反転して算出） */
+var RESIDENT_RAW = {
+  osaka: [8.34,126.8,21.3,130.03,9.1], sakai: [5.01,89.8,17.2,64.44,14.5], ikeda: [5.46,97.1,18.0,60.17,28.6],
+  toyonaka: [4.69,103.3,13.3,107.23,22.4], suita: [4.37,90.5,19.2,100.81,25.9], takatsuki: [4.65,82.8,14.7,75.27,17.0],
+  ibaraki: [4.64,81.3,14.6,65.04,17.4], minoh: [5.64,86.2,14.2,65.96,43.8], settsu: [4.7,64.0,18.1,67.25,22.9],
+  shimamoto: [3.2,80.8,11.8,59.17,32.3], toyono: [3.28,87.5,23.1,32.98,54.7], nose: [6.28,77.1,26.5,0.0,0.0],
+  moriguchi: [6.33,98.5,17.1,94.41,7.0], hirakata: [4.46,71.0,15.4,77.61,20.1], neyagawa: [5.04,81.0,20.6,100.42,13.1],
+  daito: [4.92,68.7,15.9,84.14,25.1], kadoma: [5.96,96.0,19.7,105.69,16.7], shijonawate: [6.65,68.9,26.4,52.86,36.2],
+  katano: [4.38,69.3,18.5,56.46,13.3], yao: [5.47,80.1,21.4,73.17,15.1], kashiwara: [5.09,68.3,25.0,55.59,29.1],
+  higashiosaka: [6.04,81.0,19.1,94.78,12.1], tondabayashi: [5.06,80.0,18.3,46.28,27.6], kawachinagano: [5.08,77.7,13.9,37.77,9.8],
+  matsubara: [5.66,74.0,14.2,90.04,51.0], habikino: [4.94,64.4,18.0,54.21,55.2], fujiidera: [6.72,113.1,22.1,89.99,15.7],
+  osakasayama: [5.24,87.3,18.3,60.19,17.1], taishi: [3.77,61.5,26.0,22.25,0.0], kanan: [4.4,57.3,40.8,15.14,63.7],
+  chihayaakasaka: [3.87,101.9,44.8,27.74,0.0], izumiotsu: [5.91,88.7,26.4,55.83,13.4], izumi: [5.58,69.4,14.9,38.7,21.7],
+  takaishi: [5.28,84.5,12.8,61.95,35.9], tadaoka: [5.37,84.5,20.9,50.38,60.4], kishiwada: [5.86,71.3,9.3,45.03,31.5],
+  kaizuka: [5.71,65.1,13.0,38.2,11.8], izumisano: [9.39,88.9,19.1,35.56,49.9], sennan: [6.59,61.6,16.9,37.61,16.6],
+  hannan: [5.38,85.8,23.4,45.92,19.5], kumatori: [4.32,75.4,32.1,40.03,22.9], tajiri: [9.01,83.0,50.1,17.79,0.0],
+  misaki: [5.43,67.8,16.8,28.74,67.8]
+};
+var RESIDENT_CATEGORIES=[
+  {key:'shop', label:'買い物のしやすさ'},
+  {key:'clinic', label:'医療のかかりやすさ'},
+  {key:'nursing', label:'介護のうけやすさ'},
+  {key:'elem', label:'子育て・教育環境'},
+  {key:'library', label:'文化・生きがい施設'}
+];
+function residentScaleScore(x, center, step){ return clampRound(3 - (x - center) / step); }
+MUNIS.forEach(function(m){
+  var r = RESIDENT_RAW[m.id];
+  m.shopRate=r[0]; m.clinicRate=r[1]; m.nursingRate=r[2]; m.elemRate=r[3]; m.libraryRate=r[4];
+  m.residentScores = {
+    shop: residentScaleScore(m.shopRate, 5.28, 0.65),
+    clinic: residentScaleScore(m.clinicRate, 81.0, 10),
+    nursing: residentScaleScore(m.nursingRate, 18.3, 4),
+    elem: residentScaleScore(m.elemRate, 56.46, 20),
+    library: residentScaleScore(m.libraryRate, 20.1, 10)
+  };
+  var sum=0,n=0; RESIDENT_CATEGORIES.forEach(function(c){ sum+=m.residentScores[c.key]; n++; });
+  m.residentComposite = sum/n;
+});
+
 function sevHex(score){
   var b = Math.round(Math.max(1,Math.min(5,score)));
   return SEV_HEX[b];
 }
 function scoreOf(m){ return state.mapCategory==='composite' ? m.composite : m.scores[state.mapCategory]; }
+function residentScoreOf(m){ return state.residentCategory==='composite' ? m.residentComposite : m.residentScores[state.residentCategory]; }
 
 /* ===================== 職員メモ ===================== */
 var memos = load('rc_memos', {});
@@ -655,17 +778,19 @@ var memos = load('rc_memos', {});
 /* ===================== ルーティング／状態 ===================== */
 var NAV=[
   {key:'map', label:'地域課題マップ', icon:'🗺️'},
+  {key:'resident', label:'住民目線マップ', icon:'🧑‍🤝‍🧑'},
   {key:'karte', label:'市町村カルテ', icon:'🗂️'},
   {key:'ai', label:'分析レポート', icon:'✨'},
   {key:'guide', label:'指標の計算方法', icon:'📐'}
 ];
 var TITLES={
   map:['地域課題マップ','大阪府内市町村の8指標を俯瞰します'],
+  resident:['住民目線マップ','買い物・医療・介護・教育・文化の充実度から見た地域課題'],
   karte:['市町村カルテ','市町村ごとの詳細プロファイル'],
   ai:['分析レポート','課題の要約と支援方針のドラフト生成'],
-  guide:['指標の計算方法','データソースと8指標の算出方法']
+  guide:['指標の計算方法','データソースと13指標の算出方法']
 };
-var state={ view:'map', selectedMuni:null, mapCategory:'composite' };
+var state={ view:'map', selectedMuni:null, mapCategory:'composite', residentCategory:'composite' };
 
 function setView(v){
   state.view=v;
@@ -676,6 +801,7 @@ function setView(v){
   if(v==='karte') renderKarte();
   if(v==='ai') renderAi();
   if(v==='map'){ initMap(); if(leafletMap) setTimeout(function(){ leafletMap.invalidateSize(); }, 0); }
+  if(v==='resident'){ initResidentMap(); if(residentLeafletMap) setTimeout(function(){ residentLeafletMap.invalidateSize(); }, 0); }
 }
 
 function buildNav(){
@@ -760,6 +886,74 @@ function recolorMarkers(){
     if(!layer) return;
     layer.setStyle({ fillColor: sevHex(scoreOf(m)) });
     layer.bindPopup(popupHtml(m));
+  });
+}
+
+/* ===================== 地図（住民目線マップ） ===================== */
+var residentLeafletMap=null;
+var residentGeoLayerById={};
+function buildResidentMapCategorySelect(){
+  var sel=document.getElementById('residentMapCategorySelect');
+  sel.innerHTML='<option value="composite">総合スコア</option>' + RESIDENT_CATEGORIES.map(function(c){return '<option value="'+c.key+'">'+c.label+'</option>';}).join('');
+  sel.addEventListener('change', function(){ state.residentCategory=sel.value; recolorResidentMarkers(); });
+}
+function renderResidentMapLegend(){
+  var wrap=document.getElementById('residentMapLegend');
+  wrap.innerHTML =
+    '<span>課題の度合い：</span>' +
+    '<span class="legend-scale"><i style="background:'+SEV_HEX[1]+'"></i>低い</span>' +
+    '<span class="legend-scale"><i style="background:'+SEV_HEX[2]+'"></i></span>' +
+    '<span class="legend-scale"><i style="background:'+SEV_HEX[3]+'"></i></span>' +
+    '<span class="legend-scale"><i style="background:'+SEV_HEX[4]+'"></i></span>' +
+    '<span class="legend-scale"><i style="background:'+SEV_HEX[5]+'"></i>高い</span>';
+}
+function residentPopupHtml(m){
+  var v=residentScoreOf(m);
+  return '<div class="muni-popup">'+
+    '<h5>'+m.name+'</h5>'+
+    '<div class="region">'+REGIONS[m.region].label+'</div>'+
+    '<div class="score-row"><span class="dot" style="background:'+sevHex(v)+'"></span>表示中の指標スコア：<b class="mono">'+v.toFixed(1)+'</b></div>'+
+    '<div class="score-row">住民目線 総合スコア：<b class="mono">'+m.residentComposite.toFixed(1)+'</b> / 5.0</div>'+
+    '<button type="button" data-goto="'+m.id+'">市町村カルテを見る</button>'+
+    '</div>';
+}
+function initResidentMap(){
+  if(residentLeafletMap) return;
+  residentLeafletMap = L.map('residentMapCanvas', { maxZoom:17, scrollWheelZoom:true });
+  L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
+    attribution:'<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地図: 国土地理院</a>',
+    maxZoom:18
+  }).addTo(residentLeafletMap);
+
+  var geoLayer = L.geoJSON(OSAKA_GEOJSON, {
+    style: function(feature){
+      var m = MUNI_BY_ID[feature.properties.id];
+      return { fillColor:sevHex(residentScoreOf(m)), fillOpacity:.82, color:'#fff', weight:1.2 };
+    },
+    onEachFeature: function(feature, layer){
+      var m = MUNI_BY_ID[feature.properties.id];
+      layer.bindPopup(residentPopupHtml(m));
+      layer.on('mouseover', function(){ layer.setStyle({ weight:2.4, color:'#1F5C99' }); });
+      layer.on('mouseout', function(){ layer.setStyle({ weight:1.2, color:'#fff' }); });
+      layer.on('popupopen', function(e){
+        var elBtn = e.popup.getElement().querySelector('[data-goto]');
+        if(elBtn){ elBtn.addEventListener('click', function(){ state.selectedMuni=m.id; setView('karte'); }); }
+      });
+      residentGeoLayerById[m.id]=layer;
+    }
+  }).addTo(residentLeafletMap);
+
+  var bounds = geoLayer.getBounds();
+  residentLeafletMap.fitBounds(bounds, {padding:[16,16]});
+  residentLeafletMap.setMaxBounds(bounds.pad(0.06));
+  residentLeafletMap.setMinZoom(residentLeafletMap.getZoom());
+}
+function recolorResidentMarkers(){
+  MUNIS.forEach(function(m){
+    var layer=residentGeoLayerById[m.id];
+    if(!layer) return;
+    layer.setStyle({ fillColor: sevHex(residentScoreOf(m)) });
+    layer.bindPopup(residentPopupHtml(m));
   });
 }
 
@@ -975,6 +1169,8 @@ function init(){
   buildNav();
   buildMapCategorySelect();
   renderMapLegend();
+  buildResidentMapCategorySelect();
+  renderResidentMapLegend();
   setView('map');
 
   document.getElementById('aiScopeType').addEventListener('change', updateAiScopeTargetOptions);
