@@ -97,19 +97,19 @@
 | shopRate | 小売店数%（人口千人当たり、2021年度） |
 | clinicRate | 一般診療所数（人口10万人当たり、2020年度） |
 | nursingRate | 介護老人福祉施設数（65歳以上人口10万人当たり、2020年度） |
-| elemRate | 小学校数（可住地面積100km2当たり、2024年度） |
+| elemRate | 小学校＋義務教育学校前期課程数（児童1000人当たり、2024年度、学校基本調査） |
 | libraryRate | 図書館数（人口100万人当たり、2021年度） |
 | leakageRate | 支出流出入率%（RESAS「地域ビジネス環境分析」、2022年。非公開の2市は`null`） |
 
 `residentScores`（`shop / clinic / nursing / elem / library / leakage`、1〜5）と`residentComposite`（単純平均）も
 `MUNIS`の各要素に持たせている。8指標と異なり、値が悪い（施設が少ない・支出が域外へ流出）ほどスコアが高くなるよう反転している。
 
-人口（または高齢人口）を母数とする4指標（`shop / clinic / nursing / library`）は、母数が小さい町村ほど
-「人口○人当たり」の値が施設1件の増減で大きく振れる問題があるため、**小規模自治体補正**（`shrinkRate`関数）
-をスコア化の前にかけている。母数が小さいほど大阪府全体の平均値に近づける信頼度加重平均（縮小推定）で、
-`m.shopRateAdj / clinicRateAdj / nursingRateAdj / libraryRateAdj`として保持する。面積を母数とする
-`elemRate`（子育て・教育環境）と、経済指標である`leakageRate`（地域経済の自立度）はこの補正の対象外
-（計算式は「指標の計算方法」画面参照）。
+人口・高齢人口・児童数のいずれかを母数とする5指標（`shop / clinic / nursing / elem / library`）は、母数が
+小さい町村ほど「○○当たり」の値が施設1件の増減で大きく振れる問題があるため、**小規模自治体補正**
+（`shrinkRate`関数）をスコア化の前にかけている。母数が小さいほど大阪府全体の平均値に近づける信頼度加重
+平均（縮小推定）で、`m.shopRateAdj / clinicRateAdj / nursingRateAdj / elemRateAdj / libraryRateAdj`として
+保持する（`elemRate`の母数は`ELEM_PUPILS`の児童数）。経済指標である`leakageRate`（地域経済の自立度）は
+この補正の対象外（計算式は「指標の計算方法」画面参照）。
 
 ### 4.4 RESASデータ（`RESAS_POP2050` / `RESAS_LEAKAGE` / `RESAS_INDUSTRY`）
 RESASのAPIは2025年3月に提供終了しているため、RESASの新サイト（resas.go.jp）の「地域ビジネス環境分析」を

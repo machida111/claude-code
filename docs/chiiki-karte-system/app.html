@@ -532,7 +532,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <section class="block" id="resident-indicators">
           <div class="k">3 &middot; Scoring (resident view)</div>
           <h2>6つの住民目線指標の計算方法</h2>
-          <p class="desc">「住民目線マップ」の6指標はすべて実データです。うち5指標（買い物・医療・介護・教育・文化）は人口・面積当たりの施設数、残り1指標（地域経済の自立度）は消費の流出入率です。値が悪いほど課題スコアが高くなるよう反転してスコア化しています（8指標マップと異なり、素点をそのまま使うのではなく統計を反転している点に注意）。人口（または高齢人口）を母数とする4指標は、後述する<b>小規模自治体補正</b>を適用してからスコア化しています。</p>
+          <p class="desc">「住民目線マップ」の6指標はすべて実データです。うち5指標（買い物・医療・介護・教育・文化）は人口・児童数当たりの施設数、残り1指標（地域経済の自立度）は消費の流出入率です。値が悪いほど課題スコアが高くなるよう反転してスコア化しています（8指標マップと異なり、素点をそのまま使うのではなく統計を反転している点に注意）。施設数を表す5指標は、後述する<b>小規模自治体補正</b>を適用してからスコア化しています。</p>
           <div class="idx-grid">
             <div class="idx-card">
               <div class="head"><h4>買い物のしやすさ</h4><span class="badge real">実データ</span></div>
@@ -554,9 +554,9 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
             </div>
             <div class="idx-card">
               <div class="head"><h4>子育て・教育環境</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：小学校数（可住地面積100km2当たり、補正なし）</div>
-              <p class="how">中央値56.5校を基準に、20校分の差を1点分としています。町村部では0校（隣接自治体と共用等）の場合もあります。母数が面積のため、下記の人口ベースの補正は適用していません。</p>
-              <div class="formula">score = 3 − (小学校数/100km2 − 56.5) / 20</div>
+              <div class="inputs">入力：小学校＋義務教育学校前期課程数（児童1000人当たり、小規模自治体補正済み）</div>
+              <p class="how">面積当たりではなく、実際に通う児童の数を母数にしています（学校が少なくても児童も少なければ生活環境として不便とは言えないため）。義務教育学校（小中一体型）に統合済みの町村も、前期課程を小学校相当として合算しています。大阪府全体の平均2.42校/児童千人を基準に、0.45校分の差を1点分としています。</p>
+              <div class="formula">score = 3 − (補正後学校数/児童千人 − 2.42) / 0.45</div>
             </div>
             <div class="idx-card">
               <div class="head"><h4>文化・生きがい施設</h4><span class="badge real">実データ</span></div>
@@ -574,7 +574,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
 
           <h2 style="margin-top:32px;">小規模自治体補正について</h2>
           <p class="desc">「人口○人当たり」という指標は、人口が少ない町村ほど施設1件の増減で数値が大きく振れます。たとえば人口5千人の村で診療所が1件増えるだけで「人口10万人当たり」の値は20件分も跳ね上がります。これを放置すると、小規模な町村ほど実際の充実度と関係なく極端な値（＝極端なスコア）になりやすくなります。</p>
-          <p class="desc">そこで、買い物・医療・介護・文化の4指標（人口または高齢人口を母数とするもの）には、母数が小さいほど大阪府全体の平均値に近づける補正（信頼度加重平均、いわゆる縮小推定）をかけています。母数が大きい市（大阪市・堺市など）はほぼ元の値のまま、母数が小さい町村ほど府全体の平均に近づきます。</p>
+          <p class="desc">そこで、買い物・医療・介護・教育・文化の5指標（人口・高齢人口・児童数のいずれかを母数とするもの）には、母数が小さいほど大阪府全体の平均値に近づける補正（信頼度加重平均、いわゆる縮小推定）をかけています。母数が大きい市（大阪市・堺市など）はほぼ元の値のまま、母数が小さい町村ほど府全体の平均に近づきます。</p>
           <div class="idx-card" style="margin-top:4px; max-width:640px;">
             <div class="formula">補正後の値 = (自市町村の値 × 母数 + 大阪府全体の平均値 × K) / (母数 + K)
 K：期待施設数が5件になる母数（指標ごとに固定値）</div>
@@ -585,13 +585,14 @@ K：期待施設数が5件になる母数（指標ごとに固定値）</div>
               <tr><td>買い物のしやすさ</td><td class="src">人口</td><td class="src">6.20 店/千人</td><td class="src">800人</td></tr>
               <tr><td>医療のかかりやすさ</td><td class="src">人口</td><td class="src">96.57 施設/10万人</td><td class="src">5,200人</td></tr>
               <tr><td>介護のうけやすさ</td><td class="src">65歳以上人口</td><td class="src">18.52 施設/高齢者10万人</td><td class="src">27,000人</td></tr>
+              <tr><td>子育て・教育環境</td><td class="src">小学校児童数（義務教育学校含む）</td><td class="src">2.42 校/児童千人</td><td class="src">2,070人</td></tr>
               <tr><td>文化・生きがい施設</td><td class="src">人口</td><td class="src">17.53 館/100万人</td><td class="src">285,000人</td></tr>
             </table>
           </div>
           <div class="callout">
             <div class="mark">!</div>
             <div>
-              <p>補正をかけても、母数が小さい町村のスコアは他市町村より不確かさが残ります。特に「文化・生きがい施設」は大阪市・堺市以外ほぼ全市町村で図書館数が0〜数件しかなく、指標自体の統計的な安定度が低い点に留意してください。「子育て・教育環境」は面積を母数とする指標のため、この補正の対象外です。</p>
+              <p>補正をかけても、母数が小さい町村のスコアは他市町村より不確かさが残ります。特に「文化・生きがい施設」は大阪市・堺市以外ほぼ全市町村で図書館数が0〜数件しかなく、指標自体の統計的な安定度が低い点に留意してください。「地域経済の自立度」（支出流出入率）は施設数ではなく経済指標のため、この補正の対象外です。</p>
               <p>治安・防犯についても検討しましたが、e-Stat上のデータが2005年で更新停止しており、大阪府警の統計ページも本システムからは取得できなかったため、住民目線マップの指標には含めていません。</p>
             </div>
           </div>
@@ -750,25 +751,34 @@ MUNIS.forEach(function(m){
 
 /* ===================== 住民目線データ（e-Stat 社会・人口統計体系「市区町村データ」） =====================
    買い物のしやすさ＝小売店数（人口千人当たり、2021年度）／医療のかかりやすさ＝一般診療所数（人口10万人当たり、2020年度）
-   介護のうけやすさ＝介護老人福祉施設数（65歳以上人口10万人当たり、2020年度）／子育て・教育環境＝小学校数（可住地面積100km2当たり、2024年度）
+   介護のうけやすさ＝介護老人福祉施設数（65歳以上人口10万人当たり、2020年度）
+   子育て・教育環境＝小学校＋義務教育学校前期課程数（児童1000人当たり、2024年度、学校基本調査）
    文化・生きがい＝図書館数（人口100万人当たり、2021年度）
    [買い物, 医療, 介護, 教育, 文化] （値が高いほど充実、課題スコアは反転して算出） */
 var RESIDENT_RAW = {
-  osaka: [8.34,126.8,21.3,130.03,9.1], sakai: [5.01,89.8,17.2,64.44,14.5], ikeda: [5.46,97.1,18.0,60.17,28.6],
-  toyonaka: [4.69,103.3,13.3,107.23,22.4], suita: [4.37,90.5,19.2,100.81,25.9], takatsuki: [4.65,82.8,14.7,75.27,17.0],
-  ibaraki: [4.64,81.3,14.6,65.04,17.4], minoh: [5.64,86.2,14.2,65.96,43.8], settsu: [4.7,64.0,18.1,67.25,22.9],
-  shimamoto: [3.2,80.8,11.8,59.17,32.3], toyono: [3.28,87.5,23.1,32.98,54.7], nose: [6.28,77.1,26.5,0.0,0.0],
-  moriguchi: [6.33,98.5,17.1,94.41,7.0], hirakata: [4.46,71.0,15.4,77.61,20.1], neyagawa: [5.04,81.0,20.6,100.42,13.1],
-  daito: [4.92,68.7,15.9,84.14,25.1], kadoma: [5.96,96.0,19.7,105.69,16.7], shijonawate: [6.65,68.9,26.4,52.86,36.2],
-  katano: [4.38,69.3,18.5,56.46,13.3], yao: [5.47,80.1,21.4,73.17,15.1], kashiwara: [5.09,68.3,25.0,55.59,29.1],
-  higashiosaka: [6.04,81.0,19.1,94.78,12.1], tondabayashi: [5.06,80.0,18.3,46.28,27.6], kawachinagano: [5.08,77.7,13.9,37.77,9.8],
-  matsubara: [5.66,74.0,14.2,90.04,51.0], habikino: [4.94,64.4,18.0,54.21,55.2], fujiidera: [6.72,113.1,22.1,89.99,15.7],
-  osakasayama: [5.24,87.3,18.3,60.19,17.1], taishi: [3.77,61.5,26.0,22.25,0.0], kanan: [4.4,57.3,40.8,15.14,63.7],
-  chihayaakasaka: [3.87,101.9,44.8,27.74,0.0], izumiotsu: [5.91,88.7,26.4,55.83,13.4], izumi: [5.58,69.4,14.9,38.7,21.7],
-  takaishi: [5.28,84.5,12.8,61.95,35.9], tadaoka: [5.37,84.5,20.9,50.38,60.4], kishiwada: [5.86,71.3,9.3,45.03,31.5],
-  kaizuka: [5.71,65.1,13.0,38.2,11.8], izumisano: [9.39,88.9,19.1,35.56,49.9], sennan: [6.59,61.6,16.9,37.61,16.6],
-  hannan: [5.38,85.8,23.4,45.92,19.5], kumatori: [4.32,75.4,32.1,40.03,22.9], tajiri: [9.01,83.0,50.1,17.79,0.0],
-  misaki: [5.43,67.8,16.8,28.74,67.8]
+  osaka: [8.34,126.8,21.3,2.53,9.1], sakai: [5.01,89.8,17.2,2.36,14.5], ikeda: [5.46,97.1,18.0,1.98,28.6],
+  toyonaka: [4.69,103.3,13.3,1.8,22.4], suita: [4.37,90.5,19.2,1.69,25.9], takatsuki: [4.65,82.8,14.7,2.48,17.0],
+  ibaraki: [4.64,81.3,14.6,2.06,17.4], minoh: [5.64,86.2,14.2,1.68,43.8], settsu: [4.7,64.0,18.1,2.39,22.9],
+  shimamoto: [3.2,80.8,11.8,2.06,32.3], toyono: [3.28,87.5,23.1,8.32,54.7], nose: [6.28,77.1,26.5,3.68,0.0],
+  moriguchi: [6.33,98.5,17.1,2.22,7.0], hirakata: [4.46,71.0,15.4,2.3,20.1], neyagawa: [5.04,81.0,20.6,2.33,13.1],
+  daito: [4.92,68.7,15.9,2.36,25.1], kadoma: [5.96,96.0,19.7,3.12,16.7], shijonawate: [6.65,68.9,26.4,2.35,36.2],
+  katano: [4.38,69.3,18.5,2.23,13.3], yao: [5.47,80.1,21.4,2.27,15.1], kashiwara: [5.09,68.3,25.0,3.45,29.1],
+  higashiosaka: [6.04,81.0,19.1,2.6,12.1], tondabayashi: [5.06,80.0,18.3,3.53,27.6], kawachinagano: [5.08,77.7,13.9,3.22,9.8],
+  matsubara: [5.66,74.0,14.2,3.08,51.0], habikino: [4.94,64.4,18.0,2.93,55.2], fujiidera: [6.72,113.1,22.1,2.54,15.7],
+  osakasayama: [5.24,87.3,18.3,2.14,17.1], taishi: [3.77,61.5,26.0,3.25,0.0], kanan: [4.4,57.3,40.8,3.07,63.7],
+  chihayaakasaka: [3.87,101.9,44.8,13.33,0.0], izumiotsu: [5.91,88.7,26.4,2.37,13.4], izumi: [5.58,69.4,14.9,2.23,21.7],
+  takaishi: [5.28,84.5,12.8,2.46,35.9], tadaoka: [5.37,84.5,20.9,2.72,60.4], kishiwada: [5.86,71.3,9.3,2.63,31.5],
+  kaizuka: [5.71,65.1,13.0,2.71,11.8], izumisano: [9.39,88.9,19.1,2.9,49.9], sennan: [6.59,61.6,16.9,3.61,16.6],
+  hannan: [5.38,85.8,23.4,3.86,19.5], kumatori: [4.32,75.4,32.1,2.2,22.9], tajiri: [9.01,83.0,50.1,2.3,0.0],
+  misaki: [5.43,67.8,16.8,8.44,67.8]
+};
+var ELEM_PUPILS = {
+  osaka:116236, sakai:39841, ikeda:5565, toyonaka:22243, suita:21320, takatsuki:16963, ibaraki:15538, minoh:8934,
+  settsu:4177, shimamoto:1939, toyono:481, nose:272, moriguchi:5866, hirakata:19570, neyagawa:10308, daito:5509,
+  kadoma:4162, shijonawate:2553, katano:4033, yao:12343, kashiwara:2896, higashiosaka:19640, tondabayashi:4814, kawachinagano:4035,
+  matsubara:4868, habikino:4776, fujiidera:3146, osakasayama:3274, taishi:615, kanan:651, chihayaakasaka:150, izumiotsu:3379,
+  izumi:9436, takaishi:2848, tadaoka:736, kishiwada:9130, kaizuka:4058, izumisano:4486, sennan:2771, hannan:2072,
+  kumatori:2268, tajiri:435, misaki:474
 };
 var RESIDENT_CATEGORIES=[
   {key:'shop', label:'買い物のしやすさ'},
@@ -856,13 +866,13 @@ var RESAS_INDUSTRY = {
   misaki:[[null,null],[4,3],[39,30],[48,36],[37,28],[2,2],[27,16],[4,4],[20,18],[16,8],[26,21],[20,21]]
 };
 function residentScaleScore(x, center, step){ return clampRound(3 - (x - center) / step); }
-/* 小規模自治体補正：人口（または高齢人口）当たりの施設数は、母数が小さい町村ほど1施設の増減で
+/* 小規模自治体補正：人口（または高齢人口・児童数）当たりの施設数は、母数が小さい町村ほど1施設の増減で
    大きく振れ、統計的に不安定になる（例：人口5千人の村で1施設増えるだけで「人口10万人当たり」の
    値が跳ね上がる）。信頼度の重み(母数/(母数+K))で自市町村の値と大阪府全体の平均値を加重平均し、
    母数が小さいほど府全体の平均に近づける（信頼度shrinkage）。Kは「期待施設数が5件になる母数」を
-   目安に指標ごとに設定。人口面積当たりの「子育て・教育環境」は面積が母数のため対象外。 */
-var RESIDENT_PREF_AVG = { shop:6.20, clinic:96.57, nursing:18.52, library:17.53 };
-var RESIDENT_SHRINK_K = { shop:800, clinic:5200, nursing:27000, library:285000 };
+   目安に指標ごとに設定。 */
+var RESIDENT_PREF_AVG = { shop:6.20, clinic:96.57, nursing:18.52, elem:2.42, library:17.53 };
+var RESIDENT_SHRINK_K = { shop:800, clinic:5200, nursing:27000, elem:2070, library:285000 };
 function shrinkRate(raw, base, key){
   var k=RESIDENT_SHRINK_K[key], avg=RESIDENT_PREF_AVG[key];
   return (raw*base + avg*k) / (base + k);
@@ -874,6 +884,7 @@ MUNIS.forEach(function(m){
   m.shopRateAdj = shrinkRate(m.shopRate, m.population, 'shop');
   m.clinicRateAdj = shrinkRate(m.clinicRate, m.population, 'clinic');
   m.nursingRateAdj = shrinkRate(m.nursingRate, elderlyPop, 'nursing');
+  m.elemRateAdj = shrinkRate(m.elemRate, ELEM_PUPILS[m.id], 'elem');
   m.libraryRateAdj = shrinkRate(m.libraryRate, m.population, 'library');
   var pop2050=RESAS_POP2050[m.id];
   m.pop2050=pop2050[0]; m.popRate2050=pop2050[1];
@@ -885,7 +896,7 @@ MUNIS.forEach(function(m){
     shop: residentScaleScore(m.shopRateAdj, 5.28, 0.65),
     clinic: residentScaleScore(m.clinicRateAdj, 81.0, 10),
     nursing: residentScaleScore(m.nursingRateAdj, 18.3, 4),
-    elem: residentScaleScore(m.elemRate, 56.46, 20),
+    elem: residentScaleScore(m.elemRateAdj, 2.42, 0.45),
     library: residentScaleScore(m.libraryRateAdj, 20.1, 10),
     leakage: (m.leakageRate!=null) ? residentScaleScore(m.leakageRate, -5.6, 6) : 3
   };
