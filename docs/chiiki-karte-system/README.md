@@ -95,7 +95,8 @@ GeoJSON `FeatureCollection`。各Featureの`properties.id`が4.1の`id`と対応
 ```
 docs/chiiki-karte-system/
 ├─ README.md   本書
-└─ app.html    実装一式（HTML/CSS/JSを1ファイルに集約）
+├─ app.html    実装一式（HTML/CSS/JSを1ファイルに集約）
+└─ guide.html  指標の計算方法・データソースの説明ページ（app.htmlのサイドバーからリンク）
 ```
 
 `app.html`内部の主なセクション（`<script>`内のコメント区切りに対応）:

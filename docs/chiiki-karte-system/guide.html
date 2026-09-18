@@ -1,0 +1,263 @@
+<title>指標の計算方法</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --surface-2:#EAEEF3; --surface-3:#DEE4EC;
+  --border:#D7DEE8; --ink:#19222F; --ink-muted:#5C6779; --ink-faint:#8993A3;
+  --accent:#1F5C99; --accent-ink:#123E6B; --accent-soft:#E3ECF8;
+  --sev1:#3E8E7E; --sev2:#7FA65C; --sev3:#D9A544; --sev4:#C1702B; --sev5:#B23A32;
+  --good:#2E7D5B; --good-soft:#E4F1EA; --warn:#C77D12; --warn-soft:#FBEEDA; --crit:#B23A32;
+  --shadow:0 1px 2px rgba(20,30,50,.07),0 6px 16px rgba(20,30,50,.07);
+  --font-display:'Zen Kaku Gothic New','Noto Sans JP',sans-serif;
+  --font-body:'Noto Sans JP','Zen Kaku Gothic New',sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141920; --surface:#1B222C; --surface-2:#232B37; --surface-3:#2C3542;
+    --border:#39424F; --ink:#EAEDF2; --ink-muted:#A7B0BE; --ink-faint:#748094;
+    --accent:#5B9BDB; --accent-ink:#BFDBFF; --accent-soft:#20344A;
+    --sev1:#4CA894; --sev2:#8FB86B; --sev3:#E0B457; --sev4:#D28546; --sev5:#CC5147;
+    --good:#4CA894; --good-soft:#1D3129; --warn:#D9A544; --warn-soft:#33291A; --crit:#CC5147;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 20px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141920; --surface:#1B222C; --surface-2:#232B37; --surface-3:#2C3542;
+  --border:#39424F; --ink:#EAEDF2; --ink-muted:#A7B0BE; --ink-faint:#748094;
+  --accent:#5B9BDB; --accent-ink:#BFDBFF; --accent-soft:#20344A;
+  --sev1:#4CA894; --sev2:#8FB86B; --sev3:#E0B457; --sev4:#D28546; --sev5:#CC5147;
+  --good:#4CA894; --good-soft:#1D3129; --warn:#D9A544; --warn-soft:#33291A; --crit:#CC5147;
+  --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 20px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:var(--font-body); font-size:15px; line-height:1.7;}
+h1,h2,h3,h4{font-family:var(--font-display); margin:0; text-wrap:balance;}
+a{color:var(--accent-ink);}
+.mono{font-family:var(--font-mono); font-variant-numeric:tabular-nums;}
+
+.topbar{
+  position:sticky; top:env(safe-area-inset-top,0px); z-index:10;
+  display:flex; align-items:center; gap:14px; padding:12px 24px;
+  background:var(--surface); border-bottom:1px solid var(--border);
+}
+.topbar a.back{
+  font-size:12.5px; font-weight:700; color:var(--ink-muted); text-decoration:none;
+  display:flex; align-items:center; gap:5px; white-space:nowrap;
+}
+.topbar a.back:hover{color:var(--accent-ink);}
+.topbar .sep{width:1px; height:16px; background:var(--border); flex:none;}
+.topbar .label{font-size:12.5px; color:var(--ink-faint); font-weight:600;}
+
+.wrap{max-width:860px; margin:0 auto; padding:0 24px 96px;}
+
+.hero{padding:44px 0 8px;}
+.hero .eyebrow{font-size:12px; font-weight:700; letter-spacing:.08em; color:var(--accent-ink); text-transform:uppercase;}
+.hero h1{font-size:clamp(24px,4vw,32px); margin-top:8px;}
+.hero p.lead{margin:14px 0 0; max-width:640px; color:var(--ink-muted); font-size:14.5px;}
+
+nav.toc{display:flex; flex-wrap:wrap; gap:8px; margin:26px 0 0;}
+nav.toc a{
+  font-size:12.5px; font-weight:600; color:var(--ink-muted); text-decoration:none;
+  padding:7px 13px; border-radius:999px; border:1px solid var(--border); background:var(--surface);
+}
+nav.toc a:hover{background:var(--surface-2); color:var(--ink);}
+
+section.block{padding:40px 0 0; border-top:1px solid var(--border); margin-top:40px;}
+section.block:first-of-type{border-top:none; margin-top:8px;}
+.block .k{font-size:11.5px; font-weight:700; letter-spacing:.06em; color:var(--ink-faint); text-transform:uppercase;}
+.block h2{font-size:20px; margin-top:6px;}
+.block > p.desc{color:var(--ink-muted); font-size:13.5px; max-width:620px; margin:10px 0 0;}
+
+.screen-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:22px;}
+@media (max-width:700px){.screen-grid{grid-template-columns:1fr;}}
+.screen-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:var(--shadow);}
+.screen-card .num{font-family:var(--font-mono); font-size:11px; color:var(--ink-faint);}
+.screen-card h3{font-size:14.5px; margin-top:6px;}
+.screen-card p{font-size:12.5px; color:var(--ink-muted); margin:6px 0 0;}
+
+table{width:100%; border-collapse:collapse; margin-top:22px; font-size:13px;}
+.table-wrap{overflow-x:auto;}
+th,td{text-align:left; padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top;}
+th{font-size:11.5px; color:var(--ink-faint); font-weight:700; text-transform:uppercase; letter-spacing:.03em; white-space:nowrap;}
+td.src{color:var(--ink-muted); font-size:12.5px;}
+tr:last-child td{border-bottom:none;}
+
+.scale{display:flex; align-items:center; gap:10px; margin-top:18px; flex-wrap:wrap;}
+.scale .chip{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--ink-muted);}
+.scale .dot{width:12px; height:12px; border-radius:4px; flex:none;}
+
+.idx-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:14px; margin-top:22px;}
+@media (max-width:760px){.idx-grid{grid-template-columns:1fr;}}
+.idx-card{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 18px; box-shadow:var(--shadow);}
+.idx-card .head{display:flex; align-items:center; justify-content:space-between; gap:10px;}
+.idx-card h4{font-size:14.5px;}
+.badge{
+  display:inline-flex; align-items:center; gap:5px; padding:3px 10px; border-radius:999px;
+  font-size:10.5px; font-weight:700; white-space:nowrap; flex:none;
+}
+.badge.real{background:var(--good-soft); color:var(--good);}
+.badge.est{background:var(--warn-soft); color:var(--warn);}
+.idx-card .inputs{margin:8px 0 0; font-size:12px; color:var(--ink-faint);}
+.idx-card p.how{margin:10px 0 0; font-size:13px; color:var(--ink-muted);}
+.idx-card .formula{
+  margin:10px 0 0; padding:8px 10px; background:var(--surface-2); border-radius:8px;
+  font-family:var(--font-mono); font-size:11.5px; color:var(--ink); overflow-x:auto; white-space:pre;
+}
+
+.callout{
+  margin-top:22px; padding:16px 18px; border-radius:12px; border:1px solid var(--warn);
+  background:var(--warn-soft); display:flex; gap:12px; align-items:flex-start;
+}
+.callout .mark{font-family:var(--font-display); font-weight:900; color:var(--warn); font-size:14px; flex:none;}
+.callout p{margin:0; font-size:13px; color:var(--ink); line-height:1.75;}
+.callout p + p{margin-top:8px;}
+.callout b{color:var(--accent-ink);}
+
+.foot{margin-top:56px; padding-top:20px; border-top:1px solid var(--border); font-size:12px; color:var(--ink-faint); display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.foot a{color:var(--ink-muted);}
+</style>
+
+<div class="topbar">
+  <a class="back" href="app.html">&larr; 地域課題カルテ</a>
+  <span class="sep"></span>
+  <span class="label">指標の計算方法・データについて</span>
+</div>
+
+<div class="wrap">
+  <div class="hero">
+    <div class="eyebrow">Reference — 大阪府 市町村局振興課</div>
+    <h1>指標の計算方法とデータについて</h1>
+    <p class="lead">地域課題マップ・市町村カルテで表示している8つの課題指標が、どのデータからどう計算されているかをまとめたページです。判断材料として使う前に、実データに基づく部分と簡易的な推定の部分の違いを確認してください。</p>
+    <nav class="toc">
+      <a href="#sources">1. データソース</a>
+      <a href="#indicators">2. 8指標の計算方法</a>
+      <a href="#composite">3. 総合スコア</a>
+      <a href="#caution">4. 利用上の注意</a>
+    </nav>
+  </div>
+
+  <section class="block">
+    <div class="k">Overview</div>
+    <h2>このツールでできること</h2>
+    <p class="desc">地域課題カルテは3つの画面から構成されています。いずれも表示専用で、統計データは事前に埋め込まれています。</p>
+    <div class="screen-grid">
+      <div class="screen-card"><div class="num">01</div><h3>地域課題マップ</h3><p>大阪府43市町村を8指標のいずれかでコロプレス表示。行政区域境界（国土数値情報）を地理院タイル上に塗り分けます。</p></div>
+      <div class="screen-card"><div class="num">02</div><h3>市町村カルテ</h3><p>市町村ごとの基礎情報と8指標のレーダーチャート。担当者メモをブラウザに保存できます。</p></div>
+      <div class="screen-card"><div class="num">03</div><h3>分析レポート</h3><p>全域／地域ブロック／市町村を指定し、指標スコアから共通課題・支援方針をルールベースで文章化します。</p></div>
+    </div>
+  </section>
+
+  <section class="block" id="sources">
+    <div class="k">1 &middot; Data sources</div>
+    <h2>元になっているデータ</h2>
+    <p class="desc">指標の入力に使っている値はすべて公的統計・地理データです。年次はデータソースの最新公表年に依存します。</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>項目</th><th>出典</th><th>備考</th></tr>
+        <tr><td>人口・世帯数・高齢化率</td><td class="src">e-Stat（政府統計の総合窓口）<br>社会・人口統計体系「市区町村データ」</td><td class="src">2020年国勢調査。高齢化率は65歳以上人口÷総人口。</td></tr>
+        <tr><td>面積</td><td class="src">国土地理院<br>全国都道府県市区町村別面積調</td><td class="src">人口密度（人口÷面積）の算出に使用。</td></tr>
+        <tr><td>財政力指数</td><td class="src">総務省 地方財政状況調査</td><td class="src">直近公表年度。1に近いほど自主財源の割合が高い。</td></tr>
+        <tr><td>市町村境界</td><td class="src">国土数値情報 行政区域データ（N03）</td><td class="src">大阪市24区・堺市7区は1つの市域ポリゴンに結合。</td></tr>
+        <tr><td>地図背景</td><td class="src">国土地理院 地理院タイル（淡色地図）</td><td class="src">出典表示：地図：国土地理院。</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="block" id="indicators">
+    <div class="k">2 &middot; Scoring</div>
+    <h2>8つの課題指標の計算方法</h2>
+    <p class="desc">各指標は1〜5の整数スコア（5が最も課題が大きい）。「実データ」は上記の統計値を直接計算に使っているもの、「推定」はその統計値を使った簡易的な代理指標で、その課題を直接測った統計そのものではないものです。</p>
+    <div class="scale">
+      <span class="chip"><i class="dot" style="background:var(--sev1)"></i>1 : 小さい</span>
+      <span class="chip"><i class="dot" style="background:var(--sev2)"></i>2</span>
+      <span class="chip"><i class="dot" style="background:var(--sev3)"></i>3</span>
+      <span class="chip"><i class="dot" style="background:var(--sev4)"></i>4</span>
+      <span class="chip"><i class="dot" style="background:var(--sev5)"></i>5 : 大きい</span>
+    </div>
+
+    <div class="idx-grid">
+      <div class="idx-card">
+        <div class="head"><h4>人口減少</h4><span class="badge real">実データ</span></div>
+        <div class="inputs">入力：人口増減率（2015→2020年の年率換算）</div>
+        <p class="how">増減率が低い（減少が大きい）ほど高スコア。増減率0%を基準の3点付近に置き、傾き1.1倍で振れを反映します。</p>
+        <div class="formula">score = 3 − 人口増減率(%) × 1.1  ＋ 補正値</div>
+      </div>
+      <div class="idx-card">
+        <div class="head"><h4>高齢化</h4><span class="badge real">実データ</span></div>
+        <div class="inputs">入力：高齢化率（65歳以上人口比率）</div>
+        <p class="how">高齢化率15%を基準点として、5.5ポイントの差を1点分の変化として換算します。</p>
+        <div class="formula">score = (高齢化率(%) − 15) / 5.5  ＋ 補正値</div>
+      </div>
+      <div class="idx-card">
+        <div class="head"><h4>空き家</h4><span class="badge est">推定</span></div>
+        <div class="inputs">入力：「人口減少」「高齢化」スコア（空き家率の実データは未使用）</div>
+        <p class="how">人口減少と高齢化が進むほど空き家も増えやすいという前提で、両スコアの平均から推定しています。</p>
+        <div class="formula">score = 人口減少スコア×0.5 ＋ 高齢化スコア×0.5 ＋ 補正値</div>
+      </div>
+      <div class="idx-card">
+        <div class="head"><h4>公共交通</h4><span class="badge est">推定</span></div>
+        <div class="inputs">入力：人口密度（人口÷面積、実データから算出）</div>
+        <p class="how">密度が低いほど路線・便数を維持しにくいとみなし、密度の対数が小さいほど高スコアにしています。</p>
+        <div class="formula">score = 6 − log10(人口密度)  ＋ 補正値</div>
+      </div>
+      <div class="idx-card">
+        <div class="head"><h4>地域コミュニティ</h4><span class="badge est">推定</span></div>
+        <div class="inputs">入力：「人口減少」「高齢化」スコア（自治会加入率等の実データは未使用）</div>
+        <p class="how">人口減少・高齢化が進む地域では担い手が減り活動が弱まりやすいという前提の代理指標です。</p>
+        <div class="formula">score = (人口減少スコア ＋ 高齢化スコア) / 2  ＋ 補正値</div>
+      </div>
+      <div class="idx-card">
+        <div class="head"><h4>担い手不足</h4><span class="badge est">推定</span></div>
+        <div class="inputs">入力：高齢化率、財政力指数（いずれも実データ）</div>
+        <p class="how">高齢化の度合いを主要因（60%）に、財政力の低さ（自主財源の乏しさ）を補助要因（40%）として合成しています。</p>
+        <div class="formula">score = 高齢化スコア×0.6 ＋ (1−財政力指数)×3×0.4  ＋ 補正値</div>
+      </div>
+      <div class="idx-card">
+        <div class="head"><h4>防災</h4><span class="badge est">推定</span></div>
+        <div class="inputs">入力：地域ブロック、人口密度（ハザードマップ等の実データは未使用）</div>
+        <p class="how">地域ブロックごとに設定した基準値（沿岸部・山間部を含む泉南・南河内地域などをやや高めに設定）に、人口密度が低い地域への補正を加えています。</p>
+        <div class="formula">score = 地域ブロック基準値（低密度地域は+0.5）＋ 補正値</div>
+      </div>
+      <div class="idx-card">
+        <div class="head"><h4>DX（行政デジタル化の遅れ）</h4><span class="badge est">推定</span></div>
+        <div class="inputs">入力：財政力指数、人口密度（いずれも実データ）</div>
+        <p class="how">財政力が低く、人口密度が低い（≒ICT投資の原資や規模の経済が得にくい）市町村ほど高スコアにしています。</p>
+        <div class="formula">score = 4.2 − 財政力指数×2.4 − log10(人口密度)×0.15  ＋ 補正値</div>
+      </div>
+    </div>
+
+    <div class="callout">
+      <div class="mark">!</div>
+      <div>
+        <p><b>「＋ 補正値」について</b> — 各スコアには、市町村名を種（シード）にした小さな補正値を加えています。これは人口構造が似た市町村同士が完全に同じスコアになって見分けがつかなくなるのを避けるための演出であり、追加の統計データを反映したものではありません。同じ市町村・同じ指標であれば常に同じ値になります（ページを開き直しても変わりません）。</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" id="composite">
+    <div class="k">3 &middot; Composite score</div>
+    <h2>総合スコアの算出</h2>
+    <p class="desc">地図の「総合」表示やカルテのレーダーチャートで使う総合スコアは、8指標の単純平均です。重み付けはしていません。</p>
+    <div class="idx-card" style="margin-top:18px; max-width:520px;">
+      <div class="formula">総合スコア = (人口減少 + 高齢化 + 空き家 + 公共交通 + 地域コミュニティ + 担い手不足 + 防災 + DX) / 8</div>
+    </div>
+  </section>
+
+  <section class="block" id="caution">
+    <div class="k">4 &middot; Caution</div>
+    <h2>利用上の注意</h2>
+    <div class="callout" style="border-color:var(--crit); background:var(--warn-soft);">
+      <div class="mark" style="color:var(--crit);">!</div>
+      <div>
+        <p>8指標のうち「人口減少」「高齢化」は実データ（人口増減率・高齢化率）から直接計算していますが、残り6指標（空き家・公共交通・地域コミュニティ・担い手不足・防災・DX）は、人口・面積・財政力指数などの実データを使った<b>簡易的な推定モデル</b>です。空き家率や避難所整備状況、ICT投資額といった、その課題を直接表す統計そのものは使用していません。</p>
+        <p>そのため、このスコアは市町村間の傾向を大まかに掴むための参考情報であり、<b>公式な統計指標や評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="foot">
+    <span>地域課題カルテ / docs/chiiki-karte-system/guide.html</span>
+    <a href="app.html">&larr; 地図・カルテ・分析レポートに戻る</a>
+  </div>
+</div>
