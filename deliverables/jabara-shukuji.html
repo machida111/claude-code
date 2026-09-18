@@ -53,8 +53,20 @@
 
   .panel-row{display:grid; grid-template-columns:44px 1fr 72px 34px; gap:10px; align-items:start; margin-bottom:10px;}
   .panel-row .idx{display:flex; align-items:center; justify-content:center; height:38px; font-weight:700; color:var(--ink-600); font-size:12.5px;}
-  .char-count{font-size:11px; color:var(--ink-400); margin-top:3px;}
+  .char-count{font-size:11px; color:var(--ink-400);}
   .char-count.warn{color:var(--vermilion-600); font-weight:700;}
+  .ta-toolbar{display:flex; justify-content:space-between; align-items:center; margin-top:3px; gap:8px;}
+  .ruby-btn{font:inherit; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:5px; border:1px solid var(--line-strong); background:var(--paper-0); color:var(--indigo-600); cursor:pointer; flex:none;}
+  .ruby-btn:hover{border-color:var(--indigo-600);}
+  .ruby-btn:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
+  .ruby-form{display:none; align-items:center; gap:6px; margin-top:6px; flex-wrap:wrap; background:var(--paper-0); border:1px solid var(--line-strong); border-radius:6px; padding:6px 8px;}
+  .ruby-form.open{display:flex;}
+  .ruby-form .rf-label{font-size:11.5px; color:var(--ink-600); white-space:nowrap;}
+  .ruby-form .rf-target{font-weight:700; color:var(--ink-900);}
+  .ruby-form input{width:110px; font-size:12.5px; padding:5px 7px;}
+  .ruby-form .rf-ok{font:inherit; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:5px; border:none; background:var(--indigo-600); color:var(--paper-1); cursor:pointer;}
+  .ruby-form .rf-cancel{font:inherit; font-size:11.5px; padding:4px 8px; border-radius:5px; border:1px solid var(--line-strong); background:transparent; color:var(--ink-600); cursor:pointer;}
+  .ruby-msg{font-size:11px; color:var(--vermilion-600); margin-top:4px;}
   .fontsize-wrap{display:flex; flex-direction:column; gap:3px;}
   .fontsize-wrap label{font-size:10px; color:var(--ink-600);}
   .fontsize-wrap input{width:100%; font:inherit; font-size:12.5px; padding:6px 6px; border:1px solid var(--line-strong); border-radius:6px; background:var(--paper-0); color:var(--ink-900);}
@@ -99,9 +111,8 @@
     font-family:"HGS行書体","HG行書体","Shippori Mincho",serif; padding:6mm 10mm 6mm 4mm; overflow:hidden;
   }
   .cover-panel .cover-title, .cover-panel .cover-subtitle{
-    writing-mode:vertical-rl; text-orientation:mixed; height:100%; display:flex; align-items:center; justify-content:center; overflow:hidden;
+    writing-mode:vertical-rl; text-orientation:mixed; height:100%; display:grid; place-items:center; overflow:hidden;
   }
-  .cover-panel .cover-subtitle{ align-items:flex-end; padding-bottom:12%; }
   .cover-panel .fold-guide{ position:absolute; left:0; top:0; bottom:0; width:0; border-left:1px dashed var(--fold-line); }
   .cover-panel .fold-label{
     position:absolute; left:-7px; top:3mm; font-size:8px; color:var(--fold-line); font-family:"Zen Kaku Gothic New",sans-serif;
@@ -140,10 +151,13 @@
       <div>
         <label class="field-label" for="coverTitle">タイトル（大）</label>
         <textarea id="coverTitle" rows="3">大東市[だいとうし]　市制[しせい]施行[しこう]七十周年[ななじゅっしゅうねん]記念式典[きねんしきてん]</textarea>
+        <div id="coverTitleRuby"></div>
       </div>
       <div>
-        <label class="field-label" for="coverSubtitle">サブタイトル（小）</label>
-        <input type="text" id="coverSubtitle" value="祝辞">
+        <label class="field-label" for="coverSubtitle">サブタイトル（小・日付や会場など）</label>
+        <textarea id="coverSubtitle" rows="3">令和[れいわ]八年[はちねん]四月[しがつ]五日[いつか]（日[にち]）午前[ごぜん]九時半[くじはん]　開式[かいしき]
+大東市立市民会館[だいとうしりつしみんかいかん]　キラリエホール</textarea>
+        <div id="coverSubtitleRuby"></div>
       </div>
       <div>
         <label class="field-label" for="coverSpan">表紙パネルの幅（折り幅の何個分か）</label>
@@ -159,7 +173,7 @@
         <input type="number" id="coverSubtitleSize" value="18" step="1" min="8"> pt
       </div>
     </div>
-    <div class="hint">振り仮名は他のパネルと同じく「漢字[かんじ]」の形式で入力できます。表紙パネルの幅は常に折り幅の整数倍になり、内部にも折り線が入るので、他のパネルと同じリズムで山折り・谷折りができます。</div>
+    <div class="hint">振り仮名を付けたい文字をテキスト内で選択してから「ふりがなを付ける」ボタンを押してください。表紙パネルの幅は常に折り幅の整数倍になり、内部にも折り線が入るので、他のパネルと同じリズムで山折り・谷折りができます。</div>
   </div>
 
   <div class="card">
@@ -196,12 +210,15 @@
 
 迎[むか]えられました
 ことに"></textarea>
-    <button type="button" class="btn" id="bulkApplyBtn" style="margin-top:10px;">パネルに反映</button>
+    <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+      <button type="button" class="btn" id="bulkApplyBtn">パネルに反映</button>
+      <span class="hint" id="bulkConfirmMsg" style="margin:0;"></span>
+    </div>
   </div>
 
   <div class="card">
     <h2>パネルごとの文言</h2>
-    <div class="ruby-hint">振り仮名は「漢字[かんじ]」の形式で入力すると、印刷時に自動でルビとして正しい位置に付きます（例：本日[ほんじつ]）。改行すると次の行（列）に送られます。</div>
+    <div class="ruby-hint">文字を選択して「ふりがなを付ける」ボタンを押すと、そのパネルの読みが正しい位置に付きます。改行すると次の行（列）に送られます。</div>
     <div id="panelList"></div>
     <button type="button" class="btn ghost" id="addPanelBtn">＋ パネルを追加</button>
   </div>
@@ -260,6 +277,69 @@
 
   function panelCharCount(text){ return (text||'').replace(/\n/g,'').length; }
 
+  function makeRubyBtn(targetEl){
+    var wrap = document.createElement('div');
+    var btn = document.createElement('button'); btn.type='button'; btn.className='ruby-btn'; btn.textContent='ふりがなを付ける';
+    var msg = document.createElement('div'); msg.className='ruby-msg';
+
+    var form = document.createElement('div'); form.className='ruby-form';
+    var rfLabel = document.createElement('span'); rfLabel.className='rf-label';
+    var rfTarget = document.createElement('span'); rfTarget.className='rf-target';
+    rfLabel.appendChild(document.createTextNode('「'));
+    rfLabel.appendChild(rfTarget);
+    rfLabel.appendChild(document.createTextNode('」の読み：'));
+    var rfInput = document.createElement('input'); rfInput.type='text'; rfInput.placeholder='ひらがな';
+    var rfOk = document.createElement('button'); rfOk.type='button'; rfOk.className='rf-ok'; rfOk.textContent='追加';
+    var rfCancel = document.createElement('button'); rfCancel.type='button'; rfCancel.className='rf-cancel'; rfCancel.textContent='キャンセル';
+    form.appendChild(rfLabel); form.appendChild(rfInput); form.appendChild(rfOk); form.appendChild(rfCancel);
+
+    var pending = null;
+
+    function closeForm(){ form.classList.remove('open'); pending = null; rfInput.value=''; }
+
+    btn.addEventListener('click', function(){
+      msg.textContent = '';
+      var start = targetEl.selectionStart, end = targetEl.selectionEnd;
+      if(start === end){
+        msg.textContent = 'ふりがなを付けたい文字を、テキスト内でドラッグして選択してから押してください。';
+        return;
+      }
+      var val = targetEl.value;
+      var selected = val.slice(start, end);
+      if(selected.indexOf('[')>=0 || selected.indexOf(']')>=0){
+        msg.textContent = '選択範囲に「[」「]」が含まれています。ふりがなの範囲だけを選び直してください。';
+        return;
+      }
+      pending = {start:start, end:end, selected:selected};
+      rfTarget.textContent = selected;
+      form.classList.add('open');
+      rfInput.focus();
+    });
+
+    function commit(){
+      if(!pending) return;
+      var reading = rfInput.value.trim();
+      if(!reading) return;
+      var val = targetEl.value;
+      var newVal = val.slice(0, pending.start) + pending.selected + '[' + reading + ']' + val.slice(pending.end);
+      targetEl.value = newVal;
+      var newPos = pending.start + pending.selected.length + reading.length + 2;
+      closeForm();
+      targetEl.focus();
+      targetEl.setSelectionRange(newPos, newPos);
+      targetEl.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+    rfOk.addEventListener('click', commit);
+    rfInput.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ e.preventDefault(); commit(); }
+      if(e.key==='Escape'){ e.preventDefault(); closeForm(); }
+    });
+    rfCancel.addEventListener('click', closeForm);
+
+    wrap.appendChild(btn); wrap.appendChild(msg); wrap.appendChild(form);
+    return wrap;
+  }
+
   function renderPanelEditor(){
     panelList.innerHTML = '';
     var globalSize = parseFloat(fontSizeInput.value) || 30;
@@ -269,11 +349,13 @@
 
       var taWrap = document.createElement('div');
       var ta = document.createElement('textarea'); ta.value = p.text; ta.rows=2; ta.id='panel-text-'+idx;
+      var toolbar = document.createElement('div'); toolbar.className='ta-toolbar';
       var countEl = document.createElement('div'); countEl.className='char-count'; countEl.id='char-count-'+idx;
       function updateCount(){ countEl.textContent = panelCharCount(ta.value)+'文字'; }
       updateCount();
       ta.addEventListener('input', function(){ p.text = ta.value; updateCount(); renderSheets(); });
-      taWrap.appendChild(ta); taWrap.appendChild(countEl);
+      toolbar.appendChild(countEl); toolbar.appendChild(makeRubyBtn(ta));
+      taWrap.appendChild(ta); taWrap.appendChild(toolbar);
 
       var fsWrap = document.createElement('div'); fsWrap.className='fontsize-wrap';
       var fsLabel = document.createElement('label'); fsLabel.textContent='文字サイズ'; fsLabel.setAttribute('for','panel-fs-'+idx);
@@ -418,14 +500,41 @@
     renderPanelEditor(); renderSheets();
   });
 
-  document.getElementById('bulkApplyBtn').addEventListener('click', function(){
+  var bulkApplyBtn = document.getElementById('bulkApplyBtn');
+  var bulkConfirmMsg = document.getElementById('bulkConfirmMsg');
+  var bulkArmed = false;
+  var bulkArmTimer = null;
+
+  function applyBulkInput(){
     var raw = document.getElementById('bulkInput').value;
     var chunks = raw.split(/\n\s*\n+/).map(function(s){ return s.trim(); }).filter(function(s){ return s; });
     if(!chunks.length) return;
-    var hasExisting = panels.some(function(p){ return p.text && p.text.trim(); });
-    if(hasExisting && !confirm('現在のパネル一覧（'+panels.length+'件）を、この台本の内容（'+chunks.length+'パネル）で置き換えます。よろしいですか？')) return;
     panels = chunks.map(function(c){ return {text:c}; });
     renderPanelEditor(); renderSheets();
+    bulkConfirmMsg.textContent = '反映しました（パネル '+chunks.length+' 件）。';
+  }
+
+  bulkApplyBtn.addEventListener('click', function(){
+    var raw = document.getElementById('bulkInput').value;
+    if(!raw.trim()) return;
+    var hasExisting = panels.some(function(p){ return p.text && p.text.trim(); });
+    if(hasExisting && !bulkArmed){
+      bulkArmed = true;
+      bulkApplyBtn.textContent = 'もう一度押すと置き換えます';
+      var chunkCount = raw.split(/\n\s*\n+/).map(function(s){ return s.trim(); }).filter(function(s){ return s; }).length;
+      bulkConfirmMsg.textContent = '今のパネル一覧（'+panels.length+'件）を、この台本の内容（'+chunkCount+'パネル）で置き換えます。';
+      clearTimeout(bulkArmTimer);
+      bulkArmTimer = setTimeout(function(){
+        bulkArmed = false;
+        bulkApplyBtn.textContent = 'パネルに反映';
+        bulkConfirmMsg.textContent = '';
+      }, 4000);
+      return;
+    }
+    clearTimeout(bulkArmTimer);
+    bulkArmed = false;
+    bulkApplyBtn.textContent = 'パネルに反映';
+    applyBulkInput();
   });
   [panelWidthInput, marginInput].forEach(function(el){
     el.addEventListener('input', renderSheets);
@@ -436,6 +545,9 @@
     el.addEventListener('change', renderSheets);
   });
   document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
+
+  document.getElementById('coverTitleRuby').appendChild(makeRubyBtn(coverTitle));
+  document.getElementById('coverSubtitleRuby').appendChild(makeRubyBtn(coverSubtitle));
 
   renderPanelEditor();
   renderSheets();
