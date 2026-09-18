@@ -529,42 +529,60 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <section class="block" id="resident-indicators">
           <div class="k">3 &middot; Scoring (resident view)</div>
           <h2>5つの住民目線指標の計算方法</h2>
-          <p class="desc">「住民目線マップ」の5指標はすべて、人口・面積当たりの施設数を表す実データです。施設数が少ないほど生活の不便につながるとみなし、値が低いほど課題スコアが高くなるよう反転してスコア化しています（8指標マップと異なり、素点をそのまま使うのではなく統計を反転している点に注意）。</p>
+          <p class="desc">「住民目線マップ」の5指標はすべて、人口・面積当たりの施設数を表す実データです。施設数が少ないほど生活の不便につながるとみなし、値が低いほど課題スコアが高くなるよう反転してスコア化しています（8指標マップと異なり、素点をそのまま使うのではなく統計を反転している点に注意）。人口（または高齢人口）を母数とする4指標は、後述する<b>小規模自治体補正</b>を適用してからスコア化しています。</p>
           <div class="idx-grid">
             <div class="idx-card">
               <div class="head"><h4>買い物のしやすさ</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：小売店数（人口千人当たり）</div>
+              <div class="inputs">入力：小売店数（人口千人当たり、小規模自治体補正済み）</div>
               <p class="how">中央値5.28店を基準に、0.65店分の差を1点分としています。少ないほど高スコア（課題が大きい）。</p>
-              <div class="formula">score = 3 − (小売店数/千人 − 5.28) / 0.65</div>
+              <div class="formula">score = 3 − (補正後小売店数/千人 − 5.28) / 0.65</div>
             </div>
             <div class="idx-card">
               <div class="head"><h4>医療のかかりやすさ</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：一般診療所数（人口10万人当たり）</div>
+              <div class="inputs">入力：一般診療所数（人口10万人当たり、小規模自治体補正済み）</div>
               <p class="how">中央値81.0施設を基準に、10施設分の差を1点分としています。</p>
-              <div class="formula">score = 3 − (診療所数/10万人 − 81.0) / 10</div>
+              <div class="formula">score = 3 − (補正後診療所数/10万人 − 81.0) / 10</div>
             </div>
             <div class="idx-card">
               <div class="head"><h4>介護のうけやすさ</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：介護老人福祉施設数（65歳以上人口10万人当たり）</div>
+              <div class="inputs">入力：介護老人福祉施設数（65歳以上人口10万人当たり、小規模自治体補正済み）</div>
               <p class="how">中央値18.3施設を基準に、4施設分の差を1点分としています。</p>
-              <div class="formula">score = 3 − (介護施設数/高齢者10万人 − 18.3) / 4</div>
+              <div class="formula">score = 3 − (補正後介護施設数/高齢者10万人 − 18.3) / 4</div>
             </div>
             <div class="idx-card">
               <div class="head"><h4>子育て・教育環境</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：小学校数（可住地面積100km2当たり）</div>
-              <p class="how">中央値56.5校を基準に、20校分の差を1点分としています。町村部では0校（隣接自治体と共用等）の場合もあります。</p>
+              <div class="inputs">入力：小学校数（可住地面積100km2当たり、補正なし）</div>
+              <p class="how">中央値56.5校を基準に、20校分の差を1点分としています。町村部では0校（隣接自治体と共用等）の場合もあります。母数が面積のため、下記の人口ベースの補正は適用していません。</p>
               <div class="formula">score = 3 − (小学校数/100km2 − 56.5) / 20</div>
             </div>
             <div class="idx-card">
               <div class="head"><h4>文化・生きがい施設</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：図書館数（人口100万人当たり）</div>
+              <div class="inputs">入力：図書館数（人口100万人当たり、小規模自治体補正済み）</div>
               <p class="how">中央値20.1館を基準に、10館分の差を1点分としています。小規模町村では単独の図書館を持たない（0館）場合があります。</p>
-              <div class="formula">score = 3 − (図書館数/100万人 − 20.1) / 10</div>
+              <div class="formula">score = 3 − (補正後図書館数/100万人 − 20.1) / 10</div>
             </div>
+          </div>
+
+          <h2 style="margin-top:32px;">小規模自治体補正について</h2>
+          <p class="desc">「人口○人当たり」という指標は、人口が少ない町村ほど施設1件の増減で数値が大きく振れます。たとえば人口5千人の村で診療所が1件増えるだけで「人口10万人当たり」の値は20件分も跳ね上がります。これを放置すると、小規模な町村ほど実際の充実度と関係なく極端な値（＝極端なスコア）になりやすくなります。</p>
+          <p class="desc">そこで、買い物・医療・介護・文化の4指標（人口または高齢人口を母数とするもの）には、母数が小さいほど大阪府全体の平均値に近づける補正（信頼度加重平均、いわゆる縮小推定）をかけています。母数が大きい市（大阪市・堺市など）はほぼ元の値のまま、母数が小さい町村ほど府全体の平均に近づきます。</p>
+          <div class="idx-card" style="margin-top:4px; max-width:640px;">
+            <div class="formula">補正後の値 = (自市町村の値 × 母数 + 大阪府全体の平均値 × K) / (母数 + K)
+K：期待施設数が5件になる母数（指標ごとに固定値）</div>
+          </div>
+          <div class="table-wrap" style="margin-top:14px;">
+            <table>
+              <tr><th>指標</th><th>母数</th><th>大阪府全体の平均値</th><th>K</th></tr>
+              <tr><td>買い物のしやすさ</td><td class="src">人口</td><td class="src">6.20 店/千人</td><td class="src">800人</td></tr>
+              <tr><td>医療のかかりやすさ</td><td class="src">人口</td><td class="src">96.57 施設/10万人</td><td class="src">5,200人</td></tr>
+              <tr><td>介護のうけやすさ</td><td class="src">65歳以上人口</td><td class="src">18.52 施設/高齢者10万人</td><td class="src">27,000人</td></tr>
+              <tr><td>文化・生きがい施設</td><td class="src">人口</td><td class="src">17.53 館/100万人</td><td class="src">285,000人</td></tr>
+            </table>
           </div>
           <div class="callout">
             <div class="mark">!</div>
             <div>
+              <p>補正をかけても、母数が小さい町村のスコアは他市町村より不確かさが残ります。特に「文化・生きがい施設」は大阪市・堺市以外ほぼ全市町村で図書館数が0〜数件しかなく、指標自体の統計的な安定度が低い点に留意してください。「子育て・教育環境」は面積を母数とする指標のため、この補正の対象外です。</p>
               <p>治安・防犯についても検討しましたが、e-Stat上のデータが2005年で更新停止しており、大阪府警の統計ページも本システムからは取得できなかったため、住民目線マップの指標には含めていません。</p>
             </div>
           </div>
@@ -751,15 +769,31 @@ var RESIDENT_CATEGORIES=[
   {key:'library', label:'文化・生きがい施設'}
 ];
 function residentScaleScore(x, center, step){ return clampRound(3 - (x - center) / step); }
+/* 小規模自治体補正：人口（または高齢人口）当たりの施設数は、母数が小さい町村ほど1施設の増減で
+   大きく振れ、統計的に不安定になる（例：人口5千人の村で1施設増えるだけで「人口10万人当たり」の
+   値が跳ね上がる）。信頼度の重み(母数/(母数+K))で自市町村の値と大阪府全体の平均値を加重平均し、
+   母数が小さいほど府全体の平均に近づける（信頼度shrinkage）。Kは「期待施設数が5件になる母数」を
+   目安に指標ごとに設定。人口面積当たりの「子育て・教育環境」は面積が母数のため対象外。 */
+var RESIDENT_PREF_AVG = { shop:6.20, clinic:96.57, nursing:18.52, library:17.53 };
+var RESIDENT_SHRINK_K = { shop:800, clinic:5200, nursing:27000, library:285000 };
+function shrinkRate(raw, base, key){
+  var k=RESIDENT_SHRINK_K[key], avg=RESIDENT_PREF_AVG[key];
+  return (raw*base + avg*k) / (base + k);
+}
 MUNIS.forEach(function(m){
   var r = RESIDENT_RAW[m.id];
   m.shopRate=r[0]; m.clinicRate=r[1]; m.nursingRate=r[2]; m.elemRate=r[3]; m.libraryRate=r[4];
+  var elderlyPop = m.population * m.agingRate / 100;
+  m.shopRateAdj = shrinkRate(m.shopRate, m.population, 'shop');
+  m.clinicRateAdj = shrinkRate(m.clinicRate, m.population, 'clinic');
+  m.nursingRateAdj = shrinkRate(m.nursingRate, elderlyPop, 'nursing');
+  m.libraryRateAdj = shrinkRate(m.libraryRate, m.population, 'library');
   m.residentScores = {
-    shop: residentScaleScore(m.shopRate, 5.28, 0.65),
-    clinic: residentScaleScore(m.clinicRate, 81.0, 10),
-    nursing: residentScaleScore(m.nursingRate, 18.3, 4),
+    shop: residentScaleScore(m.shopRateAdj, 5.28, 0.65),
+    clinic: residentScaleScore(m.clinicRateAdj, 81.0, 10),
+    nursing: residentScaleScore(m.nursingRateAdj, 18.3, 4),
     elem: residentScaleScore(m.elemRate, 56.46, 20),
-    library: residentScaleScore(m.libraryRate, 20.1, 10)
+    library: residentScaleScore(m.libraryRateAdj, 20.1, 10)
   };
   var sum=0,n=0; RESIDENT_CATEGORIES.forEach(function(c){ sum+=m.residentScores[c.key]; n++; });
   m.residentComposite = sum/n;

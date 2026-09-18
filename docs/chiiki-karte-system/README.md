@@ -103,6 +103,12 @@
 `residentScores`（`shop / clinic / nursing / elem / library`、1〜5）と`residentComposite`（単純平均）も
 `MUNIS`の各要素に持たせている。8指標と異なり、値が低い（施設が少ない）ほどスコアが高くなるよう反転している。
 
+人口（または高齢人口）を母数とする4指標（`shop / clinic / nursing / library`）は、母数が小さい町村ほど
+「人口○人当たり」の値が施設1件の増減で大きく振れる問題があるため、**小規模自治体補正**（`shrinkRate`関数）
+をスコア化の前にかけている。母数が小さいほど大阪府全体の平均値に近づける信頼度加重平均（縮小推定）で、
+`m.shopRateAdj / clinicRateAdj / nursingRateAdj / libraryRateAdj`として保持する。面積を母数とする
+`elemRate`（子育て・教育環境）はこの補正の対象外（計算式は「指標の計算方法」画面参照）。
+
 ### 4.4 市町村境界（`OSAKA_GEOJSON`）
 GeoJSON `FeatureCollection`。各Featureの`properties.id`が4.1の`id`と対応する。大阪府43市町村分。地域課題マップ・
 住民目線マップの両方で共有する。
