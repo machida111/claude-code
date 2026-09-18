@@ -440,7 +440,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
               <tr><td>人口・世帯数・高齢化率</td><td class="src">e-Stat（政府統計の総合窓口）<br>社会・人口統計体系「市区町村データ」</td><td class="src">2020年国勢調査。高齢化率は65歳以上人口÷総人口。</td></tr>
               <tr><td>面積</td><td class="src">国土地理院<br>全国都道府県市区町村別面積調</td><td class="src">人口密度（人口÷面積）の算出に使用。</td></tr>
               <tr><td>財政力指数</td><td class="src">総務省 地方財政状況調査</td><td class="src">直近公表年度。1に近いほど自主財源の割合が高い。</td></tr>
-              <tr><td>空き家率</td><td class="src">総務省統計局 令和5年住宅・土地統計調査</td><td class="src">人口規模の小さい5町村（能勢町・田尻町・岬町・太子町・千早赤阪村）は未公表。</td></tr>
+              <tr><td>空き家率</td><td class="src">総務省統計局 令和5年住宅・土地統計調査</td><td class="src">人口規模の小さい5町村（能勢町・田尻町・岬町・太子町・千早赤阪村）は未公表。これらの町村は空き家指標を「データなし」として扱い、総合スコアの算出から除外する。</td></tr>
               <tr><td>65歳以上単独世帯率・高齢就業者割合</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">2020年度公表値（2020年国勢調査ベース）。</td></tr>
               <tr><td>マイナンバーカード保有率</td><td class="src">総務省「マイナンバーカードの交付・保有状況」</td><td class="src">令和8年8月末時点。人口に対する保有枚数の割合。</td></tr>
               <tr><td>土砂災害警戒区域数</td><td class="src">大阪府「土砂災害防止法の指定状況」</td><td class="src">土砂災害警戒区域（イエローゾーン）の指定数。市街地中心部は指定なし（0件）の市町村が複数ある。</td></tr>
@@ -492,9 +492,9 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
             <div class="idx-card">
               <div class="head"><h4>空き家</h4><span class="badge real">実データ</span></div>
               <div class="inputs">入力：空き家率（令和5年住宅・土地統計調査）</div>
-              <p class="how">大阪府43市町村の空き家率（中央値13.4%）を基準に、1.6ポイントの差を1点分としてスコア化。人口が少なく調査結果が未公表の5町村のみ、人口減少・高齢化スコアからの推定値で代用しています。</p>
+              <p class="how">大阪府38市町村の空き家率（中央値13.4%）を基準に、1.6ポイントの差を1点分としてスコア化。人口が少なく調査結果が未公表の5町村（能勢町・田尻町・岬町・太子町・千早赤阪村）は「データなし」として地図をグレー表示し、総合スコアの算出から除外します（推定値による代用はしていません）。</p>
               <div class="formula">score = 3 + (空き家率(%) − 13.4) / 1.6
-未公表の5町村: score = 人口減少スコア×0.5 ＋ 高齢化スコア×0.5</div>
+未公表の5町村: データなし（総合スコアの算出から除外）</div>
             </div>
             <div class="idx-card">
               <div class="head"><h4>公共交通</h4><span class="badge est">推定</span></div>
@@ -601,7 +601,7 @@ K：期待施設数が5件になる母数（指標ごとに固定値）</div>
         <section class="block" id="composite">
           <div class="k">4 &middot; Composite score</div>
           <h2>総合スコアの算出</h2>
-          <p class="desc">各マップの「総合」表示やカルテのレーダーチャートで使う総合スコアは、それぞれの指標群の単純平均です。重み付けはしていません。</p>
+          <p class="desc">各マップの「総合」表示やカルテのレーダーチャートで使う総合スコアは、それぞれの指標群の単純平均です。重み付けはしていません。「空き家」がデータなしの5町村は、残り7指標の平均を総合スコアとします。</p>
           <div class="idx-card" style="margin-top:18px; max-width:560px;">
             <div class="formula">地域課題マップ 総合スコア = (人口減少 + 高齢化 + 空き家 + 公共交通 + 地域コミュニティ + 担い手不足 + 防災 + DX) / 8
 住民目線マップ 総合スコア = (買い物 + 医療 + 介護 + 教育 + 文化 + 地域経済の自立度) / 6</div>
@@ -615,7 +615,7 @@ K：期待施設数が5件になる母数（指標ごとに固定値）</div>
             <div class="mark">!</div>
             <div>
               <p>地域課題マップの8指標のうち7指標（人口減少・高齢化・空き家・地域コミュニティ・担い手不足・防災・DX）と、住民目線マップの6指標はすべて、その課題に対応する公的統計を直接スコア化しています。「公共交通」のみ、駅・バス停のカバー圏など交通そのものを全市町村共通で表す統計が見つからなかったため、人口密度からの<b>簡易的な推定</b>です。</p>
-              <p>また「防災」は土砂災害警戒区域数に基づくもので、洪水・高潮・地震などの他の災害リスクは含みません。「DX」はマイナンバーカード保有率に基づくもので、行政デジタル化の一側面（デジタルID普及）を表すにとどまります。各指標は個別の統計を組み合わせた大阪府市町村局振興課によるスコア化であり、<b>国や大阪府による公式な評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
+              <p>また「防災」は土砂災害警戒区域数に基づくもので、洪水・高潮・地震などの他の災害リスクは含みません。「DX」はマイナンバーカード保有率に基づくもので、行政デジタル化の一側面（デジタルID普及）を表すにとどまります。「空き家」は能勢町・田尻町・岬町・太子町・千早赤阪村の5町村で調査結果が未公表のため、地図・カルテ・分析レポートのいずれでも「データなし」として扱い、推定値による代用はしていません。各指標は個別の統計を組み合わせた大阪府市町村局振興課によるスコア化であり、<b>国や大阪府による公式な評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
             </div>
           </div>
         </section>
@@ -641,6 +641,7 @@ function save(key,val){ try{ localStorage.setItem(key, JSON.stringify(val)); }ca
 function load(key,fallback){ try{ var v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch(e){ return fallback; } }
 
 var SEV_HEX=['','#3E8E7E','#7FA65C','#D9A544','#C1702B','#B23A32'];
+var NODATA_HEX='#C9CDD3';
 
 var CATEGORIES=[
   {key:'population', label:'人口減少'},
@@ -666,7 +667,7 @@ var REGIONS={
 /* ===================== 市町村データ（大阪府43市町村、実データ） =====================
    出典：人口・高齢人口・世帯数＝e-Stat 社会・人口統計体系「市区町村データ」（2020年国勢調査）
    面積＝国土地理院全国都道府県市区町村別面積調、財政力指数＝総務省 地方財政状況調査（直近公表年度）
-   空き家率(%)＝総務省 令和5年住宅・土地統計調査（人口小規模な5町村は未公表のためnull）
+   空き家率(%)＝総務省 令和5年住宅・土地統計調査（人口小規模な5町村は未公表のためnull。空き家指標はデータなしとして扱い総合スコアから除外）
    65歳以上単独世帯率(%)＝e-Stat 社会・人口統計体系「市区町村データ」（2020年度）
    高齢就業者割合(%,65歳以上)＝同上（2020年度）
    マイナンバーカード保有率(%)＝総務省「マイナンバーカードの交付・保有状況」（令和8年8月末時点）
@@ -735,7 +736,7 @@ function computeScores(m){
   var dens = m.population / m.areaKm2;
   var depop = clampRound(3 - m.popChangeRate*1.1);
   var aging = clampRound((m.agingRate-15)/5.5);
-  var vacant = (m.vacantRate!=null) ? scaleScore(m.vacantRate, 13.4, 1.6) : clampRound(depop*0.5 + aging*0.5);
+  var vacant = (m.vacantRate!=null) ? scaleScore(m.vacantRate, 13.4, 1.6) : null;
   var transit = clampRound(6 - Math.log10(dens));
   var community = scaleScore(m.aloneElderlyRate, 13.4, 1.3);
   var successor = scaleScore(m.elderlyWorkerRate, 21.3, 1.2);
@@ -745,7 +746,7 @@ function computeScores(m){
 }
 MUNIS.forEach(function(m){
   m.scores = computeScores(m);
-  var sum=0,n=0; CATEGORIES.forEach(function(c){ sum+=m.scores[c.key]; n++; });
+  var sum=0,n=0; CATEGORIES.forEach(function(c){ var v=m.scores[c.key]; if(v!=null){ sum+=v; n++; } });
   m.composite = sum/n;
 });
 
@@ -905,6 +906,7 @@ MUNIS.forEach(function(m){
 });
 
 function sevHex(score){
+  if(score==null) return NODATA_HEX;
   var b = Math.round(Math.max(1,Math.min(5,score)));
   return SEV_HEX[b];
 }
@@ -975,14 +977,15 @@ function renderMapLegend(){
     '<span class="legend-scale"><i style="background:'+SEV_HEX[2]+'"></i></span>' +
     '<span class="legend-scale"><i style="background:'+SEV_HEX[3]+'"></i></span>' +
     '<span class="legend-scale"><i style="background:'+SEV_HEX[4]+'"></i></span>' +
-    '<span class="legend-scale"><i style="background:'+SEV_HEX[5]+'"></i>高い</span>';
+    '<span class="legend-scale"><i style="background:'+SEV_HEX[5]+'"></i>高い</span>' +
+    '<span class="legend-scale"><i style="background:'+NODATA_HEX+'"></i>データなし</span>';
 }
 function popupHtml(m){
   var v=scoreOf(m);
   return '<div class="muni-popup">'+
     '<h5>'+m.name+'</h5>'+
     '<div class="region">'+REGIONS[m.region].label+'</div>'+
-    '<div class="score-row"><span class="dot" style="background:'+sevHex(v)+'"></span>表示中の指標スコア：<b class="mono">'+v.toFixed(1)+'</b></div>'+
+    '<div class="score-row"><span class="dot" style="background:'+sevHex(v)+'"></span>表示中の指標スコア：<b class="mono">'+(v!=null?v.toFixed(1):'データなし')+'</b></div>'+
     '<div class="score-row">総合スコア：<b class="mono">'+m.composite.toFixed(1)+'</b> / 5.0</div>'+
     '<button type="button" data-goto="'+m.id+'">市町村カルテを見る</button>'+
     '</div>';
@@ -1115,7 +1118,7 @@ function renderKarte(){
     return;
   }
   var m=MUNI_BY_ID[state.selectedMuni];
-  var topIssues = CATEGORIES.map(function(c){ return {label:c.label, key:c.key, score:m.scores[c.key]}; }).sort(function(a,b){return b.score-a.score;});
+  var topIssues = CATEGORIES.map(function(c){ return {label:c.label, key:c.key, score:m.scores[c.key]}; }).filter(function(t){return t.score!=null;}).sort(function(a,b){return b.score-a.score;});
 
   var topResidentIssues = RESIDENT_CATEGORIES.map(function(c){ return {label:c.label, key:c.key, score:m.residentScores[c.key]}; }).sort(function(a,b){return b.score-a.score;});
 
@@ -1153,6 +1156,7 @@ function renderKarte(){
             '<div class="issue-bar-track"><div class="issue-bar-fill" style="width:'+(t.score/5*100)+'%; background:'+sevHex(t.score)+'"></div></div>'+
             '<span class="mono" style="width:22px;text-align:right;">'+t.score+'</span></div>';
         }).join('')+
+        (m.scores.vacant==null ? '<p style="font-size:11px; color:var(--ink-faint); margin-top:8px;">空き家：総務省調査で未公表のためデータなし（総合スコアの算出からも除外）</p>' : '')+
       '</div>'+
       '<div class="card">'+
         '<div class="section-title">課題スコア（住民目線マップ・6指標）</div>'+
@@ -1271,15 +1275,18 @@ function scopeMunis(){
 }
 function generateReport(scope){
   var list=scope.list;
-  var avg={}; CATEGORIES.forEach(function(c){ avg[c.key]=list.reduce(function(s,m){return s+m.scores[c.key];},0)/list.length; });
-  var sortedAvg=CATEGORIES.map(function(c){return {key:c.key,label:c.label,v:avg[c.key]};}).sort(function(a,b){return b.v-a.v;});
+  var avg={}; CATEGORIES.forEach(function(c){
+    var vals=list.map(function(m){return m.scores[c.key];}).filter(function(v){return v!=null;});
+    avg[c.key]=vals.length ? vals.reduce(function(s,v){return s+v;},0)/vals.length : null;
+  });
+  var sortedAvg=CATEGORIES.map(function(c){return {key:c.key,label:c.label,v:avg[c.key]};}).filter(function(c){return c.v!=null;}).sort(function(a,b){return b.v-a.v;});
   var common = sortedAvg.filter(function(c){return c.v>=3.3;}).slice(0,3);
   if(!common.length) common=sortedAvg.slice(0,2);
 
   var distinctive=[];
   var seenMuni={};
   CATEGORIES.forEach(function(c){
-    var maxM=list.slice().sort(function(a,b){return b.scores[c.key]-a.scores[c.key];})[0];
+    var maxM=list.filter(function(m){return m.scores[c.key]!=null;}).sort(function(a,b){return b.scores[c.key]-a.scores[c.key];})[0];
     if(maxM && maxM.scores[c.key]>=4 && (maxM.scores[c.key]-avg[c.key])>=1 && !seenMuni[maxM.id+c.key]){
       distinctive.push(maxM.name+'は「'+c.label+'」課題が特に高い水準（スコア'+maxM.scores[c.key]+'）。');
       seenMuni[maxM.id+c.key]=true;
@@ -1347,7 +1354,7 @@ function runAiAnalysis(){
       aiBlock('🧭 今後の支援の方向性', report.direction)+
       aiBlock('🤝 広域連携の可能性', report.cooperation)+
     '</div>'+
-    '<p style="font-size:11px; color:var(--ink-faint); margin-top:14px;">※本デモは内部ロジックによる自動生成です。本番運用ではSupabase Edge Function経由でOpenAI APIを呼び出し、同様の構造でレポートを生成する設計とします。</p>';
+    '<p style="font-size:11px; color:var(--ink-faint); margin-top:14px;">※統計データからルールベースで自動生成しています（外部API呼び出しなし）。</p>';
 }
 function aiBlock(title, items){
   return '<h4>'+title+'</h4><ul>'+items.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul>';
