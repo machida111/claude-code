@@ -310,7 +310,7 @@ svg.leaflet-zoom-animated{will-change:transform;}
     <section class="view" id="view-ai" hidden>
       <div class="view-head">
         <div>
-          <h3>AI分析</h3>
+          <h3>分析レポート</h3>
           <p>対象範囲を選び「分析を生成」を押すと、共通課題・特徴的な課題・支援方針・広域連携の可能性をまとめます。</p>
         </div>
       </div>
@@ -469,12 +469,12 @@ var memos = load('rc_memos', {});
 var NAV=[
   {key:'map', label:'地域課題マップ', icon:'🗺️'},
   {key:'karte', label:'市町村カルテ', icon:'🗂️'},
-  {key:'ai', label:'AI分析', icon:'✨'}
+  {key:'ai', label:'分析レポート', icon:'✨'}
 ];
 var TITLES={
   map:['地域課題マップ','大阪府内市町村の8指標を俯瞰します'],
   karte:['市町村カルテ','市町村ごとの詳細プロファイル'],
-  ai:['AI分析','課題の要約と支援方針のドラフト生成']
+  ai:['分析レポート','課題の要約と支援方針のドラフト生成']
 };
 var state={ view:'map', selectedMuni:null, mapCategory:'composite' };
 
@@ -600,7 +600,7 @@ function renderKarte(){
       '<div><button class="btn btn-ghost btn-sm" id="backToMap">← 地図に戻る</button>'+
       '<h3 style="margin-top:8px;">'+m.name+'</h3>'+
       '<p style="color:var(--ink-muted); font-size:13px;">'+REGIONS[m.region].label+' ・ 総合スコア <b class="mono">'+m.composite.toFixed(1)+'</b> / 5.0</p></div>'+
-      '<div style="display:flex; gap:8px;"><button class="btn btn-primary" id="karteToAi">AI分析を見る</button></div>'+
+      '<div style="display:flex; gap:8px;"><button class="btn btn-primary" id="karteToAi">分析レポートを見る</button></div>'+
     '</div>'+
     '<div class="grid grid-2">'+
       '<div class="card">'+
