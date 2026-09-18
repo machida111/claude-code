@@ -181,7 +181,7 @@
     <div class="settings-grid">
       <div>
         <label class="field-label" for="panelWidth">折り幅（1パネルの横幅）</label>
-        <input type="number" id="panelWidth" value="6.8" step="0.1" min="2"> cm
+        <input type="number" id="panelWidth" value="5.15" step="0.05" min="2"> cm
       </div>
       <div>
         <label class="field-label" for="marginCm">用紙の余白（上下左右）</label>
@@ -381,7 +381,7 @@
   function foldLabel(globalFoldIdx){ return globalFoldIdx % 2 === 0 ? '山' : '谷'; }
 
   function renderSheets(){
-    var panelW = parseFloat(panelWidthInput.value) || 6.8;
+    var panelW = parseFloat(panelWidthInput.value) || 5.15;
     var margin = parseFloat(marginInput.value) || 0;
     var fontSize = parseFloat(fontSizeInput.value) || 30;
     var usableW = PAGE_W - margin*2;
@@ -506,7 +506,7 @@
   var bulkArmTimer = null;
 
   function estimatePanelCapacity(){
-    var panelW = parseFloat(panelWidthInput.value) || 6.8;
+    var panelW = parseFloat(panelWidthInput.value) || 5.15;
     var margin = parseFloat(marginInput.value) || 0;
     var fontSize = parseFloat(fontSizeInput.value) || 30;
     var usableH = PAGE_H - margin*2;
