@@ -146,20 +146,20 @@
         <input type="text" id="coverSubtitle" value="祝辞">
       </div>
       <div>
-        <label class="field-label" for="coverWidth">表紙パネルの幅</label>
-        <input type="number" id="coverWidth" value="13.6" step="0.1" min="4"> cm
+        <label class="field-label" for="coverSpan">表紙パネルの幅（折り幅の何個分か）</label>
+        <input type="number" id="coverSpan" value="2" step="1" min="1"> 個分
       </div>
       <div></div>
       <div>
         <label class="field-label" for="coverTitleSize">タイトル文字サイズ</label>
-        <input type="number" id="coverTitleSize" value="30" step="1" min="10"> pt
+        <input type="number" id="coverTitleSize" value="24" step="1" min="10"> pt
       </div>
       <div>
         <label class="field-label" for="coverSubtitleSize">サブタイトル文字サイズ</label>
-        <input type="number" id="coverSubtitleSize" value="20" step="1" min="8"> pt
+        <input type="number" id="coverSubtitleSize" value="18" step="1" min="8"> pt
       </div>
     </div>
-    <div class="hint">振り仮名は他のパネルと同じく「漢字[かんじ]」の形式で入力できます。</div>
+    <div class="hint">振り仮名は他のパネルと同じく「漢字[かんじ]」の形式で入力できます。表紙パネルの幅は常に折り幅の整数倍になり、内部にも折り線が入るので、他のパネルと同じリズムで山折り・谷折りができます。</div>
   </div>
 
   <div class="card">
@@ -175,7 +175,7 @@
       </div>
       <div>
         <label class="field-label" for="fontSize">文字サイズ</label>
-        <input type="number" id="fontSize" value="26" step="1" min="10"> pt
+        <input type="number" id="fontSize" value="30" step="1" min="10"> pt
       </div>
       <div>
         <label class="field-label">A4横幅に入るパネル数</label>
@@ -238,7 +238,7 @@
   var coverEnabled = document.getElementById('coverEnabled');
   var coverTitle = document.getElementById('coverTitle');
   var coverSubtitle = document.getElementById('coverSubtitle');
-  var coverWidth = document.getElementById('coverWidth');
+  var coverSpan = document.getElementById('coverSpan');
   var coverTitleSize = document.getElementById('coverTitleSize');
   var coverSubtitleSize = document.getElementById('coverSubtitleSize');
 
@@ -262,7 +262,7 @@
 
   function renderPanelEditor(){
     panelList.innerHTML = '';
-    var globalSize = parseFloat(fontSizeInput.value) || 26;
+    var globalSize = parseFloat(fontSizeInput.value) || 30;
     panels.forEach(function(p, idx){
       var row = document.createElement('div'); row.className='panel-row';
       var idxLabel = document.createElement('div'); idxLabel.className='idx'; idxLabel.textContent = (idx+1);
@@ -301,14 +301,15 @@
   function renderSheets(){
     var panelW = parseFloat(panelWidthInput.value) || 6.8;
     var margin = parseFloat(marginInput.value) || 0;
-    var fontSize = parseFloat(fontSizeInput.value) || 26;
+    var fontSize = parseFloat(fontSizeInput.value) || 30;
     var usableW = PAGE_W - margin*2;
     var usableH = PAGE_H - margin*2;
     var perSheet = Math.max(1, Math.floor(usableW / panelW));
     panelsPerSheetDisplay.textContent = perSheet + ' パネル / 枚';
 
     var useCover = coverEnabled.checked;
-    var cWidth = parseFloat(coverWidth.value) || 13.6;
+    var cSpan = Math.max(1, parseInt(coverSpan.value, 10) || 2);
+    var cWidth = cSpan * panelW;
     var perSheetFirst = useCover ? Math.max(1, Math.floor((usableW - cWidth) / panelW)) : perSheet;
 
     var total = panels.length;
@@ -358,15 +359,16 @@
         var coverEl = document.createElement('div'); coverEl.className='cover-panel';
         coverEl.style.width = cWidth+'cm';
         var titleEl = document.createElement('div'); titleEl.className='cover-title';
-        titleEl.style.fontSize = (parseFloat(coverTitleSize.value)||30)+'pt';
+        titleEl.style.fontSize = (parseFloat(coverTitleSize.value)||24)+'pt';
         titleEl.innerHTML = renderRubyText(coverTitle.value);
         var subEl = document.createElement('div'); subEl.className='cover-subtitle';
-        subEl.style.fontSize = (parseFloat(coverSubtitleSize.value)||20)+'pt';
+        subEl.style.fontSize = (parseFloat(coverSubtitleSize.value)||18)+'pt';
         subEl.innerHTML = renderRubyText(coverSubtitle.value);
         coverEl.appendChild(titleEl); coverEl.appendChild(subEl);
-        if(total>0){
-          var cGuide = document.createElement('div'); cGuide.className='fold-guide';
-          var cLabel = document.createElement('div'); cLabel.className='fold-label'; cLabel.textContent = foldLabel(-1);
+        for(var ci=0; ci<cSpan; ci++){
+          if(ci===0 && total===0) continue;
+          var cGuide = document.createElement('div'); cGuide.className='fold-guide'; cGuide.style.left = (ci*panelW)+'cm';
+          var cLabel = document.createElement('div'); cLabel.className='fold-label'; cLabel.style.left = (ci*panelW-0.185)+'cm'; cLabel.textContent = foldLabel(-(1+ci));
           coverEl.appendChild(cGuide); coverEl.appendChild(cLabel);
         }
         strip.appendChild(coverEl);
@@ -429,7 +431,7 @@
     el.addEventListener('input', renderSheets);
   });
   fontSizeInput.addEventListener('input', function(){ renderPanelEditor(); renderSheets(); });
-  [coverEnabled, coverTitle, coverSubtitle, coverWidth, coverTitleSize, coverSubtitleSize].forEach(function(el){
+  [coverEnabled, coverTitle, coverSubtitle, coverSpan, coverTitleSize, coverSubtitleSize].forEach(function(el){
     el.addEventListener('input', renderSheets);
     el.addEventListener('change', renderSheets);
   });
