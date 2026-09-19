@@ -373,12 +373,12 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
       <div id="karteBody"></div>
     </section>
 
-    <!-- AI -->
+    <!-- REPORT -->
     <section class="view" id="view-ai" hidden>
       <div class="view-head">
         <div>
           <h3>分析レポート</h3>
-          <p>対象範囲を選び「分析を生成」を押すと、共通課題・特徴的な課題・支援方針・広域連携の可能性をまとめます。</p>
+          <p>対象範囲を選び「分析を生成」を押すと、共通課題・特徴的な課題・住民目線で見た課題・支援方針・広域連携の可能性をまとめます。</p>
         </div>
       </div>
       <div class="card">
@@ -421,7 +421,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
             <div class="screen-card"><div class="num">01</div><h3>地域課題マップ</h3><p>大阪府43市町村を8指標（行政の計画視点）のいずれかでコロプレス表示。行政区域境界（国土数値情報）を地理院タイル上に塗り分けます。</p></div>
             <div class="screen-card"><div class="num">02</div><h3>住民目線マップ</h3><p>買い物・医療・学校への行きやすさと地元消費の流出という4指標（住民の生活視点）で同じ地図をコロプレス表示します。</p></div>
             <div class="screen-card"><div class="num">03</div><h3>市町村カルテ</h3><p>市町村ごとの基礎情報と、地域課題マップ8指標・住民目線マップ4指標のレーダーチャート。RESASの将来人口・業種別事業所数も参考表示します。</p></div>
-            <div class="screen-card"><div class="num">04</div><h3>分析レポート</h3><p>全域／地域ブロック／市町村を指定し、指標スコアから共通課題・支援方針をルールベースで文章化します。</p></div>
+            <div class="screen-card"><div class="num">04</div><h3>分析レポート</h3><p>全域／地域ブロック／市町村を指定し、地域課題マップ8指標・住民目線マップ4指標のスコアから共通課題・支援方針をルールベースで文章化します（外部API呼び出しなし）。</p></div>
             <div class="screen-card"><div class="num">05</div><h3>指標の計算方法</h3><p>このページ。データソースと12指標すべての算出方法をまとめています。</p></div>
           </div>
         </section>
@@ -1224,7 +1224,7 @@ function radarOptions(){
   };
 }
 
-/* ===================== AI分析（ルールベース生成デモ） ===================== */
+/* ===================== 分析レポート（ルールベース生成） ===================== */
 function updateAiScopeTargetOptions(){
   var type=document.getElementById('aiScopeType').value;
   var sel=document.getElementById('aiScopeTarget');
@@ -1255,13 +1255,14 @@ function generateReport(scope){
   var common = sortedAvg.filter(function(c){return c.v>=3.3;}).slice(0,3);
   if(!common.length) common=sortedAvg.slice(0,2);
 
+  /* 同じ市町村が「特徴的な課題」に何度も並ぶと域内の見取り図にならないため、1市町村につき1件に絞る */
   var distinctive=[];
   var seenMuni={};
   CATEGORIES.forEach(function(c){
     var maxM=list.filter(function(m){return m.scores[c.key]!=null;}).sort(function(a,b){return b.scores[c.key]-a.scores[c.key];})[0];
-    if(maxM && maxM.scores[c.key]>=4 && (maxM.scores[c.key]-avg[c.key])>=1 && !seenMuni[maxM.id+c.key]){
+    if(maxM && maxM.scores[c.key]>=4 && (maxM.scores[c.key]-avg[c.key])>=1 && !seenMuni[maxM.id]){
       distinctive.push(maxM.name+'は「'+c.label+'」課題が特に高い水準（スコア'+maxM.scores[c.key]+'）。');
-      seenMuni[maxM.id+c.key]=true;
+      seenMuni[maxM.id]=true;
     }
   });
   distinctive = distinctive.slice(0,4);
@@ -1269,9 +1270,41 @@ function generateReport(scope){
     var topOne=list.slice().sort(function(a,b){return b.composite-a.composite;})[0];
     distinctive.push(topOne.name+'は総合スコアが域内で最も高く、重点的な支援対象として検討の余地がある。');
   }
+  /* 1市町村のみを選んだ場合、平均＝その市町村の値なので「共通課題」と同じ内容になる。
+     代わりに大阪府全体と比べてどの指標が突出しているかを示す */
   if(list.length===1){
-    distinctive=sortedAvg.slice(0,2).map(function(c){return '「'+c.label+'」のスコアが'+c.v.toFixed(1)+'と高く、他指標に比べ優先度が高い。';});
+    var only=list[0];
+    distinctive = CATEGORIES.map(function(c){
+      if(only.scores[c.key]==null) return null;
+      var vals=MUNIS.map(function(m){return m.scores[c.key];}).filter(function(v){return v!=null;});
+      var prefAvg=vals.reduce(function(s,v){return s+v;},0)/vals.length;
+      return {label:c.label, v:only.scores[c.key], gap:only.scores[c.key]-prefAvg, prefAvg:prefAvg};
+    }).filter(function(c){return c && c.gap>=0.8;})
+      .sort(function(a,b){return b.gap-a.gap;}).slice(0,3)
+      .map(function(c){
+        return '「'+c.label+'」はスコア'+c.v+'で、大阪府平均'+c.prefAvg.toFixed(1)+'を'+c.gap.toFixed(1)+'ポイント上回る。';
+      });
+    if(!distinctive.length) distinctive=['府平均を大きく上回る指標はなく、課題は特定分野に偏っていない。'];
   }
+
+  /* 住民目線マップの4指標（生活のしにくさ）も併せて示す */
+  var rAvg={}; RESIDENT_CATEGORIES.forEach(function(c){
+    var vals=list.map(function(m){return m.residentScores[c.key];});
+    rAvg[c.key]=vals.reduce(function(s,v){return s+v;},0)/vals.length;
+  });
+  var sortedRAvg=RESIDENT_CATEGORIES.map(function(c){return {key:c.key,label:c.label,v:rAvg[c.key]};})
+    .sort(function(a,b){return b.v-a.v;});
+  var residentLines = sortedRAvg.filter(function(c){return c.v>=3.3;}).slice(0,3);
+  if(!residentLines.length) residentLines=sortedRAvg.slice(0,1);
+  var residentNoteMap={
+    food:'店舗まで距離があり自動車を使いにくい高齢者が多く、移動販売・買い物支援・移動手段の確保が課題。',
+    clinic:'住んでいる場所に対して診療所の密度が低く、通院の足と一次医療へのアクセス確保が課題。',
+    school:'住んでいる場所に対して学校の密度が低く、通学距離・通学路の安全確保とスクールバス等の検討が課題。',
+    leakage:'日常の買い物や飲食が域外に流出しており、地元商業の維持・空き店舗活用が課題。'
+  };
+  var resident = residentLines.map(function(c){
+    return '「'+c.label+'」の'+(list.length===1?'スコアが':'平均スコアが')+c.v.toFixed(1)+'。'+residentNoteMap[c.key];
+  });
 
   var direction = common.map(function(c){
     var actionMap={
@@ -1302,9 +1335,16 @@ function generateReport(scope){
     coop.push(coopMap[c.key]);
   });
 
+  var single = list.length===1;
   return {
-    common: common.map(function(c){return '「'+c.label+'」の平均スコアが'+c.v.toFixed(1)+'と高く、域内の共通課題として挙げられる。';}),
+    common: common.map(function(c){
+      return single
+        ? '「'+c.label+'」のスコアが'+c.v.toFixed(1)+'と高く、優先度の高い課題。'
+        : '「'+c.label+'」の平均スコアが'+c.v.toFixed(1)+'と高く、域内の共通課題として挙げられる。';
+    }),
     distinctive: distinctive,
+    resident: resident,
+    single: single,
     direction: direction,
     cooperation: Array.from(new Set(coop))
   };
@@ -1321,8 +1361,9 @@ function runAiAnalysis(){
   box.innerHTML =
     '<div class="section-title">分析結果：'+scope.label+' <span class="count">'+scope.list.length+'市町村</span></div>'+
     '<div class="ai-report">'+
-      aiBlock('🔷 共通課題', report.common)+
-      aiBlock('🔶 特徴的な課題', report.distinctive)+
+      aiBlock(report.single ? '🔷 主な課題' : '🔷 共通課題', report.common)+
+      aiBlock(report.single ? '🔶 大阪府平均との差' : '🔶 特徴的な課題', report.distinctive)+
+      aiBlock('🧑‍🤝‍🧑 住民目線で見た課題', report.resident)+
       aiBlock('🧭 今後の支援の方向性', report.direction)+
       aiBlock('🤝 広域連携の可能性', report.cooperation)+
     '</div>'+
