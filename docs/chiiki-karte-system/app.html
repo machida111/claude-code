@@ -358,7 +358,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
       <div class="view-head">
         <div>
           <h3>住民目線マップ</h3>
-          <p>買い物・医療・介護・教育・文化の充実度から見た地域課題です。地域課題マップ（行政の計画指標）とは別の視点として、住民の日常生活に関わる公的統計をコロプレスで表示します。</p>
+          <p>買い物・医療・学校への「行きにくさ」から見た地域課題です。人口当たりの施設数ではなく、食料品アクセス困難人口の割合と可住地面積当たりの施設密度を使い、住民がその場所で実際にどれだけ不便かを測っています。</p>
         </div>
       </div>
       <div class="map-toolbar">
@@ -406,13 +406,13 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <div class="view-head">
           <div>
             <h3>指標の計算方法とデータについて</h3>
-            <p>地域課題マップ（8指標）・住民目線マップ（6指標）で表示している課題指標が、どのデータからどう計算されているかをまとめています。判断材料として使う前に、実データに基づく部分と簡易的な推定の部分の違いを確認してください。</p>
+            <p>地域課題マップ（8指標）・住民目線マップ（4指標）で表示している課題指標が、どのデータからどう計算されているかをまとめています。判断材料として使う前に、実データに基づく部分と簡易的な推定の部分の違いを確認してください。</p>
           </div>
         </div>
         <nav class="toc">
           <a href="#sources">1. データソース</a>
           <a href="#indicators">2. 8指標の計算方法（地域課題マップ）</a>
-          <a href="#resident-indicators">3. 6指標の計算方法（住民目線マップ）</a>
+          <a href="#resident-indicators">3. 4指標の計算方法（住民目線マップ）</a>
           <a href="#composite">4. 総合スコア</a>
           <a href="#caution">5. 利用上の注意</a>
         </nav>
@@ -423,10 +423,10 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
           <p class="desc">地域課題カルテは5つの画面から構成されています。いずれも表示専用で、統計データは事前に埋め込まれています。</p>
           <div class="screen-grid">
             <div class="screen-card"><div class="num">01</div><h3>地域課題マップ</h3><p>大阪府43市町村を8指標（行政の計画視点）のいずれかでコロプレス表示。行政区域境界（国土数値情報）を地理院タイル上に塗り分けます。</p></div>
-            <div class="screen-card"><div class="num">02</div><h3>住民目線マップ</h3><p>買い物・医療・介護・教育・文化・地域経済の自立度という6指標（住民の生活視点）で同じ地図をコロプレス表示します。</p></div>
+            <div class="screen-card"><div class="num">02</div><h3>住民目線マップ</h3><p>買い物・医療・学校への行きやすさと地元消費の流出という4指標（住民の生活視点）で同じ地図をコロプレス表示します。</p></div>
             <div class="screen-card"><div class="num">03</div><h3>市町村カルテ</h3><p>市町村ごとの基礎情報と8指標のレーダーチャート。担当者メモをブラウザに保存できます。</p></div>
             <div class="screen-card"><div class="num">04</div><h3>分析レポート</h3><p>全域／地域ブロック／市町村を指定し、指標スコアから共通課題・支援方針をルールベースで文章化します。</p></div>
-            <div class="screen-card"><div class="num">05</div><h3>指標の計算方法</h3><p>このページ。データソースと14指標すべての算出方法をまとめています。</p></div>
+            <div class="screen-card"><div class="num">05</div><h3>指標の計算方法</h3><p>このページ。データソースと12指標すべての算出方法をまとめています。</p></div>
           </div>
         </section>
 
@@ -444,12 +444,12 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
               <tr><td>65歳以上単独世帯率・高齢就業者割合</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">2020年度公表値（2020年国勢調査ベース）。</td></tr>
               <tr><td>マイナンバーカード保有率</td><td class="src">総務省「マイナンバーカードの交付・保有状況」</td><td class="src">令和8年8月末時点。人口に対する保有枚数の割合。</td></tr>
               <tr><td>土砂災害警戒区域数</td><td class="src">大阪府「土砂災害防止法の指定状況」</td><td class="src">土砂災害警戒区域（イエローゾーン）の指定数。市街地中心部は指定なし（0件）の市町村が複数ある。</td></tr>
-              <tr><td>小売店数（買い物）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">人口千人当たり。2021年度公表値（経済センサスベース）。</td></tr>
-              <tr><td>一般診療所数（医療）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">人口10万人当たり。2020年度公表値。</td></tr>
-              <tr><td>介護老人福祉施設数（介護）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">65歳以上人口10万人当たり。2020年度公表値。</td></tr>
-              <tr><td>小学校数（教育）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">可住地面積100km2当たり。2024年度公表値。</td></tr>
-              <tr><td>図書館数（文化）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">人口100万人当たり。2021年度公表値。</td></tr>
-              <tr><td>支出流出入率（地域経済の自立度）</td><td class="src">RESAS「地域ビジネス環境分析」</td><td class="src">2022年。住民の消費が地域内に留まるか流出するかを示す。2市（河内長野市・東大阪市）は非公開。</td></tr>
+              <tr><td>食料品アクセス困難人口割合（買い物）</td><td class="src">農林水産省 農林水産政策研究所<br>「食料品アクセスマップ」</td><td class="src">2020年。店舗まで直線500m以上かつ自動車利用が困難な65歳以上人口の割合。500mメッシュの店舗立地と国勢調査人口から国が算出。</td></tr>
+              <tr><td>一般診療所数（医療）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">可住地面積100km²当たり。2023年度公表値。</td></tr>
+              <tr><td>小学校＋義務教育学校数（学校）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」（学校基本調査）</td><td class="src">可住地面積100km²当たり。2024年度公表値。義務教育学校に統合済みの町村も小学校相当として合算。</td></tr>
+              <tr><td>可住地面積</td><td class="src">国土地理院／農林水産省<br>（e-Stat 社会・人口統計体系）</td><td class="src">総面積から林野・湖沼を除いた面積。医療・学校の施設密度の母数に使用。</td></tr>
+              <tr><td>介護施設定員（カルテのみ）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">65歳以上人口千人当たりの定員。広域利用の影響が大きいためスコア化せず、カルテに参考表示。</td></tr>
+              <tr><td>支出流出入率（地元で買えない度）</td><td class="src">RESAS「地域ビジネス環境分析」</td><td class="src">2022年。住民の消費が地域内に留まるか流出するかを示す。2市（河内長野市・東大阪市）は非公開。</td></tr>
               <tr><td>将来人口（2050年推計、カルテのみ）</td><td class="src">RESAS「地域ビジネス環境分析」（国立社会保障・人口問題研究所推計）</td><td class="src">2020年を基準とした2050年の人口推計。カルテの基本指標に参考表示。</td></tr>
               <tr><td>業種別事業所数（カルテのみ）</td><td class="src">RESAS「地域ビジネス環境分析」（経済センサス）</td><td class="src">生活関連12業種の事業所数、2016年→2021年。カルテに参考表示（スコア化なし）。</td></tr>
               <tr><td>市町村境界</td><td class="src">国土数値情報 行政区域データ（N03）</td><td class="src">大阪市24区・堺市7区は1つの市域ポリゴンに結合。</td></tr>
@@ -459,7 +459,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
           <div class="callout">
             <div class="mark">!</div>
             <div>
-              <p>「住民目線マップ」はRESAS（地域経済分析システム）と同種の地域経済・生活データを扱っています。<b>RESASのAPIは2025年3月に提供終了</b>しているため、APIとしての直接連携はできませんが、買い物・医療・介護・教育・文化の5指標は同じ系統の公的統計（e-Stat 社会・人口統計体系）から取得しています。「地域経済の自立度」（支出流出入率）と、市町村カルテの「将来人口（2050年推計）」「業種別事業所数」は、RESASの新サイト（resas.go.jp）の「地域ビジネス環境分析」を市区町村ごとに開いて取得した実データです。</p>
+              <p>「住民目線マップ」はRESAS（地域経済分析システム）と同種の地域経済・生活データを扱っています。<b>RESASのAPIは2025年3月に提供終了</b>しているため、APIとしての直接連携はできませんが、医療・学校の施設密度と可住地面積は同じ系統の公的統計（e-Stat 社会・人口統計体系）、買い物の不便さは農林水産省「食料品アクセスマップ」から取得しています。「地元で買えない度」（支出流出入率）と、市町村カルテの「将来人口（2050年推計）」「業種別事業所数」は、RESASの新サイト（resas.go.jp）の「地域ビジネス環境分析」を市区町村ごとに開いて取得した実データです。</p>
             </div>
           </div>
         </section>
@@ -531,69 +531,63 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
 
         <section class="block" id="resident-indicators">
           <div class="k">3 &middot; Scoring (resident view)</div>
-          <h2>6つの住民目線指標の計算方法</h2>
-          <p class="desc">「住民目線マップ」の6指標はすべて実データです。うち5指標（買い物・医療・介護・教育・文化）は人口・児童数当たりの施設数、残り1指標（地域経済の自立度）は消費の流出入率です。値が悪いほど課題スコアが高くなるよう反転してスコア化しています（8指標マップと異なり、素点をそのまま使うのではなく統計を反転している点に注意）。施設数を表す5指標は、後述する<b>小規模自治体補正</b>を適用してからスコア化しています。</p>
+          <h2>4つの住民目線指標の計算方法</h2>
+          <p class="desc">「住民目線マップ」の4指標はすべて実データです。住民が日常生活で感じる不便さを「<b>行きにくさ</b>」として測っています。値が悪いほど課題スコアが高くなるよう、必要に応じて反転してスコア化しています。</p>
+
+          <div class="callout" style="margin-bottom:18px;">
+            <div class="mark">!</div>
+            <div>
+              <p><b>なぜ「人口当たりの施設数」を使わないのか。</b>当初は「人口10万人当たりの診療所数」のような供給量の指標で測っていましたが、人口が減った町村ほど見かけ上「1人当たりの施設が多い＝恵まれている」と出てしまい、住民の実感と逆になる問題がありました。たとえば千早赤阪村（人口4,909人）は診療所5軒で「人口10万人当たり102施設」と府内最上位クラスになりますが、実際には村内の移動距離が長く、多くの用事で隣の市町村まで出る必要があります。</p>
+              <p>そこで指標を「どれだけ施設があるか」ではなく「<b>そこに住んでいる人がどれだけ行きにくいか</b>」に組み直しました。人口を母数から外し、実際に人が住んでいる面積（可住地面積）当たりの施設密度と、国の実測に基づく買い物困難人口の割合を使っています。</p>
+            </div>
+          </div>
+
           <div class="idx-grid">
             <div class="idx-card">
-              <div class="head"><h4>買い物のしやすさ</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：小売店数（人口千人当たり、小規模自治体補正済み）</div>
-              <p class="how">中央値5.28店を基準に、0.65店分の差を1点分としています。少ないほど高スコア（課題が大きい）。</p>
-              <div class="formula">score = 3 − (補正後小売店数/千人 − 5.28) / 0.65</div>
+              <div class="head"><h4>買い物の不便さ</h4><span class="badge real">実データ</span></div>
+              <div class="inputs">入力：食料品アクセス困難人口割合（65歳以上、農林水産省「食料品アクセスマップ」2020年）</div>
+              <p class="how">店舗まで直線距離500m以上で、かつ自動車を利用しにくい65歳以上住民の割合。500mメッシュ単位の店舗立地と国勢調査人口から国が算出したもので、施設数ではなく「実際に買い物に困っている人がどれだけいるか」を直接表します。府内中央値29.29%を基準に、6.4ポイントの差を1点分としています。割合が高いほど高スコア（課題が大きい）。</p>
+              <div class="formula">score = 3 + (食料品アクセス困難率(%) − 29.29) / 6.4</div>
             </div>
             <div class="idx-card">
-              <div class="head"><h4>医療のかかりやすさ</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：一般診療所数（人口10万人当たり、小規模自治体補正済み）</div>
-              <p class="how">中央値81.0施設を基準に、10施設分の差を1点分としています。</p>
-              <div class="formula">score = 3 − (補正後診療所数/10万人 − 81.0) / 10</div>
+              <div class="head"><h4>医療への行きにくさ</h4><span class="badge real">実データ</span></div>
+              <div class="inputs">入力：可住地面積100km²当たり一般診療所数（e-Stat 社会・人口統計体系、2023年／小規模自治体補正済み）</div>
+              <p class="how">人口ではなく可住地面積を母数にすることで、「近所に医院があるか」に近い密度になります。密度は大阪市（1,657施設/100km²）と能勢町（32.8施設/100km²）で50倍以上開くため、常用対数（log10）に変換してから点数化しています。密度が低いほど高スコア。</p>
+              <div class="formula">score = 3 − (log10(補正後診療所密度) − 2.60) / 0.19</div>
             </div>
             <div class="idx-card">
-              <div class="head"><h4>介護のうけやすさ</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：介護老人福祉施設数（65歳以上人口10万人当たり、小規模自治体補正済み）</div>
-              <p class="how">中央値18.3施設を基準に、4施設分の差を1点分としています。</p>
-              <div class="formula">score = 3 − (補正後介護施設数/高齢者10万人 − 18.3) / 4</div>
+              <div class="head"><h4>学校への通いにくさ</h4><span class="badge real">実データ</span></div>
+              <div class="inputs">入力：可住地面積100km²当たり小学校＋義務教育学校数（学校基本調査、2024年／小規模自治体補正済み）</div>
+              <p class="how">児童数当たりではなく可住地面積当たりにすることで、「子どもが歩いて通える距離に学校があるか」に近い指標になります。児童数を母数にすると、児童が減って学校を統廃合した町村ほど良い値が出てしまうためです。義務教育学校（小中一体型）に統合済みの町村も小学校相当として合算しています。診療所と同様に対数変換しています。</p>
+              <div class="formula">score = 3 − (log10(補正後学校密度) − 1.81) / 0.14</div>
             </div>
             <div class="idx-card">
-              <div class="head"><h4>子育て・教育環境</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：小学校＋義務教育学校前期課程数（児童1000人当たり、小規模自治体補正済み）</div>
-              <p class="how">面積当たりではなく、実際に通う児童の数を母数にしています（学校が少なくても児童も少なければ生活環境として不便とは言えないため）。義務教育学校（小中一体型）に統合済みの町村も、前期課程を小学校相当として合算しています。大阪府全体の平均2.42校/児童千人を基準に、0.45校分の差を1点分としています。</p>
-              <div class="formula">score = 3 − (補正後学校数/児童千人 − 2.42) / 0.45</div>
-            </div>
-            <div class="idx-card">
-              <div class="head"><h4>文化・生きがい施設</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：図書館数（人口100万人当たり、小規模自治体補正済み）</div>
-              <p class="how">中央値20.1館を基準に、10館分の差を1点分としています。小規模町村では単独の図書館を持たない（0館）場合があります。</p>
-              <div class="formula">score = 3 − (補正後図書館数/100万人 − 20.1) / 10</div>
-            </div>
-            <div class="idx-card">
-              <div class="head"><h4>地域経済の自立度</h4><span class="badge real">実データ</span></div>
+              <div class="head"><h4>地元で買えない度</h4><span class="badge real">実データ</span></div>
               <div class="inputs">入力：支出流出入率（RESAS「地域ビジネス環境分析」、2022年）</div>
-              <p class="how">住民の消費が地域内にどれだけ留まっているかを示す指標。マイナス（域外へ流出）が大きいほど高スコアとしています。中央値-5.6%を基準に、6ポイントの差を1点分としています。大阪市のように域外から消費が流入する市町村は低スコア（良好）になります。データが非公開の市町村（河内長野市・東大阪市）は中間の3点としています。</p>
+              <p class="how">住民の消費が地域内にどれだけ留まっているかを示す指標。マイナス（域外へ流出）が大きいほど、日常の買い物や飲食を域外に頼っている＝地元で用が足りないことを意味するため、高スコアとしています。中央値-5.6%を基準に、6ポイントの差を1点分としています。データが非公開の市町村（河内長野市・東大阪市）は中間の3点としています。</p>
               <div class="formula">score = 3 − (支出流出入率(%) − (−5.6)) / 6</div>
             </div>
           </div>
 
           <h2 style="margin-top:32px;">小規模自治体補正について</h2>
-          <p class="desc">「人口○人当たり」という指標は、人口が少ない町村ほど施設1件の増減で数値が大きく振れます。たとえば人口5千人の村で診療所が1件増えるだけで「人口10万人当たり」の値は20件分も跳ね上がります。これを放置すると、小規模な町村ほど実際の充実度と関係なく極端な値（＝極端なスコア）になりやすくなります。</p>
-          <p class="desc">そこで、買い物・医療・介護・教育・文化の5指標（人口・高齢人口・児童数のいずれかを母数とするもの）には、母数が小さいほど大阪府全体の平均値に近づける補正（信頼度加重平均、いわゆる縮小推定）をかけています。母数が大きい市（大阪市・堺市など）はほぼ元の値のまま、母数が小さい町村ほど府全体の平均に近づきます。</p>
+          <p class="desc">可住地面積当たりの施設密度も、可住地面積が小さい市町村では施設1件の増減で値が大きく振れます（例：可住地面積4km²の忠岡町では診療所1件で密度が25施設/100km²動く）。そこで医療・学校の2指標には、可住地面積を母数とした信頼度加重平均（縮小推定）をかけ、面積が小さいほど大阪府全体の密度に近づけています。可住地面積の大きい市（大阪市・堺市など）はほぼ元の値のままです。</p>
           <div class="idx-card" style="margin-top:4px; max-width:640px;">
-            <div class="formula">補正後の値 = (自市町村の値 × 母数 + 大阪府全体の平均値 × K) / (母数 + K)
-K：期待施設数が5件になる母数（指標ごとに固定値）</div>
+            <div class="formula">補正後の密度 = (自市町村の密度 × 可住地面積 + 大阪府全体の密度 × K) / (可住地面積 + K)
+K：期待施設数が5件になる可住地面積（指標ごとに固定値）</div>
           </div>
           <div class="table-wrap" style="margin-top:14px;">
             <table>
-              <tr><th>指標</th><th>母数</th><th>大阪府全体の平均値</th><th>K</th></tr>
-              <tr><td>買い物のしやすさ</td><td class="src">人口</td><td class="src">6.20 店/千人</td><td class="src">800人</td></tr>
-              <tr><td>医療のかかりやすさ</td><td class="src">人口</td><td class="src">96.57 施設/10万人</td><td class="src">5,200人</td></tr>
-              <tr><td>介護のうけやすさ</td><td class="src">65歳以上人口</td><td class="src">18.52 施設/高齢者10万人</td><td class="src">27,000人</td></tr>
-              <tr><td>子育て・教育環境</td><td class="src">小学校児童数（義務教育学校含む）</td><td class="src">2.42 校/児童千人</td><td class="src">2,070人</td></tr>
-              <tr><td>文化・生きがい施設</td><td class="src">人口</td><td class="src">17.53 館/100万人</td><td class="src">285,000人</td></tr>
+              <tr><th>指標</th><th>母数</th><th>大阪府全体の密度</th><th>K</th></tr>
+              <tr><td>医療への行きにくさ</td><td class="src">可住地面積</td><td class="src">665.4 施設/100km²</td><td class="src">0.75 km²</td></tr>
+              <tr><td>学校への通いにくさ</td><td class="src">可住地面積</td><td class="src">74.1 校/100km²</td><td class="src">6.74 km²</td></tr>
             </table>
           </div>
           <div class="callout">
             <div class="mark">!</div>
             <div>
-              <p>補正をかけても、母数が小さい町村のスコアは他市町村より不確かさが残ります。特に「文化・生きがい施設」は大阪市・堺市以外ほぼ全市町村で図書館数が0〜数件しかなく、指標自体の統計的な安定度が低い点に留意してください。「地域経済の自立度」（支出流出入率）は施設数ではなく経済指標のため、この補正の対象外です。</p>
+              <p><b>スコアに含めなかった指標。</b>「介護のうけやすさ」（高齢者当たりの施設定員）は、広域から利用者を受け入れる大規模な特別養護老人ホームが小規模町村に1つあるだけで数値が跳ね上がり、その町の住民が受けやすいことを意味しないため、スコアから外しカルテの参考値（介護施設定員／高齢者千人）としてのみ表示しています。「文化・生きがい施設」（図書館数）は大阪市・堺市以外ほぼ全市町村で0〜3館しかなく、統計として市町村間の比較に耐えないため外しました。</p>
               <p>治安・防犯についても検討しましたが、e-Stat上のデータが2005年で更新停止しており、大阪府警の統計ページも本システムからは取得できなかったため、住民目線マップの指標には含めていません。</p>
+              <p>「地元で買えない度」（支出流出入率）は施設密度ではなく経済指標のため、小規模自治体補正の対象外です。</p>
             </div>
           </div>
         </section>
@@ -604,7 +598,7 @@ K：期待施設数が5件になる母数（指標ごとに固定値）</div>
           <p class="desc">各マップの「総合」表示やカルテのレーダーチャートで使う総合スコアは、それぞれの指標群の単純平均です。重み付けはしていません。「空き家」がデータなしの5町村は、残り7指標の平均を総合スコアとします。</p>
           <div class="idx-card" style="margin-top:18px; max-width:560px;">
             <div class="formula">地域課題マップ 総合スコア = (人口減少 + 高齢化 + 空き家 + 公共交通 + 地域コミュニティ + 担い手不足 + 防災 + DX) / 8
-住民目線マップ 総合スコア = (買い物 + 医療 + 介護 + 教育 + 文化 + 地域経済の自立度) / 6</div>
+住民目線マップ 総合スコア = (買い物の不便さ + 医療への行きにくさ + 学校への通いにくさ + 地元で買えない度) / 4</div>
           </div>
         </section>
 
@@ -614,7 +608,7 @@ K：期待施設数が5件になる母数（指標ごとに固定値）</div>
           <div class="callout crit">
             <div class="mark">!</div>
             <div>
-              <p>地域課題マップの8指標のうち7指標（人口減少・高齢化・空き家・地域コミュニティ・担い手不足・防災・DX）と、住民目線マップの6指標はすべて、その課題に対応する公的統計を直接スコア化しています。「公共交通」のみ、駅・バス停のカバー圏など交通そのものを全市町村共通で表す統計が見つからなかったため、人口密度からの<b>簡易的な推定</b>です。</p>
+              <p>地域課題マップの8指標のうち7指標（人口減少・高齢化・空き家・地域コミュニティ・担い手不足・防災・DX）と、住民目線マップの4指標はすべて、その課題に対応する公的統計を直接スコア化しています。「公共交通」のみ、駅・バス停のカバー圏など交通そのものを全市町村共通で表す統計が見つからなかったため、人口密度からの<b>簡易的な推定</b>です。</p>
               <p>また「防災」は土砂災害警戒区域数に基づくもので、洪水・高潮・地震などの他の災害リスクは含みません。「DX」はマイナンバーカード保有率に基づくもので、行政デジタル化の一側面（デジタルID普及）を表すにとどまります。「空き家」は能勢町・田尻町・岬町・太子町・千早赤阪村の5町村で調査結果が未公表のため、地図・カルテ・分析レポートのいずれでも「データなし」として扱い、推定値による代用はしていません。各指標は個別の統計を組み合わせた大阪府市町村局振興課によるスコア化であり、<b>国や大阪府による公式な評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
             </div>
           </div>
@@ -750,44 +744,51 @@ MUNIS.forEach(function(m){
   m.composite = sum/n;
 });
 
-/* ===================== 住民目線データ（e-Stat 社会・人口統計体系「市区町村データ」） =====================
-   買い物のしやすさ＝小売店数（人口千人当たり、2021年度）／医療のかかりやすさ＝一般診療所数（人口10万人当たり、2020年度）
-   介護のうけやすさ＝介護老人福祉施設数（65歳以上人口10万人当たり、2020年度）
-   子育て・教育環境＝小学校＋義務教育学校前期課程数（児童1000人当たり、2024年度、学校基本調査）
-   文化・生きがい＝図書館数（人口100万人当たり、2021年度）
-   [買い物, 医療, 介護, 教育, 文化] （値が高いほど充実、課題スコアは反転して算出） */
+/* ===================== 住民目線データ（買い物・医療・学校へのアクセスのしにくさ） =====================
+   「人口当たりの施設数」は、人口が減った町村ほど見かけ上「1人当たり施設が多い＝恵まれている」と
+   出てしまい、住民の実感と合わない（例：人口5千人の村に診療所が5軒あると「人口10万人当たり102施設」
+   となり府内最上位になるが、実際には隣町まで車で行く必要がある）。そこで住民目線マップの指標は
+   「供給量」ではなく「行きにくさ（距離・密度）」で測る形に組み直している。
+   [0] 食料品アクセス困難人口割合（65歳以上、%）：店舗まで直線500m以上かつ自動車利用困難な高齢者の割合
+       （農林水産省「食料品アクセスマップ」2020年、500mメッシュ×国勢調査より算出）
+   [1] 可住地面積100km²当たり一般診療所数（e-Stat 社会・人口統計体系、2023年）
+   [2] 可住地面積100km²当たり小学校＋義務教育学校数（学校基本調査、2024年）
+   [3] 可住地面積（km²、林野・湖沼を除いた実際に人が住む面積。国土地理院／農林水産省）
+   ※山林・湖沼を含む総面積ではなく可住地面積を使うことで、面積の大半が山地の町村でも
+     「住んでいる場所からの行きやすさ」に近い値になる。 */
 var RESIDENT_RAW = {
-  osaka: [8.34,126.8,21.3,2.53,9.1], sakai: [5.01,89.8,17.2,2.36,14.5], ikeda: [5.46,97.1,18.0,1.98,28.6],
-  toyonaka: [4.69,103.3,13.3,1.8,22.4], suita: [4.37,90.5,19.2,1.69,25.9], takatsuki: [4.65,82.8,14.7,2.48,17.0],
-  ibaraki: [4.64,81.3,14.6,2.06,17.4], minoh: [5.64,86.2,14.2,1.68,43.8], settsu: [4.7,64.0,18.1,2.39,22.9],
-  shimamoto: [3.2,80.8,11.8,2.06,32.3], toyono: [3.28,87.5,23.1,8.32,54.7], nose: [6.28,77.1,26.5,3.68,0.0],
-  moriguchi: [6.33,98.5,17.1,2.22,7.0], hirakata: [4.46,71.0,15.4,2.3,20.1], neyagawa: [5.04,81.0,20.6,2.33,13.1],
-  daito: [4.92,68.7,15.9,2.36,25.1], kadoma: [5.96,96.0,19.7,3.12,16.7], shijonawate: [6.65,68.9,26.4,2.35,36.2],
-  katano: [4.38,69.3,18.5,2.23,13.3], yao: [5.47,80.1,21.4,2.27,15.1], kashiwara: [5.09,68.3,25.0,3.45,29.1],
-  higashiosaka: [6.04,81.0,19.1,2.6,12.1], tondabayashi: [5.06,80.0,18.3,3.53,27.6], kawachinagano: [5.08,77.7,13.9,3.22,9.8],
-  matsubara: [5.66,74.0,14.2,3.08,51.0], habikino: [4.94,64.4,18.0,2.93,55.2], fujiidera: [6.72,113.1,22.1,2.54,15.7],
-  osakasayama: [5.24,87.3,18.3,2.14,17.1], taishi: [3.77,61.5,26.0,3.25,0.0], kanan: [4.4,57.3,40.8,3.07,63.7],
-  chihayaakasaka: [3.87,101.9,44.8,13.33,0.0], izumiotsu: [5.91,88.7,26.4,2.37,13.4], izumi: [5.58,69.4,14.9,2.23,21.7],
-  takaishi: [5.28,84.5,12.8,2.46,35.9], tadaoka: [5.37,84.5,20.9,2.72,60.4], kishiwada: [5.86,71.3,9.3,2.63,31.5],
-  kaizuka: [5.71,65.1,13.0,2.71,11.8], izumisano: [9.39,88.9,19.1,2.9,49.9], sennan: [6.59,61.6,16.9,3.61,16.6],
-  hannan: [5.38,85.8,23.4,3.86,19.5], kumatori: [4.32,75.4,32.1,2.2,22.9], tajiri: [9.01,83.0,50.1,2.3,0.0],
-  misaki: [5.43,67.8,16.8,8.44,67.8]
+  osaka: [13.56,1657.1,130.5,225.34], sakai: [26.44,510.0,64.4,145.93], ikeda: [25.32,619.7,66.2,16.63],
+  toyonaka: [16.91,1182.3,110.0,36.35], suita: [22.26,1044.5,100.9,35.69], takatsuki: [26.24,532.3,75.3,55.8],
+  ibaraki: [28.51,500.0,65.1,49.18], minoh: [22.78,593.7,65.9,22.75], settsu: [29.29,390.0,67.2,14.87],
+  shimamoto: [26.95,355.0,59.2,6.76], toyono: [29.68,115.4,33.0,12.12], nose: [33.95,32.8,4.7,21.33],
+  moriguchi: [16.36,1093.6,102.3,12.71], hirakata: [28.09,489.8,77.6,57.96], neyagawa: [22.23,761.5,100.4,23.91],
+  daito: [19.48,517.8,84.1,15.46], kadoma: [20.99,935.0,105.7,12.3], shijonawate: [31.77,317.2,52.9,11.34],
+  katano: [29.34,345.0,56.5,15.94], yao: [24.91,574.5,75.9,36.88], kashiwara: [33.69,266.8,55.6,17.98],
+  higashiosaka: [22.05,767.9,98.6,51.71], tondabayashi: [35.67,236.9,46.3,36.74], kawachinagano: [38.1,220.8,37.8,34.42],
+  matsubara: [28.91,576.2,90.0,16.66], habikino: [24.75,287.7,58.4,23.99], fujiidera: [22.82,787.4,90.0,8.89],
+  osakasayama: [39.48,481.5,60.2,11.63], taishi: [37.92,77.9,22.3,8.98], kanan: [45.66,68.1,15.1,13.21],
+  chihayaakasaka: [41.3,69.3,27.8,7.2], izumiotsu: [21.65,488.5,55.8,14.33], izumi: [31.5,247.7,40.6,51.67],
+  takaishi: [28.6,451.3,61.9,11.3], tadaoka: [29.65,352.6,50.4,3.97], kishiwada: [29.78,272.0,45.0,53.3],
+  kaizuka: [31.51,217.7,42.0,26.18], izumisano: [31.05,243.4,35.6,36.56], sennan: [40.74,150.4,37.6,26.6],
+  hannan: [39.79,246.8,45.9,17.43], kumatori: [39.09,264.2,40.1,12.48], tajiri: [44.01,142.3,17.8,5.62],
+  misaki: [41.88,79.0,28.7,13.92]
 };
-var ELEM_PUPILS = {
-  osaka:116236, sakai:39841, ikeda:5565, toyonaka:22243, suita:21320, takatsuki:16963, ibaraki:15538, minoh:8934,
-  settsu:4177, shimamoto:1939, toyono:481, nose:272, moriguchi:5866, hirakata:19570, neyagawa:10308, daito:5509,
-  kadoma:4162, shijonawate:2553, katano:4033, yao:12343, kashiwara:2896, higashiosaka:19640, tondabayashi:4814, kawachinagano:4035,
-  matsubara:4868, habikino:4776, fujiidera:3146, osakasayama:3274, taishi:615, kanan:651, chihayaakasaka:150, izumiotsu:3379,
-  izumi:9436, takaishi:2848, tadaoka:736, kishiwada:9130, kaizuka:4058, izumisano:4486, sennan:2771, hannan:2072,
-  kumatori:2268, tajiri:435, misaki:474
+/* 介護定員（65歳以上人口千人当たり、介護保険事業状況報告ほか）。広域から利用者を受け入れる大規模施設が
+   小規模町村に1つあるだけで数値が跳ね上がる（＝その町の住民が受けやすいとは限らない）ため、
+   スコアには使わずカルテの参考値としてのみ表示する。 */
+var NURSING_PER1K = {
+  osaka:20.2, sakai:13.1, ikeda:14.2, toyonaka:11.2, suita:16.9, takatsuki:12.4, ibaraki:10.0, minoh:10.8,
+  settsu:12.4, shimamoto:5.9, toyono:15.0, nose:13.3, moriguchi:9.5, hirakata:10.9, neyagawa:13.4, daito:11.5,
+  kadoma:12.7, shijonawate:17.8, katano:10.9, yao:12.3, kashiwara:11.0, higashiosaka:13.7, tondabayashi:13.3, kawachinagano:12.3,
+  matsubara:9.2, habikino:13.8, fujiidera:12.2, osakasayama:11.0, taishi:13.0, kanan:32.7, chihayaakasaka:30.4, izumiotsu:15.2,
+  izumi:9.1, takaishi:7.8, tadaoka:21.0, kishiwada:7.7, kaizuka:8.9, izumisano:10.3, sennan:12.4, hannan:11.7,
+  kumatori:14.4, tajiri:30.0, misaki:10.6
 };
 var RESIDENT_CATEGORIES=[
-  {key:'shop', label:'買い物のしやすさ'},
-  {key:'clinic', label:'医療のかかりやすさ'},
-  {key:'nursing', label:'介護のうけやすさ'},
-  {key:'elem', label:'子育て・教育環境'},
-  {key:'library', label:'文化・生きがい施設'},
-  {key:'leakage', label:'地域経済の自立度'}
+  {key:'food', label:'買い物の不便さ'},
+  {key:'clinic', label:'医療への行きにくさ'},
+  {key:'school', label:'学校への通いにくさ'},
+  {key:'leakage', label:'地元で買えない度'}
 ];
 
 /* ===================== RESASデータ（地域ビジネス環境分析、市区町村単位） =====================
@@ -866,39 +867,36 @@ var RESAS_INDUSTRY = {
   tajiri:[[null,1],[5,2],[40,34],[36,33],[59,32],[3,4],[26,20],[3,5],[2,1],[12,11],[20,19],[4,6]],
   misaki:[[null,null],[4,3],[39,30],[48,36],[37,28],[2,2],[27,16],[4,4],[20,18],[16,8],[26,21],[20,21]]
 };
+/* 値が小さいほど「行きにくい」指標は反転（3 − 偏差）、値が大きいほど課題の指標はそのまま（3 ＋ 偏差） */
 function residentScaleScore(x, center, step){ return clampRound(3 - (x - center) / step); }
-/* 小規模自治体補正：人口（または高齢人口・児童数）当たりの施設数は、母数が小さい町村ほど1施設の増減で
-   大きく振れ、統計的に不安定になる（例：人口5千人の村で1施設増えるだけで「人口10万人当たり」の
-   値が跳ね上がる）。信頼度の重み(母数/(母数+K))で自市町村の値と大阪府全体の平均値を加重平均し、
-   母数が小さいほど府全体の平均に近づける（信頼度shrinkage）。Kは「期待施設数が5件になる母数」を
-   目安に指標ごとに設定。 */
-var RESIDENT_PREF_AVG = { shop:6.20, clinic:96.57, nursing:18.52, elem:2.42, library:17.53 };
-var RESIDENT_SHRINK_K = { shop:800, clinic:5200, nursing:27000, elem:2070, library:285000 };
-function shrinkRate(raw, base, key){
-  var k=RESIDENT_SHRINK_K[key], avg=RESIDENT_PREF_AVG[key];
-  return (raw*base + avg*k) / (base + k);
+function residentScaleScoreUp(x, center, step){ return clampRound(3 + (x - center) / step); }
+
+/* 施設密度の小規模自治体補正：可住地面積が小さい市町村ほど施設1件の増減で密度が大きく振れるため、
+   可住地面積を母数とした信頼度加重平均（縮小推定）で大阪府全体の密度に寄せる。
+   K は「期待施設数が5件になる可住地面積」。 */
+var RESIDENT_PREF_DENSITY = { clinic:665.4, school:74.1 };
+var RESIDENT_SHRINK_K = { clinic:0.75, school:6.74 };
+function shrinkDensity(raw, areaKm2, key){
+  var k=RESIDENT_SHRINK_K[key], avg=RESIDENT_PREF_DENSITY[key];
+  return (raw*areaKm2 + avg*k) / (areaKm2 + k);
 }
 MUNIS.forEach(function(m){
   var r = RESIDENT_RAW[m.id];
-  m.shopRate=r[0]; m.clinicRate=r[1]; m.nursingRate=r[2]; m.elemRate=r[3]; m.libraryRate=r[4];
-  var elderlyPop = m.population * m.agingRate / 100;
-  m.shopRateAdj = shrinkRate(m.shopRate, m.population, 'shop');
-  m.clinicRateAdj = shrinkRate(m.clinicRate, m.population, 'clinic');
-  m.nursingRateAdj = shrinkRate(m.nursingRate, elderlyPop, 'nursing');
-  m.elemRateAdj = shrinkRate(m.elemRate, ELEM_PUPILS[m.id], 'elem');
-  m.libraryRateAdj = shrinkRate(m.libraryRate, m.population, 'library');
+  m.foodAccessRate=r[0]; m.clinicDensity=r[1]; m.schoolDensity=r[2]; m.habitableKm2=r[3];
+  m.clinicDensityAdj = shrinkDensity(m.clinicDensity, m.habitableKm2, 'clinic');
+  m.schoolDensityAdj = shrinkDensity(m.schoolDensity, m.habitableKm2, 'school');
+  m.nursingPer1k = NURSING_PER1K[m.id];
   var pop2050=RESAS_POP2050[m.id];
   m.pop2050=pop2050[0]; m.popRate2050=pop2050[1];
   m.leakageRate = RESAS_LEAKAGE[m.id];
   m.industry = RESAS_INDUSTRY[m.id].map(function(v,i){
     return v==null ? null : {label:INDUSTRY_LABELS[i], count2016:v[0], count2021:v[1]};
   });
+  /* 施設密度は市街地と山間部で100倍以上開くため、対数（log10）にしてから点数化する */
   m.residentScores = {
-    shop: residentScaleScore(m.shopRateAdj, 5.28, 0.65),
-    clinic: residentScaleScore(m.clinicRateAdj, 81.0, 10),
-    nursing: residentScaleScore(m.nursingRateAdj, 18.3, 4),
-    elem: residentScaleScore(m.elemRateAdj, 2.42, 0.45),
-    library: residentScaleScore(m.libraryRateAdj, 20.1, 10),
+    food: residentScaleScoreUp(m.foodAccessRate, 29.29, 6.4),
+    clinic: residentScaleScore(Math.log10(m.clinicDensityAdj), 2.60, 0.19),
+    school: residentScaleScore(Math.log10(m.schoolDensityAdj), 1.81, 0.14),
     leakage: (m.leakageRate!=null) ? residentScaleScore(m.leakageRate, -5.6, 6) : 3
   };
   var sum=0,n=0; RESIDENT_CATEGORIES.forEach(function(c){ sum+=m.residentScores[c.key]; n++; });
@@ -926,10 +924,10 @@ var NAV=[
 ];
 var TITLES={
   map:['地域課題マップ','大阪府内市町村の8指標を俯瞰します'],
-  resident:['住民目線マップ','買い物・医療・介護・教育・文化の充実度から見た地域課題'],
+  resident:['住民目線マップ','買い物・医療・学校への行きやすさから見た地域課題'],
   karte:['市町村カルテ','市町村ごとの詳細プロファイル'],
   ai:['分析レポート','課題の要約と支援方針のドラフト生成'],
-  guide:['指標の計算方法','データソースと14指標の算出方法']
+  guide:['指標の計算方法','データソースと12指標の算出方法']
 };
 var state={ view:'map', selectedMuni:null, mapCategory:'composite', residentCategory:'composite' };
 
@@ -1137,10 +1135,12 @@ function renderKarte(){
           statTile('人口増減率', (m.popChangeRate>0?'+':'')+m.popChangeRate.toFixed(1)+'%')+
           statTile('高齢化率', m.agingRate.toFixed(1)+'%')+
           statTile('面積', m.areaKm2.toFixed(2)+' km²')+
+          statTile('可住地面積', m.habitableKm2.toFixed(2)+' km²')+
           statTile('世帯数', fmtNum(m.households)+'世帯')+
           statTile('財政力指数', m.fiscalIndex.toFixed(2))+
           statTile('将来人口（2050年推計）', fmtNum(m.pop2050)+'人')+
           statTile('将来人口増減率（2020→2050）', m.popRate2050.toFixed(1)+'%')+
+          statTile('介護施設定員（高齢者千人当たり）', m.nursingPer1k.toFixed(1)+'人分')+
         '</div>'+
       '</div>'+
       '<div class="card">'+
@@ -1159,7 +1159,7 @@ function renderKarte(){
         (m.scores.vacant==null ? '<p style="font-size:11px; color:var(--ink-faint); margin-top:8px;">空き家：総務省調査で未公表のためデータなし（総合スコアの算出からも除外）</p>' : '')+
       '</div>'+
       '<div class="card">'+
-        '<div class="section-title">課題スコア（住民目線マップ・6指標）</div>'+
+        '<div class="section-title">課題スコア（住民目線マップ・4指標）</div>'+
         '<div class="chart-box sm"><canvas id="chartKarteRadarResident"></canvas></div>'+
       '</div>'+
     '</div>'+
@@ -1171,6 +1171,7 @@ function renderKarte(){
             '<div class="issue-bar-track"><div class="issue-bar-fill" style="width:'+(t.score/5*100)+'%; background:'+sevHex(t.score)+'"></div></div>'+
             '<span class="mono" style="width:22px;text-align:right;">'+t.score+'</span></div>';
         }).join('')+
+        '<p style="font-size:11px; color:var(--ink-faint); margin-top:8px;">買い物は食料品アクセス困難人口割合、医療・学校は可住地面積当たりの施設密度（対数）で算出しています。介護は広域利用の影響が大きいため、スコア化せず上の「介護施設定員」を参考値として表示しています。</p>'+
       '</div>'+
       '<div class="card">'+
         '<div class="section-title">担当者メモ</div>'+
