@@ -109,11 +109,10 @@ h1,h2,h3,h4{font-family:var(--font-display); margin:0; text-wrap:balance;}
 .section-title{font-size:14px; font-weight:700; margin:0 0 12px; display:flex; align-items:center; gap:8px;}
 .section-title .count{font-size:11px; font-weight:600; color:var(--ink-faint); background:var(--surface-2); padding:2px 8px; border-radius:999px;}
 
-.input,.select,.textarea{
+.select{
   width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:8px;
   background:var(--bg); color:var(--ink); font-size:13px;
 }
-.textarea{resize:vertical; min-height:80px; font-family:var(--font-body);}
 label.field{display:flex; flex-direction:column; gap:5px; font-size:12px; color:var(--ink-muted); font-weight:600;}
 
 .badge{display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:999px; font-size:11px; font-weight:700;}
@@ -156,9 +155,6 @@ label.field{display:flex; flex-direction:column; gap:5px; font-size:12px; color:
 .muni-pick-grid{display:flex; flex-wrap:wrap; gap:8px;}
 .muni-chip{padding:7px 12px; border-radius:999px; border:1px solid var(--border); background:var(--surface); font-size:12.5px; font-weight:600; cursor:pointer;}
 .muni-chip:hover{background:var(--surface-2);}
-
-.toast{position:fixed; bottom:24px; right:24px; background:var(--ink); color:var(--bg); padding:10px 16px; border-radius:10px; font-size:12.5px; font-weight:600; box-shadow:var(--shadow); z-index:60; transition:opacity .3s, transform .3s;}
-.toast[hidden]{opacity:0; transform:translateY(8px); pointer-events:none;}
 
 .chart-box{position:relative; height:280px;}
 .chart-box.sm{height:220px;}
@@ -424,7 +420,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
           <div class="screen-grid">
             <div class="screen-card"><div class="num">01</div><h3>地域課題マップ</h3><p>大阪府43市町村を8指標（行政の計画視点）のいずれかでコロプレス表示。行政区域境界（国土数値情報）を地理院タイル上に塗り分けます。</p></div>
             <div class="screen-card"><div class="num">02</div><h3>住民目線マップ</h3><p>買い物・医療・学校への行きやすさと地元消費の流出という4指標（住民の生活視点）で同じ地図をコロプレス表示します。</p></div>
-            <div class="screen-card"><div class="num">03</div><h3>市町村カルテ</h3><p>市町村ごとの基礎情報と8指標のレーダーチャート。担当者メモをブラウザに保存できます。</p></div>
+            <div class="screen-card"><div class="num">03</div><h3>市町村カルテ</h3><p>市町村ごとの基礎情報と、地域課題マップ8指標・住民目線マップ4指標のレーダーチャート。RESASの将来人口・業種別事業所数も参考表示します。</p></div>
             <div class="screen-card"><div class="num">04</div><h3>分析レポート</h3><p>全域／地域ブロック／市町村を指定し、指標スコアから共通課題・支援方針をルールベースで文章化します。</p></div>
             <div class="screen-card"><div class="num">05</div><h3>指標の計算方法</h3><p>このページ。データソースと12指標すべての算出方法をまとめています。</p></div>
           </div>
@@ -618,8 +614,6 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
   </div>
 </div>
 
-<div class="toast" id="toast" hidden></div>
-
 <script>
 (function(){
 "use strict";
@@ -627,12 +621,6 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
 /* ===================== ユーティリティ ===================== */
 function clampRound(v){ return Math.max(1, Math.min(5, Math.round(v))); }
 function fmtNum(n){ return Number(n).toLocaleString('ja-JP'); }
-function toast(msg){
-  var t=document.getElementById('toast'); t.textContent=msg; t.hidden=false;
-  clearTimeout(t._h); t._h=setTimeout(function(){t.hidden=true;}, 2400);
-}
-function save(key,val){ try{ localStorage.setItem(key, JSON.stringify(val)); }catch(e){} }
-function load(key,fallback){ try{ var v=localStorage.getItem(key); return v?JSON.parse(v):fallback; }catch(e){ return fallback; } }
 
 var SEV_HEX=['','#3E8E7E','#7FA65C','#D9A544','#C1702B','#B23A32'];
 var NODATA_HEX='#C9CDD3';
@@ -911,9 +899,6 @@ function sevHex(score){
 function scoreOf(m){ return state.mapCategory==='composite' ? m.composite : m.scores[state.mapCategory]; }
 function residentScoreOf(m){ return state.residentCategory==='composite' ? m.residentComposite : m.residentScores[state.residentCategory]; }
 
-/* ===================== 職員メモ ===================== */
-var memos = load('rc_memos', {});
-
 /* ===================== ルーティング／状態 ===================== */
 var NAV=[
   {key:'map', label:'地域課題マップ', icon:'🗺️'},
@@ -1163,21 +1148,14 @@ function renderKarte(){
         '<div class="chart-box sm"><canvas id="chartKarteRadarResident"></canvas></div>'+
       '</div>'+
     '</div>'+
-    '<div class="grid grid-2" style="margin-top:16px;">'+
-      '<div class="card">'+
-        '<div class="section-title">主な住民目線の課題</div>'+
-        topResidentIssues.map(function(t){
-          return '<div class="issue-row"><span class="name">'+t.label+'</span>'+
-            '<div class="issue-bar-track"><div class="issue-bar-fill" style="width:'+(t.score/5*100)+'%; background:'+sevHex(t.score)+'"></div></div>'+
-            '<span class="mono" style="width:22px;text-align:right;">'+t.score+'</span></div>';
-        }).join('')+
-        '<p style="font-size:11px; color:var(--ink-faint); margin-top:8px;">買い物は食料品アクセス困難人口割合、医療・学校は可住地面積当たりの施設密度（対数）で算出しています。介護は広域利用の影響が大きいため、スコア化せず上の「介護施設定員」を参考値として表示しています。</p>'+
-      '</div>'+
-      '<div class="card">'+
-        '<div class="section-title">担当者メモ</div>'+
-        '<textarea class="textarea" id="karteMemo" placeholder="この市町村に関する所感・引継ぎ事項などを記録">'+(memos[m.id]||'')+'</textarea>'+
-        '<p style="font-size:11px; color:var(--ink-faint); margin-top:6px;">入力内容は自動保存されます（ブラウザ内保存）。</p>'+
-      '</div>'+
+    '<div class="card" style="margin-top:16px;">'+
+      '<div class="section-title">主な住民目線の課題</div>'+
+      topResidentIssues.map(function(t){
+        return '<div class="issue-row"><span class="name">'+t.label+'</span>'+
+          '<div class="issue-bar-track"><div class="issue-bar-fill" style="width:'+(t.score/5*100)+'%; background:'+sevHex(t.score)+'"></div></div>'+
+          '<span class="mono" style="width:22px;text-align:right;">'+t.score+'</span></div>';
+      }).join('')+
+      '<p style="font-size:11px; color:var(--ink-faint); margin-top:8px;">買い物は食料品アクセス困難人口割合、医療・学校は可住地面積当たりの施設密度（対数）で算出しています。介護は広域利用の影響が大きいため、スコア化せず上の「介護施設定員」を参考値として表示しています。</p>'+
     '</div>'+
     '<div class="card" style="margin-top:16px;">'+
       '<div class="section-title">業種別事業所数（参考：RESAS）<span class="count">生活関連12業種</span></div>'+
@@ -1205,13 +1183,6 @@ function renderKarte(){
     updateAiScopeTargetOptions();
     document.getElementById('aiScopeTarget').value=m.id;
   });
-  var memoEl=document.getElementById('karteMemo');
-  var t=null;
-  memoEl.addEventListener('input', function(){
-    clearTimeout(t);
-    t=setTimeout(function(){ memos[m.id]=memoEl.value; save('rc_memos', memos); toast('メモを保存しました'); }, 500);
-  });
-
   var ctx=document.getElementById('chartKarteRadar');
   new Chart(ctx, {
     type:'radar',
