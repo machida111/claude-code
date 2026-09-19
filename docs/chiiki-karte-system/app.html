@@ -402,7 +402,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <div class="view-head">
           <div>
             <h3>指標の計算方法とデータについて</h3>
-            <p>地域課題マップ（8指標）・住民目線マップ（4指標）で表示している課題指標が、どのデータからどう計算されているかをまとめています。判断材料として使う前に、実データに基づく部分と簡易的な推定の部分の違いを確認してください。</p>
+            <p>地域課題マップ（8指標）・住民目線マップ（4指標）で表示している課題指標が、どのデータからどう計算されているかをまとめています。12指標はすべて公的統計の実データで、推定値による代用はしていません。判断材料として使う前に、それぞれの指標が実際に何を測っているかを確認してください。</p>
           </div>
         </div>
         <nav class="toc">
@@ -440,6 +440,8 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
               <tr><td>65歳以上単独世帯率・高齢就業者割合</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">2020年度公表値（2020年国勢調査ベース）。</td></tr>
               <tr><td>マイナンバーカード保有率</td><td class="src">総務省「マイナンバーカードの交付・保有状況」</td><td class="src">令和8年8月末時点。人口に対する保有枚数の割合。</td></tr>
               <tr><td>土砂災害警戒区域数</td><td class="src">大阪府「土砂災害防止法の指定状況」</td><td class="src">土砂災害警戒区域（イエローゾーン）の指定数。市街地中心部は指定なし（0件）の市町村が複数ある。</td></tr>
+              <tr><td>自家用車利用率（公共交通）</td><td class="src">e-Stat 2020年国勢調査<br>「利用交通手段」（統計表0003454514）</td><td class="src">15歳以上の自宅外就業者・通学者のうち、通勤・通学に自家用車を利用する人の割合。複数手段の併用があるため各手段の割合の合計は100%を超える。</td></tr>
+              <tr><td>鉄道駅1km圏人口（カルテのみ）</td><td class="src">国土数値情報 鉄道データ（N02-23）<br>＋ e-Stat 2020年国勢調査1kmメッシュ人口</td><td class="src">駅から半径1km圏内に住む人の割合。1kmメッシュを5×5に等分し人口を均等配分して算出。カルテに参考表示（スコア化なし）。</td></tr>
               <tr><td>食料品アクセス困難人口割合（買い物）</td><td class="src">農林水産省 農林水産政策研究所<br>「食料品アクセスマップ」</td><td class="src">2020年。店舗まで直線500m以上かつ自動車利用が困難な65歳以上人口の割合。500mメッシュの店舗立地と国勢調査人口から国が算出。</td></tr>
               <tr><td>一般診療所数（医療）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">可住地面積100km²当たり。2023年度公表値。</td></tr>
               <tr><td>小学校＋義務教育学校数（学校）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」（学校基本調査）</td><td class="src">可住地面積100km²当たり。2024年度公表値。義務教育学校に統合済みの町村も小学校相当として合算。</td></tr>
@@ -463,7 +465,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <section class="block" id="indicators">
           <div class="k">2 &middot; Scoring</div>
           <h2>8つの課題指標の計算方法</h2>
-          <p class="desc">各指標は1〜5の整数スコア（5が最も課題が大きい）。「実データ」はその課題を直接表す公的統計を使っているもの、「推定」は関連する複数の実データから簡易的に推定した代理指標です。多くの指標は市町村ごとの実際の値の分布（25パーセンタイル・中央値・75パーセンタイルの近辺がそれぞれ概ね2点・3点・4点になるよう設定）に基づいてスコア化しており、市町村名などによる人為的な補正は加えていません。</p>
+          <p class="desc">各指標は1〜5の整数スコア（5が最も課題が大きい）。8指標すべて、その課題に対応する公的統計を直接スコア化しています。多くの指標は市町村ごとの実際の値の分布（25パーセンタイル・中央値・75パーセンタイルの近辺がそれぞれ概ね2点・3点・4点になるよう設定）に基づいてスコア化しており、市町村名などによる人為的な補正は加えていません。</p>
           <div class="scale">
             <span class="chip"><i class="dot" style="background:var(--sev1)"></i>1 : 小さい</span>
             <span class="chip"><i class="dot" style="background:var(--sev2)"></i>2</span>
@@ -493,10 +495,10 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
 未公表の5町村: データなし（総合スコアの算出から除外）</div>
             </div>
             <div class="idx-card">
-              <div class="head"><h4>公共交通</h4><span class="badge est">推定</span></div>
-              <div class="inputs">入力：人口密度（人口÷面積、実データから算出）</div>
-              <p class="how">密度が低いほど路線・便数を維持しにくいとみなし、密度の対数が小さいほど高スコアにしています。駅・バス停のカバー圏など交通そのものを表す全市町村共通の公的統計は見つからなかったため、この指標のみ人口密度からの推定にとどめています。</p>
-              <div class="formula">score = 6 − log10(人口密度)</div>
+              <div class="head"><h4>公共交通</h4><span class="badge real">実データ</span></div>
+              <div class="inputs">入力：通勤・通学に自家用車を利用する人の割合（2020年国勢調査「利用交通手段」）</div>
+              <p class="how">公共交通で用が足りる地域では鉄道・バス・自転車・徒歩が選べますが、路線や便数が足りない地域では自家用車に頼らざるを得ません。その割合を、住民が実際に取っている行動として直接測った指標です。中央値27.8%を基準に、11.2ポイントの差を1点分としています。大阪市10.5%（最低）から能勢町75.7%（最高）まで分布します。</p>
+              <div class="formula">score = 3 + (自家用車利用率(%) − 27.8) / 11.2</div>
             </div>
             <div class="idx-card">
               <div class="head"><h4>地域コミュニティ</h4><span class="badge real">実データ</span></div>
@@ -604,7 +606,8 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
           <div class="callout crit">
             <div class="mark">!</div>
             <div>
-              <p>地域課題マップの8指標のうち7指標（人口減少・高齢化・空き家・地域コミュニティ・担い手不足・防災・DX）と、住民目線マップの4指標はすべて、その課題に対応する公的統計を直接スコア化しています。「公共交通」のみ、駅・バス停のカバー圏など交通そのものを全市町村共通で表す統計が見つからなかったため、人口密度からの<b>簡易的な推定</b>です。</p>
+              <p>地域課題マップの8指標・住民目線マップの4指標はすべて、その課題に対応する公的統計を直接スコア化しています。推定値による代用はどの指標でも行っていません。ただし「公共交通」は自家用車の利用率という<b>住民の行動から測った指標</b>である点に注意してください。自家用車の利用には公共交通の便以外の要因（勤め先の位置、世帯の所得、駐車場の有無など）も影響します。また対象は通勤・通学者であり、通勤も通学もしていない住民（高齢者など）の移動手段は含みません。</p>
+              <p>当初は国土交通省の定義（鉄道駅1km圏・バス停300m圏の外を公共交通空白地域とする）に沿って空白地域の人口割合を算出することも検討しましたが、国土数値情報のバス停留所データに事業者単位の欠落があり（忠岡町・高石市・柏原市などでバス停が0〜数件しか収録されていない）、市町村間の比較に使える精度がなかったため採用していません。鉄道駅のみのカバー率は駅位置データが完全なため、カルテに参考値として表示しています（ただし高槻市のようにバス網で支えられている市では低く出ます）。</p>
               <p>また「防災」は土砂災害警戒区域数に基づくもので、洪水・高潮・地震などの他の災害リスクは含みません。「DX」はマイナンバーカード保有率に基づくもので、行政デジタル化の一側面（デジタルID普及）を表すにとどまります。「空き家」は能勢町・田尻町・岬町・太子町・千早赤阪村の5町村で調査結果が未公表のため、地図・カルテ・分析レポートのいずれでも「データなし」として扱い、推定値による代用はしていません。各指標は個別の統計を組み合わせた大阪府市町村局振興課によるスコア化であり、<b>国や大阪府による公式な評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
             </div>
           </div>
@@ -711,15 +714,44 @@ var MUNIS = RAW.map(function(r){
 });
 var MUNI_BY_ID={}; MUNIS.forEach(function(m){ MUNI_BY_ID[m.id]=m; });
 
+/* ===================== 公共交通データ =====================
+   CAR_COMMUTE_RATE: 通勤・通学に自家用車を利用する人の割合%（2020年国勢調査「利用交通手段」、
+   15歳以上自宅外就業者・通学者に占める割合。e-Stat 統計表0003454514）。公共交通で用が足りない地域ほど
+   自家用車に頼らざるを得ないため、この割合をそのまま公共交通の課題としてスコア化する。
+   RAIL_COVER_1KM: 鉄道駅から半径1km圏内に住む人の割合%（カルテの参考表示のみ、スコア化なし）。
+   国土数値情報「鉄道データ」(N02-23)の駅位置と、2020年国勢調査1kmメッシュ人口（e-Stat統計GIS、
+   各メッシュを5×5に等分し人口を均等配分）から算出。 */
+var CAR_COMMUTE_RATE = {
+  osaka:10.5, sakai:28.5, ikeda:18.1, toyonaka:16.0, suita:13.5,
+  takatsuki:18.6, ibaraki:18.1, minoh:24.9, settsu:19.1, shimamoto:15.4,
+  toyono:44.3, nose:75.7, moriguchi:15.7, hirakata:23.2, neyagawa:20.3,
+  daito:18.9, kadoma:18.3, shijonawate:26.4, katano:26.0, yao:21.1,
+  kashiwara:23.6, higashiosaka:18.0, tondabayashi:39.5, kawachinagano:40.8, matsubara:24.3,
+  habikino:32.8, fujiidera:26.3, osakasayama:36.2, taishi:50.5, kanan:57.5,
+  chihayaakasaka:67.5, izumiotsu:30.3, izumi:41.2, takaishi:27.8, tadaoka:37.9,
+  kishiwada:41.2, kaizuka:44.4, izumisano:41.5, sennan:49.6, hannan:48.7,
+  kumatori:49.0, tajiri:35.4, misaki:50.0
+};
+var RAIL_COVER_1KM = {
+  osaka:95.8, sakai:65.6, ikeda:59.6, toyonaka:77.0, suita:81.3,
+  takatsuki:29.3, ibaraki:59.6, minoh:50.0, settsu:72.9, shimamoto:87.8,
+  toyono:59.8, nose:0.0, moriguchi:68.4, hirakata:56.0, neyagawa:48.0,
+  daito:63.9, kadoma:68.0, shijonawate:59.6, katano:75.9, yao:73.6,
+  kashiwara:92.0, higashiosaka:83.6, tondabayashi:59.2, kawachinagano:52.3, matsubara:71.7,
+  habikino:46.3, fujiidera:71.9, osakasayama:48.9, taishi:14.6, kanan:0.0,
+  chihayaakasaka:0.0, izumiotsu:82.5, izumi:41.8, takaishi:99.7, tadaoka:61.6,
+  kishiwada:62.1, kaizuka:89.1, izumisano:79.4, sennan:63.5, hannan:54.3,
+  kumatori:22.6, tajiri:97.3, misaki:75.3
+};
+
 /* 実データ（percentile: 25%→約2点, 50%→3点, 75%→約4点）をスコア化する共通変換 */
 function scaleScore(x, center, step){ return clampRound(3 + (x - center) / step); }
 
 function computeScores(m){
-  var dens = m.population / m.areaKm2;
   var depop = clampRound(3 - m.popChangeRate*1.1);
   var aging = clampRound((m.agingRate-15)/5.5);
   var vacant = (m.vacantRate!=null) ? scaleScore(m.vacantRate, 13.4, 1.6) : null;
-  var transit = clampRound(6 - Math.log10(dens));
+  var transit = scaleScore(m.carCommuteRate, 27.8, 11.2);
   var community = scaleScore(m.aloneElderlyRate, 13.4, 1.3);
   var successor = scaleScore(m.elderlyWorkerRate, 21.3, 1.2);
   var disaster = clampRound(1 + (m.hazardCount / m.areaKm2) / 2.2);
@@ -727,6 +759,8 @@ function computeScores(m){
   return {population:depop, aging:aging, vacant:vacant, transit:transit, community:community, successor:successor, disaster:disaster, dx:dx};
 }
 MUNIS.forEach(function(m){
+  m.carCommuteRate = CAR_COMMUTE_RATE[m.id];
+  m.railCover1km = RAIL_COVER_1KM[m.id];
   m.scores = computeScores(m);
   var sum=0,n=0; CATEGORIES.forEach(function(c){ var v=m.scores[c.key]; if(v!=null){ sum+=v; n++; } });
   m.composite = sum/n;
@@ -1126,6 +1160,7 @@ function renderKarte(){
           statTile('将来人口（2050年推計）', fmtNum(m.pop2050)+'人')+
           statTile('将来人口増減率（2020→2050）', m.popRate2050.toFixed(1)+'%')+
           statTile('介護施設定員（高齢者千人当たり）', m.nursingPer1k.toFixed(1)+'人分')+
+          statTile('鉄道駅1km圏に住む人の割合', m.railCover1km.toFixed(1)+'%')+
         '</div>'+
       '</div>'+
       '<div class="card">'+
