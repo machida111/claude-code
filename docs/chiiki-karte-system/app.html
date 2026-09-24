@@ -168,6 +168,33 @@ label.field{display:flex; flex-direction:column; gap:5px; font-size:12px; color:
 .ai-report h4:first-child{margin-top:0;}
 .ai-report ul{margin:0; padding-left:18px; font-size:13px; line-height:1.7;}
 
+/* ---- 一覧表 ---- */
+.list-toolbar{display:flex; align-items:flex-end; gap:10px; flex-wrap:wrap; margin-bottom:12px;}
+.list-toolbar .spacer{flex:1;}
+.seg{display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden;}
+.seg button{border:0; background:var(--surface); color:var(--ink-muted); padding:8px 12px; font:inherit; font-size:12.5px; font-weight:600; cursor:pointer;}
+.seg button+button{border-left:1px solid var(--border);}
+.seg button.on{background:var(--accent); color:#fff;}
+.list-wrap{overflow:auto; max-height:calc(100vh - 250px); border:1px solid var(--border); border-radius:12px; background:var(--surface);}
+table.data-table{border-collapse:separate; border-spacing:0; font-size:12.5px; width:max-content; min-width:100%;}
+.data-table th,.data-table td{padding:7px 10px; border-bottom:1px solid var(--border); white-space:nowrap; text-align:right;}
+.data-table th{position:sticky; top:0; z-index:2; background:var(--surface-2); font-size:11.5px; color:var(--ink-muted); font-weight:700; cursor:pointer; user-select:none; vertical-align:bottom; line-height:1.35;}
+.data-table th small{display:block; font-weight:500; color:var(--ink-faint); font-size:10.5px;}
+.data-table th .arrow{color:var(--accent); margin-left:3px;}
+.data-table th.grp-main{border-top:3px solid #1F5C99;}
+.data-table th.grp-resident{border-top:3px solid #C77D12;}
+.data-table th.grp-hazard{border-top:3px solid #B23A32;}
+.data-table .col-name{position:sticky; left:0; z-index:1; background:var(--surface); text-align:left; font-weight:700;}
+.data-table th.col-name{z-index:3; background:var(--surface-2);}
+.data-table td.col-name button{border:0; background:none; padding:0; font:inherit; color:var(--accent-ink); cursor:pointer; text-decoration:underline; text-underline-offset:2px;}
+.data-table td.left{text-align:left; color:var(--ink-muted);}
+.data-table tbody tr:hover td{background:var(--surface-2);}
+.sc{display:inline-block; min-width:26px; padding:2px 6px; border-radius:6px; color:#fff; font-weight:700; text-align:center; font-family:var(--font-mono, monospace);}
+.sc.na{background:var(--surface-3); color:var(--ink-faint); font-weight:600;}
+.data-table .col-region{text-align:left; color:var(--ink-muted);}
+@media (max-width:780px){ .data-table .col-region{display:none;} .list-wrap{max-height:none;} }
+.list-note{font-size:11.5px; color:var(--ink-faint); margin-top:10px; line-height:1.6;}
+
 @media (max-width:780px){
   .app-shell{grid-template-columns:1fr; grid-template-rows:auto 1fr;}
   .sidebar{
@@ -184,6 +211,38 @@ label.field{display:flex; flex-direction:column; gap:5px; font-size:12px; color:
   .nav-foot{display:none;}
   .header-bar{padding:12px 16px;}
   .view{padding:16px;}
+}
+
+/* ---- 印刷（市町村カルテ・分析レポート・一覧表） ---- */
+.print-only{display:none;}
+.print-msg{font-size:11.5px; color:var(--crit, #B23A32); margin-top:6px;}
+@page{size:A4; margin:12mm;}
+@media print{
+  :root, :root:not([data-theme="light"]), :root[data-theme="dark"]{
+    --bg:#FFFFFF; --surface:#FFFFFF; --surface-2:#F1F3F6; --surface-3:#E3E7ED;
+    --border:#CDD4DE; --ink:#111822; --ink-muted:#4A5566; --ink-faint:#6B7584;
+    --accent:#1F5C99; --accent-ink:#123E6B; --shadow:none;
+  }
+  html, body{background:#fff !important; height:auto !important; overflow:visible !important;}
+  *{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+  .app-shell{display:block !important; height:auto !important;}
+  .sidebar, .header-bar, .no-print, .btn, .print-msg{display:none !important;}
+  .main-col{height:auto !important; overflow:visible !important; display:block !important;}
+  .view{overflow:visible !important; padding:0 !important;}
+  .print-only{display:block; font-size:11px; color:#4A5566; border-bottom:1px solid #CDD4DE; padding-bottom:6px; margin-bottom:12px;}
+  .card{box-shadow:none !important; break-inside:avoid; page-break-inside:avoid;}
+  .grid-2{grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;}
+  .chart-box.sm{height:200px;}
+  .chart-box canvas{max-width:100% !important; max-height:200px !important; object-fit:contain;}
+  .list-wrap{max-height:none !important; overflow:visible !important; border:0;}
+  .data-table th{position:static;}
+  .data-table .col-name{position:static;}
+  .data-table{font-size:9.5px;}
+  .data-table th, .data-table td{padding:3px 5px;}
+  .view-head p{display:none;}
+  .ai-report h4{break-after:avoid; page-break-after:avoid;}
+  .ai-report ul{break-inside:auto;}
+  a[href]{color:inherit; text-decoration:none;}
 }
 
 /* ---- leaflet (vendored, trimmed) ---- */
@@ -332,6 +391,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
   </nav>
 
   <div class="main-col">
+    <div class="print-only" id="printHeader"></div>
     <header class="header-bar">
       <div class="header-title">
         <h2 id="viewTitle">地域課題マップ</h2>
@@ -396,6 +456,33 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
       <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地理院タイル</a>） ／ 災害データ：大阪府（土砂災害警戒区域）・国土数値情報（浸水想定区域）・防災科学技術研究所 J-SHIS（地震動予測・微地形区分）・国土交通省（液状化の発生傾向） ／ 人口：2020年国勢調査250mメッシュ ／ 行政区域境界：国土数値情報（行政区域データ N03）</p>
     </section>
 
+    <!-- LIST -->
+    <section class="view" id="view-list" hidden>
+      <div class="view-head">
+        <div>
+          <h3>一覧表</h3>
+          <p>43市町村の15指標を1つの表で比べます。列の見出しを押すと並べ替え（もう一度押すと逆順）、市町村名を押すと市町村カルテに移動します。CSVにはスコアと元の統計値の両方が入ります。</p>
+        </div>
+      </div>
+      <div class="list-toolbar no-print">
+        <label class="field" style="width:200px;"><span>表示する指標</span>
+          <select class="select" id="listGroup">
+            <option value="all">すべて（15指標）</option>
+            <option value="main">地域課題マップ（7指標）</option>
+            <option value="resident">住民目線マップ（4指標）</option>
+            <option value="hazard">防災マップ（4指標）</option>
+          </select></label>
+        <label class="field"><span>表示する値</span>
+          <div class="seg" id="listMode"><button type="button" data-mode="score" class="on">スコア（1〜5）</button><button type="button" data-mode="raw">元の値</button></div></label>
+        <div class="spacer"></div>
+        <button class="btn" id="btnListPrint" type="button">印刷</button>
+        <button class="btn" id="btnCsv" type="button">CSVを保存</button>
+      </div>
+      <div class="print-msg" id="listPrintMsg" hidden></div>
+      <div class="list-wrap"><table class="data-table" id="listTable"></table></div>
+      <p class="list-note" id="listNote">「—」はデータなし（空き家：未公表の5町村、地元で買えない度：非公開の2市）。スコアは5が最も課題（リスク）が大きい。元の値の単位は列見出しの下に表示しています。</p>
+    </section>
+
     <!-- KARTE -->
     <section class="view" id="view-karte" hidden>
       <div id="karteBody"></div>
@@ -409,7 +496,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
           <p>対象範囲を選び「分析を生成」を押すと、共通課題・特徴的な課題・住民目線で見た課題・災害リスク・重なっている課題・悪化が目立つ変化・支援方針・広域連携の可能性をまとめます。</p>
         </div>
       </div>
-      <div class="card">
+      <div class="card no-print">
         <div class="grid grid-3">
           <label class="field"><span>対象範囲</span><select class="select" id="aiScopeType">
             <option value="all">大阪府全域</option>
@@ -446,14 +533,15 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <section class="block">
           <div class="k">Overview</div>
           <h2>このツールでできること</h2>
-          <p class="desc">地域課題カルテは6つの画面から構成されています。いずれも表示専用で、統計データは事前に埋め込まれています。</p>
+          <p class="desc">地域課題カルテは7つの画面から構成されています。いずれも表示専用で、統計データは事前に埋め込まれています。</p>
           <div class="screen-grid">
             <div class="screen-card"><div class="num">01</div><h3>地域課題マップ</h3><p>大阪府43市町村を7指標（行政の計画視点）のいずれかでコロプレス表示。行政区域境界（国土数値情報）を地理院タイル上に塗り分けます。</p></div>
             <div class="screen-card"><div class="num">02</div><h3>住民目線マップ</h3><p>買い物・医療・学校への行きやすさと地元消費の流出という4指標（住民の生活視点）で同じ地図をコロプレス表示します。</p></div>
             <div class="screen-card"><div class="num">03</div><h3>防災マップ</h3><p>土砂災害・水害・地震の揺れ・液状化の4つの災害リスクを、災害ごとに切り替えてコロプレス表示します。</p></div>
-            <div class="screen-card"><div class="num">04</div><h3>市町村カルテ</h3><p>市町村ごとの基礎情報と、地域課題マップ7指標・住民目線マップ4指標・防災マップ4指標のレーダーチャート。RESASの将来人口・業種別事業所数も参考表示します。</p></div>
-            <div class="screen-card"><div class="num">05</div><h3>分析レポート</h3><p>全域／地域ブロック／市町村を指定し、3つのマップの15指標のスコアから共通課題・支援方針をルールベースで文章化します（外部API呼び出しなし）。</p></div>
-            <div class="screen-card"><div class="num">06</div><h3>指標の計算方法</h3><p>このページ。データソースと15指標すべての算出方法をまとめています。</p></div>
+            <div class="screen-card"><div class="num">04</div><h3>一覧表</h3><p>43市町村の15指標を1つの表に並べて並べ替えられます。スコアと元の統計値を切り替えられ、CSVで保存できます。</p></div>
+            <div class="screen-card"><div class="num">05</div><h3>市町村カルテ</h3><p>市町村ごとの基礎情報と、地域課題マップ7指標・住民目線マップ4指標・防災マップ4指標のレーダーチャート。RESASの将来人口・業種別事業所数も参考表示します。</p></div>
+            <div class="screen-card"><div class="num">06</div><h3>分析レポート</h3><p>全域／地域ブロック／市町村を指定し、3つのマップの15指標のスコアから共通課題・支援方針をルールベースで文章化します（外部API呼び出しなし）。</p></div>
+            <div class="screen-card"><div class="num">07</div><h3>指標の計算方法</h3><p>このページ。データソースと15指標すべての算出方法をまとめています。</p></div>
           </div>
         </section>
 
@@ -468,7 +556,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
               <tr><td>面積</td><td class="src">国土地理院<br>全国都道府県市区町村別面積調</td><td class="src">人口密度（人口÷面積）の算出に使用。</td></tr>
               <tr><td>財政力指数</td><td class="src">総務省 地方財政状況調査</td><td class="src">直近公表年度。1に近いほど自主財源の割合が高い。</td></tr>
               <tr><td>空き家率</td><td class="src">総務省統計局 令和5年住宅・土地統計調査</td><td class="src">人口規模の小さい5町村（能勢町・田尻町・岬町・太子町・千早赤阪村）は未公表。これらの町村は空き家指標を「データなし」として扱い、総合スコアの算出から除外する。</td></tr>
-              <tr><td>65歳以上単独世帯率・高齢就業者割合</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">2020年度公表値（2020年国勢調査ベース）。</td></tr>
+              <tr><td>65歳以上単独世帯率</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">2020年度公表値（2020年国勢調査ベース）。</td></tr>
               <tr><td>AI・RPA・生成AI導入状況（DX）</td><td class="src">総務省「地方自治体におけるAI・RPAの実証実験・導入状況等調査」</td><td class="src">令和7年度。導入済・実証実験中の団体一覧に掲載がない団体は未導入として扱う。</td></tr>
               <tr><td>手続のオンライン化状況（DX）</td><td class="src">総務省「自治体DX・情報化推進概要」個別資料<br>（オンライン利用状況調査）</td><td class="src">令和7年4月1日現在（令和8年9月18日公表）。重点計画対象手続のうち「オンライン化済」の数。</td></tr>
               <tr><td>マイナンバーカード保有率（カルテのみ）</td><td class="src">総務省「マイナンバーカードの交付・保有状況」</td><td class="src">令和8年8月末時点。人口に対する保有枚数の割合。カルテに参考表示（スコア化なし）。</td></tr>
@@ -478,13 +566,13 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
               <tr><td>液状化しやすい地形（防災マップ）</td><td class="src">J-SHIS 250mメッシュ微地形区分（表層地盤V4）<br>＋ 国土交通省「地形区分に基づく液状化の発生傾向」<br>＋ e-Stat 2020年国勢調査250mメッシュ人口</td><td class="src">発生傾向が「強い」「やや強い」とされる地形（埋立地・旧河道・旧池沼・砂丘・砂州間低地・干拓地・自然堤防・三角州・海岸低地）に住む人の割合。</td></tr>
               <tr><td>土砂災害警戒区域数</td><td class="src">大阪府「土砂災害防止法の指定状況」</td><td class="src">土砂災害警戒区域（イエローゾーン）の指定数。市街地中心部は指定なし（0件）の市町村が複数ある。</td></tr>
               <tr><td>自家用車利用率（公共交通）</td><td class="src">e-Stat 2020年国勢調査<br>「利用交通手段」（統計表0003454514）</td><td class="src">15歳以上の自宅外就業者・通学者のうち、通勤・通学に自家用車を利用する人の割合。複数手段の併用があるため各手段の割合の合計は100%を超える。</td></tr>
-              <tr><td>鉄道駅1km圏人口（カルテのみ）</td><td class="src">国土数値情報 鉄道データ（N02-23）<br>＋ e-Stat 2020年国勢調査1kmメッシュ人口</td><td class="src">駅から半径1km圏内に住む人の割合。1kmメッシュを5×5に等分し人口を均等配分して算出。カルテに参考表示（スコア化なし）。</td></tr>
+              <tr><td>鉄道駅1km圏人口（カルテのみ）</td><td class="src">国土数値情報 鉄道データ（N02-23）<br>＋ e-Stat 2020年国勢調査250mメッシュ人口</td><td class="src">駅から半径1km圏内に住む人の割合。250mメッシュを5×5（50m四方）に等分し人口を均等配分して算出。カルテに参考表示（スコア化なし）。</td></tr>
               <tr><td>食料品アクセス困難人口割合（買い物）</td><td class="src">農林水産省 農林水産政策研究所<br>「食料品アクセスマップ」</td><td class="src">2020年。店舗まで直線500m以上かつ自動車利用が困難な65歳以上人口の割合。500mメッシュの店舗立地と国勢調査人口から国が算出。</td></tr>
               <tr><td>一般診療所数（医療）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">可住地面積100km²当たり。2023年度公表値。</td></tr>
               <tr><td>小学校＋義務教育学校数（学校）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」（学校基本調査）</td><td class="src">可住地面積100km²当たり。2024年度公表値。義務教育学校に統合済みの町村も小学校相当として合算。</td></tr>
               <tr><td>可住地面積</td><td class="src">国土地理院／農林水産省<br>（e-Stat 社会・人口統計体系）</td><td class="src">総面積から林野・湖沼を除いた面積。医療・学校の施設密度の母数に使用。</td></tr>
               <tr><td>介護施設定員（カルテのみ）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">65歳以上人口千人当たりの定員。広域利用の影響が大きいためスコア化せず、カルテに参考表示。</td></tr>
-              <tr><td>支出流出入率（地元で買えない度）</td><td class="src">RESAS「地域ビジネス環境分析」</td><td class="src">2022年。住民の消費が地域内に留まるか流出するかを示す。2市（河内長野市・東大阪市）は非公開。</td></tr>
+              <tr><td>支出流出入率（地元で買えない度）</td><td class="src">RESAS「地域ビジネス環境分析」</td><td class="src">2022年。住民の消費が地域内に留まるか流出するかを示す。2市（河内長野市・東大阪市）は非公開のため「データなし」として扱い、住民目線の総合スコアの算出から除外する。</td></tr>
               <tr><td>将来人口（2050年推計、カルテのみ）</td><td class="src">RESAS「地域ビジネス環境分析」（国立社会保障・人口問題研究所推計）</td><td class="src">2020年を基準とした2050年の人口推計。カルテの基本指標に参考表示。</td></tr>
               <tr><td>業種別事業所数（カルテのみ）</td><td class="src">RESAS「地域ビジネス環境分析」（経済センサス）</td><td class="src">生活関連12業種の事業所数、2016年→2021年。カルテに参考表示（スコア化なし）。</td></tr>
               <tr><td>市町村境界</td><td class="src">国土数値情報 行政区域データ（N03）</td><td class="src">大阪市24区・堺市7区は1つの市域ポリゴンに結合。</td></tr>
@@ -535,12 +623,14 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
               <div class="head"><h4>公共交通</h4><span class="badge real">実データ</span></div>
               <div class="inputs">入力：通勤・通学に自家用車を利用する人の割合（2020年国勢調査「利用交通手段」）</div>
               <p class="how">公共交通で用が足りる地域では鉄道・バス・自転車・徒歩が選べますが、路線や便数が足りない地域では自家用車に頼らざるを得ません。その割合を、住民が実際に取っている行動として直接測った指標です。中央値27.8%を基準に、11.2ポイントの差を1点分としています。大阪市10.5%（最低）から能勢町75.7%（最高）まで分布します。</p>
+              <p class="how">路線バスの走り方（路線・便数）から測ることも検討しましたが、国土数値情報のバス停留所データ（2022年）・バスルートデータ（2022年）はいずれも事業者やコミュニティバスの収録漏れがあり（忠岡町は空港リムジンのみ、柏原市は4路線のみ）、便数も含まれないため使っていません。なお、国勢調査は2020年時点のため、その後の路線の廃止・縮小（2023年12月の金剛自動車の路線バス廃止など）は反映されていません。南河内の町村では、現状はこのスコアより厳しい可能性があります。</p>
               <div class="formula">score = 3 + (自家用車利用率(%) − 27.8) / 11.2</div>
             </div>
             <div class="idx-card">
               <div class="head"><h4>高齢者の見守り</h4><span class="badge real">実データ</span></div>
               <div class="inputs">入力：65歳以上世帯員の単独世帯の割合（国勢調査）</div>
               <p class="how">一人暮らしの高齢者が多いほど、安否確認・見守り・生活支援の必要が大きいとみなしています。以前は「地域コミュニティ」という名前でしたが、自治会加入率など地域のつながりを直接表す統計は市町村ごとに集計方法が異なり全市町村分をそろえられないため、測っている中身どおりの名前に改めました。</p>
+              <p class="how">高齢者の世帯の形は、ほかに「65歳以上のうち一人暮らしの割合」「高齢者のみの世帯（単身＋夫婦のみ）の割合」でも測れるため、3つを比べました。高齢者のみの世帯の割合は高齢化率との相関が0.97で、豊能町（44.7%）・千早赤阪村・岬町・能勢町が上位となり「高齢化」の指標とほぼ同じ情報になります。65歳以上のうち一人暮らしの割合は逆に都市部ほど高く（大阪市31.5%、豊能町11.5%、高齢化率との相関−0.56）、高齢者が多い町村の見守りの必要を拾えません。今のスコア（全世帯に占める高齢単身世帯の割合、高齢化率との相関0.42）は、都市部の一人暮らし（門真市・守口市・大阪市）と、高齢化の進んだ町村（岬町・千早赤阪村）の両方を拾うため、これを使っています。ほかの2つはカルテに参考値として表示しています。民生委員の数など見守る側の体制を表す統計は、市町村単位の全国統計がないため含んでいません。</p>
               <div class="formula">score = 3 + (65歳以上単独世帯率(%) − 13.4) / 1.3</div>
             </div>
             <div class="idx-card">
@@ -594,7 +684,7 @@ score = ((5 − 導入点 × 4/3) + (3 − (オンライン化済割合(%) − 7
             <div class="idx-card">
               <div class="head"><h4>地元で買えない度</h4><span class="badge real">実データ</span></div>
               <div class="inputs">入力：支出流出入率（RESAS「地域ビジネス環境分析」、2022年）</div>
-              <p class="how">住民の消費が地域内にどれだけ留まっているかを示す指標。マイナス（域外へ流出）が大きいほど、日常の買い物や飲食を域外に頼っている＝地元で用が足りないことを意味するため、高スコアとしています。中央値-5.6%を基準に、6ポイントの差を1点分としています。データが非公開の市町村（河内長野市・東大阪市）は中間の3点としています。</p>
+              <p class="how">住民の消費が地域内にどれだけ留まっているかを示す指標。マイナス（域外へ流出）が大きいほど、日常の買い物や飲食を域外に頼っている＝地元で用が足りないことを意味するため、高スコアとしています。中央値-5.6%を基準に、6ポイントの差を1点分としています。データが非公開の市町村（河内長野市・東大阪市）は、空き家と同じく「データなし」として扱い、推定値や中間点で埋めていません（地図はグレー表示、住民目線の総合スコアは残り3指標の平均）。</p>
               <div class="formula">score = 3 − (支出流出入率(%) − (−5.6)) / 6</div>
             </div>
           </div>
@@ -663,7 +753,7 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
         <section class="block" id="composite">
           <div class="k">5 &middot; Composite score</div>
           <h2>総合スコアの算出</h2>
-          <p class="desc">地域課題マップと住民目線マップの総合スコアは、それぞれの指標群の単純平均です。重み付けはしていません。「空き家」がデータなしの5町村は、残り6指標の平均を総合スコアとします。防災マップの総合は、4つの災害のうち最も高い点数です（前の節を参照）。</p>
+          <p class="desc">地域課題マップと住民目線マップの総合スコアは、それぞれの指標群の単純平均です。重み付けはしていません。「空き家」がデータなしの5町村は残り6指標の平均を、「地元で買えない度」がデータなしの2市（河内長野市・東大阪市）は残り3指標の平均を総合スコアとします。防災マップの総合は、4つの災害のうち最も高い点数です（前の節を参照）。</p>
           <div class="idx-card" style="margin-top:18px; max-width:560px;">
             <div class="formula">地域課題マップ 総合スコア = (人口減少 + 高齢化 + 空き家 + 公共交通 + 高齢者の見守り + 担い手不足 + DX) / 7
 住民目線マップ 総合スコア = (買い物の不便さ + 医療への行きにくさ + 学校への通いにくさ + 地元で買えない度) / 4
@@ -717,7 +807,7 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
             <div>
               <p>地域課題マップの7指標・住民目線マップの4指標・防災マップの4指標はすべて、その課題に対応する公的統計を直接スコア化しています。推定値による代用はどの指標でも行っていません。ただし「公共交通」は自家用車の利用率という<b>住民の行動から測った指標</b>である点に注意してください。自家用車の利用には公共交通の便以外の要因（勤め先の位置、世帯の所得、駐車場の有無など）も影響します。また対象は通勤・通学者であり、通勤も通学もしていない住民（高齢者など）の移動手段は含みません。</p>
               <p>当初は国土交通省の定義（鉄道駅1km圏・バス停300m圏の外を公共交通空白地域とする）に沿って空白地域の人口割合を算出することも検討しましたが、国土数値情報のバス停留所データに事業者単位の欠落があり（忠岡町・高石市・柏原市などでバス停が0〜数件しか収録されていない）、市町村間の比較に使える精度がなかったため採用していません。鉄道駅のみのカバー率は駅位置データが完全なため、カルテに参考値として表示しています（ただし高槻市のようにバス網で支えられている市では低く出ます）。</p>
-              <p>また防災マップの人口割合は、250mメッシュの人口をメッシュ内で均等に配分して数えています（1kmメッシュより細かいものの、建物単位の分布ではありません）。地震の確率は国の長期評価に基づく予測で、特定の地震の被害想定ではありません。液状化は地形から見た発生しやすさで、地盤調査による判定ではありません。「DX」は総務省調査の「導入しているか」「オンライン化しているか」を数えたもので、導入したAIがどの業務でどれだけ使われているか、オンライン申請が実際にどれだけ使われているかまでは測っていません。またAI・RPA・生成AIの調査結果は導入団体の一覧形式のため、一覧に掲載がない団体を「未導入」として扱っています（未回答の団体を含む可能性があります）。「空き家」は能勢町・田尻町・岬町・太子町・千早赤阪村の5町村で調査結果が未公表のため、地図・カルテ・分析レポートのいずれでも「データなし」として扱い、推定値による代用はしていません。本ツールは<b>ベータ版</b>で、指標の選び方・算出方法は利用者の意見を踏まえて今後変更することがあります。各指標は個別の統計を組み合わせた大阪府市町村局振興課によるスコア化であり、<b>国や大阪府による公式な評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
+              <p>また防災マップの人口割合は、250mメッシュの人口をメッシュ内で均等に配分して数えています（1kmメッシュより細かいものの、建物単位の分布ではありません）。地震の確率は国の長期評価に基づく予測で、特定の地震の被害想定ではありません。液状化は地形から見た発生しやすさで、地盤調査による判定ではありません。「DX」は総務省調査の「導入しているか」「オンライン化しているか」を数えたもので、導入したAIがどの業務でどれだけ使われているか、オンライン申請が実際にどれだけ使われているかまでは測っていません。またAI・RPA・生成AIの調査結果は導入団体の一覧形式のため、一覧に掲載がない団体を「未導入」として扱っています（未回答の団体を含む可能性があります）。「空き家」は能勢町・田尻町・岬町・太子町・千早赤阪村の5町村で調査結果が未公表のため、地図・カルテ・分析レポートのいずれでも「データなし」として扱い、推定値による代用はしていません。「地元で買えない度」も、河内長野市・東大阪市の2市はRESASで支出流出入率が非公開のため、同じく「データなし」として扱っています。本ツールは<b>ベータ版</b>で、指標の選び方・算出方法は利用者の意見を踏まえて今後変更することがあります。各指標は個別の統計を組み合わせた大阪府市町村局振興課によるスコア化であり、<b>国や大阪府による公式な評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
             </div>
           </div>
         </section>
@@ -770,62 +860,61 @@ var REGIONS={
    面積＝国土地理院全国都道府県市区町村別面積調、財政力指数＝総務省 地方財政状況調査（直近公表年度）
    空き家率(%)＝総務省 令和5年住宅・土地統計調査（人口小規模な5町村は未公表のためnull。空き家指標はデータなしとして扱い総合スコアから除外）
    65歳以上単独世帯率(%)＝e-Stat 社会・人口統計体系「市区町村データ」（2020年度）
-   高齢就業者割合(%,65歳以上)＝同上（2020年度）※現在はスコアに使っていない（担い手不足は生産年齢人口の増減率に変更）
    マイナンバーカード保有率(%)＝総務省「マイナンバーカードの交付・保有状況」（令和8年8月末時点）
    土砂災害警戒区域数＝大阪府「土砂災害防止法の指定状況」
    [id, 名称, 地域, 緯度, 経度, 人口, 人口増減率%, 高齢化率%, 面積km2, 世帯数, 財政力指数,
-    空き家率%, 65歳以上単独世帯率%, 高齢就業者割合%, マイナンバーカード保有率%, 土砂災害警戒区域数] */
+    空き家率%, 65歳以上単独世帯率%, マイナンバーカード保有率%, 土砂災害警戒区域数] */
 var RAW=[
-['osaka','大阪市','osaka-city',34.6937,135.5023,2752412,0.45,24.6,225.34,1469718,0.92,16.12,14.56,22.69,81.69,0],
-['sakai','堺市','sen-hoku',34.5732,135.483,826161,-0.32,28.2,149.83,366079,0.78,12.90,14.12,20.80,82.69,142],
-['ikeda','池田市','kita',34.8167,135.4308,104993,0.37,26.5,22.14,48611,0.82,12.95,12.03,21.80,85.19,163],
-['toyonaka','豊中市','kita',34.7815,135.4695,401558,0.31,26.2,36.39,176967,0.87,13.70,14.51,22.52,84.48,49],
-['suita','吹田市','kita',34.7617,135.5158,385567,0.59,23.0,36.09,180099,0.96,12.03,10.99,21.89,85.25,75],
-['takatsuki','高槻市','kita',34.8467,135.6178,352698,0.05,29.0,105.29,152869,0.78,9.63,12.92,18.46,83.32,468],
-['ibaraki','茨木市','kita',34.8156,135.5686,287730,0.54,23.9,76.49,125089,0.97,9.12,10.59,21.26,84.16,382],
-['minoh','箕面市','kita',34.8256,135.47,136868,0.51,25.8,47.9,58088,0.9,11.69,11.12,23.33,84.47,340],
-['settsu','摂津市','kita',34.7736,135.5661,87456,0.57,25.3,14.87,40243,0.95,11.39,12.05,25.05,82.74,0],
-['shimamoto','島本町','kita',34.8867,135.6767,30927,0.62,27.5,16.81,12747,0.71,6.29,13.31,19.68,86.87,67],
-['toyono','豊能町','kita',34.9264,135.4581,18279,-1.72,47.4,34.34,7580,0.41,8.92,13.15,20.36,84.25,415],
-['nose','能勢町','kita',34.9694,135.4231,9079,-2.41,41.5,98.75,3645,0.36,null,14.01,33.08,75.88,1072],
-['moriguchi','守口市','kita-kawachi',34.7377,135.5697,143096,0.01,28.6,12.71,67860,0.7,17.07,15.66,22.47,83.75,0],
-['hirakata','枚方市','kita-kawachi',34.8153,135.6567,397289,-0.34,27.8,65.12,172253,0.77,11.43,11.53,20.08,83.78,165],
-['neyagawa','寝屋川市','kita-kawachi',34.7642,135.6283,229733,-0.66,29.6,24.7,101538,0.64,13.31,14.68,20.99,79.84,43],
-['daito','大東市','kita-kawachi',34.7136,135.6197,119367,-0.63,26.3,18.27,52686,0.72,14.92,13.01,23.19,81.34,120],
-['kadoma','門真市','kita-kawachi',34.7369,135.5789,119764,-0.62,29.7,12.3,57379,0.68,16.99,16.98,22.52,80.38,0],
-['shijonawate','四條畷市','kita-kawachi',34.7378,135.6478,55177,-0.32,27.5,18.69,22415,0.59,15.54,12.88,22.48,83.81,70],
-['katano','交野市','kita-kawachi',34.7692,135.6667,75033,-0.37,28.8,25.55,29569,0.69,11.03,12.05,19.08,84.48,135],
-['yao','八尾市','naka-kawachi',34.6247,135.6003,264642,-0.31,28.3,41.72,114265,0.71,13.91,14.96,21.52,82.82,71],
-['kashiwara','柏原市','naka-kawachi',34.5789,135.6444,68775,-0.67,29.0,25.33,30009,0.6,20.79,13.21,23.38,82.81,239],
-['higashiosaka','東大阪市','naka-kawachi',34.6797,135.6008,493940,-0.35,27.5,61.78,232303,0.74,16.25,13.97,22.69,80.05,167],
-['tondabayashi','富田林市','minami-kawachi',34.5,135.5983,108699,-0.95,30.2,39.72,45699,0.62,13.02,14.06,21.37,81.53,199],
-['kawachinagano','河内長野市','minami-kawachi',34.4581,135.5686,101692,-1.01,35.4,109.63,42367,0.59,12.11,14.33,19.02,83.71,1671],
-['matsubara','松原市','minami-kawachi',34.5772,135.5442,117641,-0.52,30.0,16.66,51902,0.59,13.42,15.07,20.71,81.45,0],
-['habikino','羽曳野市','minami-kawachi',34.5561,135.61,108736,-0.71,30.6,26.45,45008,0.56,14.50,13.91,21.27,82.4,37],
-['fujiidera','藤井寺市','minami-kawachi',34.5697,135.5983,63688,-0.54,28.4,8.89,27814,0.61,14.40,14.62,21.56,82.64,0],
-['osakasayama','大阪狭山市','minami-kawachi',34.5133,135.5683,58435,0.22,28.1,11.92,24216,0.66,11.96,13.11,20.18,83.7,24],
-['taishi','太子町','minami-kawachi',34.5061,135.6394,13009,-1.1,29.5,14.17,5048,0.47,null,11.32,25.13,84.09,131],
-['kanan','河南町','minami-kawachi',34.4881,135.6486,15697,-0.54,31.2,25.26,6392,0.43,15.07,9.87,26.44,83.92,251],
-['chihayaakasaka','千早赤阪村','minami-kawachi',34.4494,135.6394,4909,-1.81,45.5,37.3,1944,0.26,null,15.15,20.83,83.11,306],
-['izumiotsu','泉大津市','sen-hoku',34.5033,135.4106,74412,-0.39,25.5,14.33,32516,0.71,13.98,13.46,22.19,82.94,0],
-['izumi','和泉市','sen-hoku',34.4839,135.4181,184495,-0.17,25.5,84.98,73701,0.72,11.42,11.16,21.07,83.43,458],
-['takaishi','高石市','sen-hoku',34.5225,135.4344,55635,-0.32,28.2,11.3,23130,0.79,12.04,14.18,20.31,82.95,0],
-['tadaoka','忠岡町','sen-hoku',34.4989,135.4319,16567,-0.86,28.8,3.97,6749,0.55,15.74,14.35,18.92,78.21,0],
-['kishiwada','岸和田市','sen-nan',34.4614,135.3719,190658,-0.44,28.1,72.72,79073,0.61,13.82,13.67,20.06,80.05,177],
-['kaizuka','貝塚市','sen-nan',34.4339,135.3486,84443,-0.98,27.3,43.93,33284,0.65,14.83,13.39,21.28,82.83,158],
-['izumisano','泉佐野市','sen-nan',34.4067,135.3097,100131,-0.17,26.2,56.51,43864,0.9,12.28,11.98,22.46,85.74,103],
-['sennan','泉南市','sen-nan',34.3833,135.2822,60102,-0.76,29.6,48.98,23123,0.69,13.49,13.36,18.42,82.38,185],
-['hannan','阪南市','sen-nan',34.3489,135.2244,51254,-1.14,33.3,36.17,20774,0.52,15.17,14.52,18.13,81.72,231],
-['kumatori','熊取町','sen-nan',34.4083,135.3489,43763,-0.3,28.4,17.24,17256,0.57,9.92,10.21,20.48,84.88,62],
-['tajiri','田尻町','sen-nan',34.4142,135.3125,8434,0.04,23.7,5.62,3734,1.3,null,11.13,19.94,86.22,1],
-['misaki','岬町','sen-nan',34.3181,135.1461,14741,-1.55,40.5,49.18,6273,0.47,null,19.37,17.03,83.66,327]
+['osaka','大阪市','osaka-city',34.6937,135.5023,2752412,0.45,24.6,225.34,1469718,0.92,16.12,14.56,81.69,0],
+['sakai','堺市','sen-hoku',34.5732,135.483,826161,-0.32,28.2,149.83,366079,0.78,12.90,14.12,82.69,142],
+['ikeda','池田市','kita',34.8167,135.4308,104993,0.37,26.5,22.14,48611,0.82,12.95,12.03,85.19,163],
+['toyonaka','豊中市','kita',34.7815,135.4695,401558,0.31,26.2,36.39,176967,0.87,13.70,14.51,84.48,49],
+['suita','吹田市','kita',34.7617,135.5158,385567,0.59,23.0,36.09,180099,0.96,12.03,10.99,85.25,75],
+['takatsuki','高槻市','kita',34.8467,135.6178,352698,0.05,29.0,105.29,152869,0.78,9.63,12.92,83.32,468],
+['ibaraki','茨木市','kita',34.8156,135.5686,287730,0.54,23.9,76.49,125089,0.97,9.12,10.59,84.16,382],
+['minoh','箕面市','kita',34.8256,135.47,136868,0.51,25.8,47.9,58088,0.9,11.69,11.12,84.47,340],
+['settsu','摂津市','kita',34.7736,135.5661,87456,0.57,25.3,14.87,40243,0.95,11.39,12.05,82.74,0],
+['shimamoto','島本町','kita',34.8867,135.6767,30927,0.62,27.5,16.81,12747,0.71,6.29,13.31,86.87,67],
+['toyono','豊能町','kita',34.9264,135.4581,18279,-1.72,47.4,34.34,7580,0.41,8.92,13.15,84.25,415],
+['nose','能勢町','kita',34.9694,135.4231,9079,-2.41,41.5,98.75,3645,0.36,null,14.01,75.88,1072],
+['moriguchi','守口市','kita-kawachi',34.7377,135.5697,143096,0.01,28.6,12.71,67860,0.7,17.07,15.66,83.75,0],
+['hirakata','枚方市','kita-kawachi',34.8153,135.6567,397289,-0.34,27.8,65.12,172253,0.77,11.43,11.53,83.78,165],
+['neyagawa','寝屋川市','kita-kawachi',34.7642,135.6283,229733,-0.66,29.6,24.7,101538,0.64,13.31,14.68,79.84,43],
+['daito','大東市','kita-kawachi',34.7136,135.6197,119367,-0.63,26.3,18.27,52686,0.72,14.92,13.01,81.34,120],
+['kadoma','門真市','kita-kawachi',34.7369,135.5789,119764,-0.62,29.7,12.3,57379,0.68,16.99,16.98,80.38,0],
+['shijonawate','四條畷市','kita-kawachi',34.7378,135.6478,55177,-0.32,27.5,18.69,22415,0.59,15.54,12.88,83.81,70],
+['katano','交野市','kita-kawachi',34.7692,135.6667,75033,-0.37,28.8,25.55,29569,0.69,11.03,12.05,84.48,135],
+['yao','八尾市','naka-kawachi',34.6247,135.6003,264642,-0.31,28.3,41.72,114265,0.71,13.91,14.96,82.82,71],
+['kashiwara','柏原市','naka-kawachi',34.5789,135.6444,68775,-0.67,29.0,25.33,30009,0.6,20.79,13.21,82.81,239],
+['higashiosaka','東大阪市','naka-kawachi',34.6797,135.6008,493940,-0.35,27.5,61.78,232303,0.74,16.25,13.97,80.05,167],
+['tondabayashi','富田林市','minami-kawachi',34.5,135.5983,108699,-0.95,30.2,39.72,45699,0.62,13.02,14.06,81.53,199],
+['kawachinagano','河内長野市','minami-kawachi',34.4581,135.5686,101692,-1.01,35.4,109.63,42367,0.59,12.11,14.33,83.71,1671],
+['matsubara','松原市','minami-kawachi',34.5772,135.5442,117641,-0.52,30.0,16.66,51902,0.59,13.42,15.07,81.45,0],
+['habikino','羽曳野市','minami-kawachi',34.5561,135.61,108736,-0.71,30.6,26.45,45008,0.56,14.50,13.91,82.4,37],
+['fujiidera','藤井寺市','minami-kawachi',34.5697,135.5983,63688,-0.54,28.4,8.89,27814,0.61,14.40,14.62,82.64,0],
+['osakasayama','大阪狭山市','minami-kawachi',34.5133,135.5683,58435,0.22,28.1,11.92,24216,0.66,11.96,13.11,83.7,24],
+['taishi','太子町','minami-kawachi',34.5061,135.6394,13009,-1.1,29.5,14.17,5048,0.47,null,11.32,84.09,131],
+['kanan','河南町','minami-kawachi',34.4881,135.6486,15697,-0.54,31.2,25.26,6392,0.43,15.07,9.87,83.92,251],
+['chihayaakasaka','千早赤阪村','minami-kawachi',34.4494,135.6394,4909,-1.81,45.5,37.3,1944,0.26,null,15.15,83.11,306],
+['izumiotsu','泉大津市','sen-hoku',34.5033,135.4106,74412,-0.39,25.5,14.33,32516,0.71,13.98,13.46,82.94,0],
+['izumi','和泉市','sen-hoku',34.4839,135.4181,184495,-0.17,25.5,84.98,73701,0.72,11.42,11.16,83.43,458],
+['takaishi','高石市','sen-hoku',34.5225,135.4344,55635,-0.32,28.2,11.3,23130,0.79,12.04,14.18,82.95,0],
+['tadaoka','忠岡町','sen-hoku',34.4989,135.4319,16567,-0.86,28.8,3.97,6749,0.55,15.74,14.35,78.21,0],
+['kishiwada','岸和田市','sen-nan',34.4614,135.3719,190658,-0.44,28.1,72.72,79073,0.61,13.82,13.67,80.05,177],
+['kaizuka','貝塚市','sen-nan',34.4339,135.3486,84443,-0.98,27.3,43.93,33284,0.65,14.83,13.39,82.83,158],
+['izumisano','泉佐野市','sen-nan',34.4067,135.3097,100131,-0.17,26.2,56.51,43864,0.9,12.28,11.98,85.74,103],
+['sennan','泉南市','sen-nan',34.3833,135.2822,60102,-0.76,29.6,48.98,23123,0.69,13.49,13.36,82.38,185],
+['hannan','阪南市','sen-nan',34.3489,135.2244,51254,-1.14,33.3,36.17,20774,0.52,15.17,14.52,81.72,231],
+['kumatori','熊取町','sen-nan',34.4083,135.3489,43763,-0.3,28.4,17.24,17256,0.57,9.92,10.21,84.88,62],
+['tajiri','田尻町','sen-nan',34.4142,135.3125,8434,0.04,23.7,5.62,3734,1.3,null,11.13,86.22,1],
+['misaki','岬町','sen-nan',34.3181,135.1461,14741,-1.55,40.5,49.18,6273,0.47,null,19.37,83.66,327]
 ];
 
 var MUNIS = RAW.map(function(r){
   return {
     id:r[0], name:r[1], region:r[2], lat:r[3], lng:r[4],
     population:r[5], popChangeRate:r[6], agingRate:r[7], areaKm2:r[8], households:r[9], fiscalIndex:r[10],
-    vacantRate:r[11], aloneElderlyRate:r[12], elderlyWorkerRate:r[13], cardRate:r[14], hazardCount:r[15]
+    vacantRate:r[11], aloneElderlyRate:r[12], cardRate:r[13], hazardCount:r[14]
   };
 });
 var MUNI_BY_ID={}; MUNIS.forEach(function(m){ MUNI_BY_ID[m.id]=m; });
@@ -835,29 +924,30 @@ var MUNI_BY_ID={}; MUNIS.forEach(function(m){ MUNI_BY_ID[m.id]=m; });
    15歳以上自宅外就業者・通学者に占める割合。e-Stat 統計表0003454514）。公共交通で用が足りない地域ほど
    自家用車に頼らざるを得ないため、この割合をそのまま公共交通の課題としてスコア化する。
    RAIL_COVER_1KM: 鉄道駅から半径1km圏内に住む人の割合%（カルテの参考表示のみ、スコア化なし）。
-   国土数値情報「鉄道データ」(N02-23)の駅位置と、2020年国勢調査1kmメッシュ人口（e-Stat統計GIS、
-   各メッシュを5×5に等分し人口を均等配分）から算出。 */
+   国土数値情報「鉄道データ」(N02-23)の駅位置と、2020年国勢調査250mメッシュ人口（e-Stat統計GIS、
+   各メッシュを5×5＝50m四方に等分し人口を均等配分）から算出。
+   これらの数値は tools/ のスクリプト（estat.py・geo.py）で再作成できる。 */
 var CAR_COMMUTE_RATE = {
   osaka:10.5, sakai:28.5, ikeda:18.1, toyonaka:16.0, suita:13.5,
   takatsuki:18.6, ibaraki:18.1, minoh:24.9, settsu:19.1, shimamoto:15.4,
   toyono:44.3, nose:75.7, moriguchi:15.7, hirakata:23.2, neyagawa:20.3,
   daito:18.9, kadoma:18.3, shijonawate:26.4, katano:26.0, yao:21.1,
   kashiwara:23.6, higashiosaka:18.0, tondabayashi:39.5, kawachinagano:40.8, matsubara:24.3,
-  habikino:32.8, fujiidera:26.3, osakasayama:36.2, taishi:50.5, kanan:57.5,
-  chihayaakasaka:67.5, izumiotsu:30.3, izumi:41.2, takaishi:27.8, tadaoka:37.9,
-  kishiwada:41.2, kaizuka:44.4, izumisano:41.5, sennan:49.6, hannan:48.7,
+  habikino:32.8, fujiidera:26.3, osakasayama:36.2, taishi:50.4, kanan:57.5,
+  chihayaakasaka:67.5, izumiotsu:30.3, izumi:41.2, takaishi:27.8, tadaoka:37.8,
+  kishiwada:41.2, kaizuka:44.4, izumisano:41.6, sennan:49.6, hannan:48.7,
   kumatori:49.0, tajiri:35.4, misaki:50.0
 };
 var RAIL_COVER_1KM = {
-  osaka:95.8, sakai:65.6, ikeda:59.6, toyonaka:77.0, suita:81.3,
-  takatsuki:29.3, ibaraki:59.6, minoh:50.0, settsu:72.9, shimamoto:87.8,
-  toyono:59.8, nose:0.0, moriguchi:68.4, hirakata:56.0, neyagawa:48.0,
-  daito:63.9, kadoma:68.0, shijonawate:59.6, katano:75.9, yao:73.6,
-  kashiwara:92.0, higashiosaka:83.6, tondabayashi:59.2, kawachinagano:52.3, matsubara:71.7,
-  habikino:46.3, fujiidera:71.9, osakasayama:48.9, taishi:14.6, kanan:0.0,
-  chihayaakasaka:0.0, izumiotsu:82.5, izumi:41.8, takaishi:99.7, tadaoka:61.6,
-  kishiwada:62.1, kaizuka:89.1, izumisano:79.4, sennan:63.5, hannan:54.3,
-  kumatori:22.6, tajiri:97.3, misaki:75.3
+  osaka:96.9, sakai:67.6, ikeda:59.5, toyonaka:79.6, suita:80.4,
+  takatsuki:29.6, ibaraki:62.5, minoh:50.0, settsu:73.6, shimamoto:90.1,
+  toyono:61.8, nose:0.0, moriguchi:68.7, hirakata:57.8, neyagawa:50.6,
+  daito:69.6, kadoma:67.4, shijonawate:66.7, katano:78.7, yao:76.7,
+  kashiwara:95.4, higashiosaka:84.8, tondabayashi:60.5, kawachinagano:57.2, matsubara:73.6,
+  habikino:51.3, fujiidera:77.2, osakasayama:52.1, taishi:22.0, kanan:0.0,
+  chihayaakasaka:0.0, izumiotsu:86.8, izumi:44.1, takaishi:99.8, tadaoka:70.8,
+  kishiwada:65.9, kaizuka:92.0, izumisano:81.4, sennan:67.7, hannan:55.9,
+  kumatori:23.2, tajiri:99.7, misaki:79.5
 };
 
 /* ===================== 行政DXデータ =====================
@@ -925,6 +1015,20 @@ var AGING_RISE = {
   chihayaakasaka:4.82, izumiotsu:1.73, izumi:2.83, takaishi:1.23, tadaoka:1.46, kishiwada:2.22,
   kaizuka:2.45, izumisano:1.47, sennan:2.67, hannan:4.63, kumatori:2.75, tajiri:0.86,
   misaki:4.16
+};
+/* ELDERLY_HOUSEHOLDS: 高齢者の世帯の形（2020年国勢調査、e-Stat 社会・人口統計体系 A8301・A8201・A1303・A710101）。
+   [65歳以上のうち一人暮らしの割合%, 高齢者のみの世帯（65歳以上の単独＋夫65歳以上・妻60歳以上の夫婦のみ）が一般世帯に占める割合%]。
+   「高齢者の見守り」のスコアには使わず、カルテの参考値として表示する（理由は指標の計算方法の画面を参照）。 */
+var ELDERLY_HOUSEHOLDS = {
+  osaka:[31.5,22.2], sakai:[22.1,26.7], ikeda:[21.0,24.0], toyonaka:[24.3,26.4], suita:[22.3,21.6],
+  takatsuki:[19.3,27.2], ibaraki:[19.3,22.1], minoh:[18.3,24.7], settsu:[21.9,22.9], shimamoto:[20.0,29.1],
+  toyono:[11.5,44.7], nose:[13.5,36.0], moriguchi:[25.9,26.6], hirakata:[18.0,25.5], neyagawa:[21.9,28.0],
+  daito:[21.8,25.0], kadoma:[27.4,28.0], shijonawate:[19.0,26.3], katano:[16.5,28.8], yao:[22.8,27.7],
+  kashiwara:[19.8,27.1], higashiosaka:[23.9,24.7], tondabayashi:[19.6,29.4], kawachinagano:[16.8,34.3], matsubara:[22.2,28.3],
+  habikino:[18.8,28.9], fujiidera:[22.5,27.7], osakasayama:[19.3,28.0], taishi:[14.8,28.9], kanan:[12.9,26.0],
+  chihayaakasaka:[13.2,41.3], izumiotsu:[23.1,24.6], izumi:[17.5,24.3], takaishi:[20.9,27.6], tadaoka:[20.2,27.6],
+  kishiwada:[20.2,26.0], kaizuka:[19.3,26.1], izumisano:[20.0,22.8], sennan:[17.3,28.2], hannan:[17.6,33.3],
+  kumatori:[14.1,26.5], tajiri:[20.8,20.1], misaki:[20.3,38.5]
 };
 var FLOOD_EXPOSURE = {
   osaka:[81.4,62.8,51.2,27.9], sakai:[17.6,12.4,13.4,6.0], ikeda:[18.4,18.4,0.0,0.0], toyonaka:[22.1,21.5,18.6,0.0],
@@ -1005,6 +1109,8 @@ MUNIS.forEach(function(m){
   m.agingRise = AGING_RISE[m.id];
   var fe = FLOOD_EXPOSURE[m.id];
   m.floodExposure = fe[0]; m.floodRiver = fe[1]; m.floodSurge = fe[2]; m.floodTsunami = fe[3];
+  var eh = ELDERLY_HOUSEHOLDS[m.id];
+  m.elderlyAloneShare = eh[0]; m.elderlyOnlyHH = eh[1];
   var qh = QUAKE_HAZARD[m.id];
   m.quakeProb = qh[0]; m.quakeProb6s = qh[1]; m.liquefyRate = qh[2];
   var d = DX_ADMIN[m.id];
@@ -1181,15 +1287,16 @@ MUNIS.forEach(function(m){
     food: residentScaleScoreUp(m.foodAccessRate, 29.29, 6.4),
     clinic: residentScaleScore(Math.log10(m.clinicDensityAdj), 2.60, 0.19),
     school: residentScaleScore(Math.log10(m.schoolDensityAdj), 1.81, 0.14),
-    leakage: (m.leakageRate!=null) ? residentScaleScore(m.leakageRate, -5.6, 6) : 3
+    /* 支出流出入率が非公開の2市（河内長野市・東大阪市）は、空き家と同じく「データなし」（null）とする */
+    leakage: (m.leakageRate!=null) ? residentScaleScore(m.leakageRate, -5.6, 6) : null
   };
   m.residentRawScores = {
     food: clamp15(3 + (m.foodAccessRate - 29.29) / 6.4),
     clinic: clamp15(3 - (Math.log10(m.clinicDensityAdj) - 2.60) / 0.19),
     school: clamp15(3 - (Math.log10(m.schoolDensityAdj) - 1.81) / 0.14),
-    leakage: (m.leakageRate!=null) ? clamp15(3 - (m.leakageRate + 5.6) / 6) : 3
+    leakage: (m.leakageRate!=null) ? clamp15(3 - (m.leakageRate + 5.6) / 6) : null
   };
-  var sum=0,n=0; RESIDENT_CATEGORIES.forEach(function(c){ sum+=m.residentScores[c.key]; n++; });
+  var sum=0,n=0; RESIDENT_CATEGORIES.forEach(function(c){ var v=m.residentScores[c.key]; if(v!=null){ sum+=v; n++; } });
   m.residentComposite = sum/n;
 });
 
@@ -1264,6 +1371,7 @@ var NAV=[
   {key:'map', label:'地域課題マップ', icon:'🗺️'},
   {key:'resident', label:'住民目線マップ', icon:'🧑‍🤝‍🧑'},
   {key:'hazard', label:'防災マップ', icon:'🌊'},
+  {key:'list', label:'一覧表', icon:'📋'},
   {key:'karte', label:'市町村カルテ', icon:'🗂️'},
   {key:'ai', label:'分析レポート', icon:'✨'},
   {key:'guide', label:'指標の計算方法', icon:'📐'}
@@ -1272,6 +1380,7 @@ var TITLES={
   map:['地域課題マップ','大阪府内市町村の7指標を俯瞰します'],
   resident:['住民目線マップ','買い物・医療・学校への行きやすさから見た地域課題'],
   hazard:['防災マップ','土砂災害・水害・地震の揺れ・液状化の4つの災害リスク'],
+  list:['一覧表','43市町村×15指標の並べ替えとCSV保存'],
   karte:['市町村カルテ','市町村ごとの詳細プロファイル'],
   ai:['分析レポート','課題の要約と支援方針のドラフト生成'],
   guide:['指標の計算方法','データソースと15指標の算出方法']
@@ -1285,6 +1394,7 @@ function setView(v){
   document.getElementById('viewTitle').textContent = TITLES[v][0];
   document.getElementById('viewSubtitle').textContent = TITLES[v][1];
   if(v==='karte') renderKarte();
+  if(v==='list') renderList();
   if(v==='ai') renderAi();
   if(MAPS[v]) MAPS[v].init();
 }
@@ -1383,7 +1493,7 @@ var MAPS = {
     summary:function(m){ return '総合スコア：<b class="mono">'+m.composite.toFixed(1)+'</b> / 5.0'; }
   }),
   resident: createChoropleth({
-    canvasId:'residentMapCanvas', selectId:'residentMapCategorySelect', legendId:'residentMapLegend', noData:false,
+    canvasId:'residentMapCanvas', selectId:'residentMapCategorySelect', legendId:'residentMapLegend', noData:true,
     categories:RESIDENT_CATEGORIES, compositeLabel:'総合スコア',
     value:function(m, cat){ return cat==='composite' ? m.residentComposite : m.residentScores[cat]; },
     summary:function(m){ return '住民目線 総合スコア：<b class="mono">'+m.residentComposite.toFixed(1)+'</b> / 5.0'; }
@@ -1395,6 +1505,165 @@ var MAPS = {
     summary:function(m){ return '最も高い災害：<b>'+m.hazardTop.label+'</b>（<b class="mono">'+m.hazardMax+'</b> / 5）'; }
   })
 };
+
+/* ===================== 一覧表・CSV ===================== */
+function fixedFmt(d, unit){ return function(x){ return x.toFixed(d)+(unit||''); }; }
+/* 各指標の元の統計値（一覧表の「元の値」とCSVで使う） */
+var LIST_STATS = {
+  population:{name:'人口増減率', unit:'%/年', v:function(m){return m.popChangeRate;}, d:2},
+  aging:{name:'高齢化率', unit:'%', v:function(m){return m.agingRate;}, d:1},
+  vacant:{name:'空き家率', unit:'%', v:function(m){return m.vacantRate;}, d:1},
+  transit:{name:'通勤・通学の自家用車利用率', unit:'%', v:function(m){return m.carCommuteRate;}, d:1},
+  community:{name:'65歳以上単独世帯率', unit:'%', v:function(m){return m.aloneElderlyRate;}, d:1},
+  successor:{name:'生産年齢人口の増減率', unit:'%', v:function(m){return m.workAgeChange;}, d:1},
+  dx:{name:'手続のオンライン化済割合', unit:'%', v:function(m){return m.onlineDoneRate;}, d:0},
+  food:{name:'食料品アクセス困難人口割合', unit:'%', v:function(m){return m.foodAccessRate;}, d:1},
+  clinic:{name:'診療所密度', unit:'施設/100km²', v:function(m){return m.clinicDensity;}, d:1},
+  school:{name:'学校密度', unit:'校/100km²', v:function(m){return m.schoolDensity;}, d:1},
+  leakage:{name:'支出流出入率', unit:'%', v:function(m){return m.leakageRate;}, d:1},
+  landslide:{name:'土砂災害警戒区域の密度', unit:'区域/km²', v:function(m){return m.hazardCount/m.areaKm2;}, d:1},
+  flood:{name:'浸水想定区域の人口割合', unit:'%', v:function(m){return m.floodExposure;}, d:1},
+  quake:{name:'震度6強以上の確率（30年）', unit:'%', v:function(m){return m.quakeProb6s;}, d:1},
+  liquefy:{name:'液状化しやすい地形の人口割合', unit:'%', v:function(m){return m.liquefyRate;}, d:1}
+};
+function listColumns(){
+  var cols = [];
+  function add(group, cats, scoreKey){
+    cats.forEach(function(c){
+      var st = LIST_STATS[c.key];
+      cols.push({key:c.key, group:group, label:c.label, stat:st,
+        score:function(m){ return m[scoreKey][c.key]; }, raw:function(m){ return st.v(m); }});
+    });
+  }
+  cols.push({key:'composite', group:'main', label:'地域課題 総合', total:true,
+    score:function(m){return m.composite;}, raw:function(m){return m.composite;}});
+  add('main', CATEGORIES, 'scores');
+  cols.push({key:'residentComposite', group:'resident', label:'住民目線 総合', total:true,
+    score:function(m){return m.residentComposite;}, raw:function(m){return m.residentComposite;}});
+  add('resident', RESIDENT_CATEGORIES, 'residentScores');
+  cols.push({key:'hazardMax', group:'hazard', label:'最も高い災害', total:true,
+    score:function(m){return m.hazardMax;}, raw:function(m){return m.hazardMax;}, note:function(m){return m.hazardTop.label;}});
+  add('hazard', HAZARD_CATEGORIES, 'hazardScores');
+  return cols;
+}
+var listState = {group:'all', mode:'score', sort:'composite', dir:-1};
+function scoreChip(v, isAverage){
+  if(v==null) return '<span class="sc na">—</span>';
+  return '<span class="sc" style="background:'+sevHex(v)+'">'+(isAverage ? v.toFixed(1) : v)+'</span>';
+}
+function renderList(){
+  var cols = listColumns().filter(function(c){ return listState.group==='all' || c.group===listState.group; });
+  var colOf = {}; listColumns().forEach(function(c){ colOf[c.key]=c; });
+  var sortCol = colOf[listState.sort];
+  function sortVal(m){
+    if(listState.sort==='name') return null;
+    if(listState.sort==='population') return m.population;
+    return listState.mode==='raw' ? sortCol.raw(m) : sortCol.score(m);
+  }
+  var rows = MUNIS.slice().sort(function(a,b){
+    if(listState.sort==='name') return listState.dir * a.name.localeCompare(b.name, 'ja');
+    var va=sortVal(a), vb=sortVal(b);
+    if(va==null && vb==null) return 0;
+    if(va==null) return 1;           // データなしは向きにかかわらず最後
+    if(vb==null) return -1;
+    return listState.dir * (va - vb) || a.id.localeCompare(b.id);
+  });
+  function th(key, html, cls){
+    var arrow = listState.sort===key ? '<span class="arrow">'+(listState.dir<0?'▼':'▲')+'</span>' : '';
+    return '<th data-sort="'+key+'" class="'+(cls||'')+'">'+html+arrow+'</th>';
+  }
+  var head = '<thead><tr>'+th('name','市町村','col-name')+'<th class="col-region" style="cursor:default">地域</th>'+th('population','人口')+
+    cols.map(function(c){
+      var sub = listState.mode==='raw' && c.stat ? '<small>'+c.stat.name+'（'+c.stat.unit+'）</small>' : (c.total ? '<small>'+(c.key==='hazardMax'?'4災害の最大':'平均')+'</small>' : '');
+      return th(c.key, c.label+sub, 'grp-'+c.group);
+    }).join('')+'</tr></thead>';
+  var body = '<tbody>'+rows.map(function(m){
+    return '<tr><td class="col-name"><button type="button" data-goto="'+m.id+'">'+m.name+'</button></td>'+
+      '<td class="col-region">'+REGIONS[m.region].label+'</td>'+
+      '<td>'+fmtNum(m.population)+'</td>'+
+      cols.map(function(c){
+        if(listState.mode==='raw' && c.stat){
+          var v=c.raw(m);
+          return '<td>'+(v==null ? '<span class="sc na">—</span>' : c.stat.v(m).toFixed(c.stat.d))+'</td>';
+        }
+        var cell = scoreChip(c.score(m), c.total && !c.note);
+        if(c.note) cell += ' <span style="color:var(--ink-muted);font-size:11.5px">'+c.note(m)+'</span>';
+        return '<td>'+cell+'</td>';
+      }).join('')+'</tr>';
+  }).join('')+'</tbody>';
+  var table = document.getElementById('listTable');
+  table.innerHTML = head + body;
+  table.querySelectorAll('th[data-sort]').forEach(function(el){
+    el.addEventListener('click', function(){
+      var k = el.dataset.sort;
+      if(listState.sort===k) listState.dir = -listState.dir;
+      else { listState.sort = k; listState.dir = (k==='name') ? 1 : -1; }
+      renderList();
+    });
+  });
+  table.querySelectorAll('[data-goto]').forEach(function(el){
+    el.addEventListener('click', function(){ state.selectedMuni=el.dataset.goto; setView('karte'); });
+  });
+}
+function setupList(){
+  document.getElementById('listGroup').addEventListener('change', function(e){ listState.group=e.target.value; renderList(); });
+  document.querySelectorAll('#listMode button').forEach(function(b){
+    b.addEventListener('click', function(){
+      listState.mode=b.dataset.mode;
+      document.querySelectorAll('#listMode button').forEach(function(x){ x.classList.toggle('on', x===b); });
+      renderList();
+    });
+  });
+  document.getElementById('btnCsv').addEventListener('click', saveCsv);
+  document.getElementById('btnListPrint').addEventListener('click', function(){ printView('一覧表', 'listPrintMsg'); });
+}
+/* CSV：スコアと元の統計値を両方入れる。Excelで文字化けしないようBOM付きUTF-8 */
+function buildCsv(){
+  var cols = listColumns();
+  var header = ['市町村コード','市町村','地域ブロック','同規模グループ','人口'];
+  cols.forEach(function(c){
+    header.push(c.label+(c.total ? '' : '（スコア）'));
+    if(c.stat) header.push(c.label+'：'+c.stat.name+'（'+c.stat.unit+'）');
+    if(c.note) header.push('最も高い災害の種類');
+  });
+  var lines = [header];
+  MUNIS.forEach(function(m){
+    var row = [m.id, m.name, REGIONS[m.region].label, PEER_LABELS[m.peerGroup], m.population];
+    cols.forEach(function(c){
+      var sc = c.score(m);
+      row.push(sc==null ? '' : (c.total ? Math.round(sc*100)/100 : sc));
+      if(c.stat){ var v=c.raw(m); row.push(v==null ? '' : Math.round(v*100)/100); }
+      if(c.note) row.push(c.note(m));
+    });
+    lines.push(row);
+  });
+  return lines.map(function(r){
+    return r.map(function(x){ var t=String(x); return /[",\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t; }).join(',');
+  }).join('\r\n');
+}
+function saveCsv(){
+  var data = '\ufeff' + buildCsv();
+  var filename = 'chiiki-karte_ichiran_' + new Date().toISOString().slice(0,10) + '.csv';
+  var note = document.getElementById('listNote');
+  function fallback(){
+    var url = URL.createObjectURL(new Blob([data], {type:'text/csv'}));
+    var a = document.createElement('a'); a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+  }
+  /* claude.ai上で開いた場合は保存の確認を出す downloads 機能を使い、それ以外（HTMLファイルを直接開いた場合）は通常のダウンロード */
+  if(window.claude && typeof window.claude.use === 'function'){
+    window.claude.use('downloads').then(function(dl){
+      if(!dl){ fallback(); return; }
+      dl.save({filename:filename, data:data}).catch(function(e){
+        if(e && e.code==='declined') return;
+        note.textContent = 'この表示環境ではCSVを保存できませんでした。HTMLファイルをブラウザで直接開いて保存してください。';
+      });
+    }, fallback);
+  } else {
+    fallback();
+  }
+}
 
 /* ===================== 市町村カルテ ===================== */
 function renderKarte(){
@@ -1417,14 +1686,14 @@ function renderKarte(){
   var m=MUNI_BY_ID[state.selectedMuni];
   var topIssues = CATEGORIES.map(function(c){ return {label:c.label, key:c.key, score:m.scores[c.key]}; }).filter(function(t){return t.score!=null;}).sort(function(a,b){return b.score-a.score;});
 
-  var topResidentIssues = RESIDENT_CATEGORIES.map(function(c){ return {label:c.label, key:c.key, score:m.residentScores[c.key]}; }).sort(function(a,b){return b.score-a.score;});
+  var topResidentIssues = RESIDENT_CATEGORIES.map(function(c){ return {label:c.label, key:c.key, score:m.residentScores[c.key]}; }).filter(function(t){return t.score!=null;}).sort(function(a,b){return b.score-a.score;});
 
   body.innerHTML =
     '<div class="karte-header" style="margin-bottom:16px;">'+
       '<div><button class="btn btn-ghost btn-sm" id="backToMap">← 地図に戻る</button>'+
       '<h3 style="margin-top:8px;">'+m.name+'</h3>'+
       '<p style="color:var(--ink-muted); font-size:13px;">'+REGIONS[m.region].label+' ・ 同規模グループ：'+PEER_LABELS[m.peerGroup]+' ・ 地域課題 総合スコア <b class="mono">'+m.composite.toFixed(1)+'</b> / 5.0 ・ 住民目線 総合スコア <b class="mono">'+m.residentComposite.toFixed(1)+'</b> / 5.0 ・ 最も高い災害 <b>'+m.hazardTop.label+'</b>（<b class="mono">'+m.hazardMax+'</b> / 5）</p></div>'+
-      '<div style="display:flex; gap:8px;"><button class="btn btn-primary" id="karteToAi">分析レポートを見る</button></div>'+
+      '<div><div style="display:flex; gap:8px; justify-content:flex-end;"><button class="btn" id="kartePrint" type="button">印刷</button><button class="btn btn-primary" id="karteToAi">分析レポートを見る</button></div><div class="print-msg" id="kartePrintMsg" hidden></div></div>'+
     '</div>'+
     '<div class="grid grid-2">'+
       '<div class="card">'+
@@ -1440,6 +1709,8 @@ function renderKarte(){
           statTile('将来人口（2050年推計）', fmtNum(m.pop2050)+'人')+
           statTile('将来人口増減率（2020→2050）', m.popRate2050.toFixed(1)+'%')+
           statTile('介護施設定員（高齢者千人当たり）', m.nursingPer1k.toFixed(1)+'人分')+
+          statTile('65歳以上のうち一人暮らしの割合', m.elderlyAloneShare.toFixed(1)+'%')+
+          statTile('高齢者のみの世帯の割合（単身＋夫婦）', m.elderlyOnlyHH.toFixed(1)+'%')+
           statTile('鉄道駅1km圏に住む人の割合', m.railCover1km.toFixed(1)+'%')+
           statTile('生産年齢人口の増減（2015→2020）', (m.workAgeChange>0?'+':'')+m.workAgeChange.toFixed(1)+'%')+
           statTile('民営事業所数（2016→2021）', fmtNum(m.est2016)+'→'+fmtNum(m.est2021)+'（'+(m.estChange>0?'+':'')+m.estChange.toFixed(1)+'%）')+
@@ -1475,6 +1746,7 @@ function renderKarte(){
           '<div class="issue-bar-track"><div class="issue-bar-fill" style="width:'+(t.score/5*100)+'%; background:'+sevHex(t.score)+'"></div></div>'+
           '<span class="mono" style="width:22px;text-align:right;">'+t.score+'</span></div>';
       }).join('')+
+      (m.residentScores.leakage==null ? '<p style="font-size:11px; color:var(--ink-faint); margin-top:8px;">地元で買えない度：RESASで支出流出入率が非公開のためデータなし（住民目線の総合スコアの算出からも除外）</p>' : '')+
       '<p style="font-size:11px; color:var(--ink-faint); margin-top:8px;">買い物は食料品アクセス困難人口割合、医療・学校は可住地面積当たりの施設密度（対数）で算出しています。介護は広域利用の影響が大きいため、スコア化せず上の「介護施設定員」を参考値として表示しています。</p>'+
     '</div>'+
     '<div class="grid grid-2" style="margin-top:16px;">'+
@@ -1519,6 +1791,7 @@ function renderKarte(){
     '</div>';
 
   document.getElementById('backToMap').addEventListener('click', function(){ setView('map'); });
+  document.getElementById('kartePrint').addEventListener('click', function(){ printView('市町村カルテ：'+m.name, 'kartePrintMsg'); });
   document.getElementById('karteToAi').addEventListener('click', function(){
     setView('ai');
     document.getElementById('aiScopeType').value='muni';
@@ -1574,6 +1847,7 @@ function radarOptions(){
   var textColor=getComputedStyle(document.body).getPropertyValue('--ink-muted').trim();
   return {
     responsive:true, maintainAspectRatio:false,
+    animation:false,   // 印刷時に描き直したとき、アニメーション途中の空の図が印刷されないようにする
     scales:{ r:{ min:0, max:5, ticks:{stepSize:1, color:textColor, backdropColor:'transparent'}, grid:{color:gridColor}, angleLines:{color:gridColor}, pointLabels:{color:textColor, font:{size:11}} } },
     plugins:{ legend:{ labels:{color:textColor} } }
   };
@@ -1665,7 +1939,7 @@ var HIGH_LINE = 3.5;
 function highIssues(m){
   var out=[];
   CATEGORIES.forEach(function(c){ var v=m.rawScores[c.key]; if(v!=null && v>=HIGH_LINE) out.push({key:c.key,label:c.label,v:v}); });
-  RESIDENT_CATEGORIES.forEach(function(c){ var v=m.residentRawScores[c.key]; if(v>=HIGH_LINE) out.push({key:c.key,label:c.label,v:v}); });
+  RESIDENT_CATEGORIES.forEach(function(c){ var v=m.residentRawScores[c.key]; if(v!=null && v>=HIGH_LINE) out.push({key:c.key,label:c.label,v:v}); });
   HAZARD_CATEGORIES.forEach(function(c){ var v=m.hazardRawScores[c.key]; if(v>=HIGH_LINE) out.push({key:c.key,label:c.label,v:v}); });
   return out;
 }
@@ -1769,10 +2043,10 @@ function generateReport(scope){
 
   /* 住民目線の4指標（連続値の平均） */
   var rAvg={}; RESIDENT_CATEGORIES.forEach(function(c){
-    rAvg[c.key]=avgOf(list.map(function(m){return m.residentRawScores[c.key];}));
+    rAvg[c.key]=avgOf(list.map(function(m){return m.residentRawScores[c.key];}).filter(function(v){return v!=null;}));
   });
   var sortedRAvg=RESIDENT_CATEGORIES.map(function(c){return {key:c.key,label:c.label,v:rAvg[c.key]};})
-    .sort(function(a,b){return b.v-a.v;});
+    .filter(function(c){return c.v!=null;}).sort(function(a,b){return b.v-a.v;});
   var residentLines = sortedRAvg.filter(function(c){return c.v>=3.3;}).slice(0,3);
   var residentNoteMap={
     food:'店舗まで距離があり自動車を使いにくい高齢者が多く、移動販売・買い物支援・移動手段の確保が課題。',
@@ -1784,7 +2058,7 @@ function generateReport(scope){
     return '「'+c.label+'」の'+(single?'スコアが':'平均スコアが')+c.v.toFixed(1)+'。'+residentNoteMap[c.key];
   });
   if(!resident.length){
-    resident=['住民目線の4指標に大きな課題は見られない（最も高い「'+sortedRAvg[0].label+'」でもスコア'+sortedRAvg[0].v.toFixed(1)+'）。'];
+    resident=['住民目線の指標に大きな課題は見られない（最も高い「'+sortedRAvg[0].label+'」でもスコア'+sortedRAvg[0].v.toFixed(1)+'）。'];
   }
 
   /* 災害リスク（防災マップの4指標）：種類ごとに必要な対策が違うため、1つにまとめず種類別に書く */
@@ -1926,7 +2200,9 @@ function runAiAnalysis(){
   var box=document.getElementById('aiResult');
   box.hidden=false;
   box.innerHTML =
-    '<div class="section-title">分析結果：'+scope.label+' <span class="count">'+scope.list.length+'市町村</span></div>'+
+    '<div class="section-title">分析結果：'+scope.label+' <span class="count">'+scope.list.length+'市町村</span>'+
+      '<button class="btn btn-sm" id="aiPrint" type="button" style="margin-left:auto;">印刷</button></div>'+
+    '<div class="print-msg" id="aiPrintMsg" hidden></div>'+
     '<div class="ai-report">'+
       aiBlock(report.single ? '🔷 主な課題' : '🔷 共通課題', report.common)+
       aiBlock(report.single ? '🔶 同規模の団体との比較（'+report.peerLabel+'）' : '🔶 特徴的な課題（同規模の団体と比べて）', report.distinctive)+
@@ -1938,6 +2214,21 @@ function runAiAnalysis(){
       aiBlock('🤝 広域連携の可能性（隣接する市町村）', report.cooperation)+
     '</div>'+
     '<p style="font-size:11px; color:var(--ink-faint); margin-top:14px;">※統計データからルールベースで自動生成しています（外部API呼び出しなし）。</p>';
+  document.getElementById('aiPrint').addEventListener('click', function(){ printView('分析レポート：'+scope.label, 'aiPrintMsg'); });
+}
+/* 印刷：ブラウザの印刷画面を開く。claude.ai上の表示などで印刷が止められている環境では
+   print() がすぐ戻るため、その場合はHTMLファイルを直接開いて印刷するよう案内する */
+function printView(title, msgId){
+  document.getElementById('printHeader').textContent =
+    '地域課題カルテ（ベータ版）　'+title+'　｜　印刷日 '+new Date().toLocaleDateString('ja-JP')+'　｜　大阪府 市町村局振興課（公的統計をもとにしたスコア化。国・府の公式評価ではありません）';
+  var msg = msgId && document.getElementById(msgId);
+  if(msg) msg.hidden = true;
+  var t = Date.now();
+  window.print();
+  if(msg && Date.now() - t < 150){
+    msg.textContent = '印刷画面が開かない場合は、HTMLファイルをブラウザ（Edge・Chromeなど）で直接開いてから印刷してください。';
+    msg.hidden = false;
+  }
 }
 function aiBlock(title, items){
   return '<h4>'+title+'</h4><ul>'+items.map(function(i){return '<li>'+i+'</li>';}).join('')+'</ul>';
@@ -1947,11 +2238,16 @@ function aiBlock(title, items){
 function init(){
   buildNav();
   Object.keys(MAPS).forEach(function(k){ MAPS[k].setup(); });
+  setupList();
   setView('map');
 
   document.getElementById('aiScopeType').addEventListener('change', updateAiScopeTargetOptions);
   document.getElementById('btnGenAi').addEventListener('click', runAiAnalysis);
 }
 document.addEventListener('DOMContentLoaded', init);
+/* 印刷の前後でレーダーチャートを紙の幅に合わせて描き直す */
+function resizeCharts(){ if(window.Chart && Chart.instances){ Object.keys(Chart.instances).forEach(function(k){ Chart.instances[k].resize(); }); } }
+window.addEventListener('beforeprint', resizeCharts);
+window.addEventListener('afterprint', resizeCharts);
 })();
 </script>
