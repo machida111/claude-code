@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>地域課題カルテ（ベータ版）</title>
+<title>地域課題分析カルテ（ベータ版）</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Noto+Sans+JP:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.1/chart.umd.min.js"></script>
@@ -457,7 +457,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
     <div class="brand">
       <div class="brand-mark">🗺️</div>
       <div class="brand-text">
-        <h1>地域課題カルテ<small class="beta-badge">ベータ版</small></h1>
+        <h1>地域課題分析カルテ<small class="beta-badge">ベータ版</small></h1>
         <span>大阪府 市町村局振興課</span>
       </div>
     </div>
@@ -535,8 +535,8 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
     <section class="view" id="view-scene" hidden>
       <div class="view-head">
         <div>
-          <h3>生活場面マップ</h3>
-          <p>地域課題・住民目線・防災の15指標のうち、4つの生活場面に関連する指標を横断して、丸め前のスコアが3.5以上（課題の重なり・広域連携と同じ判定ライン）の指標がいくつ重なっているかを色分けします。新しい基準値や総合スコアは作っていません。市町村をクリックすると、重なり数・判定に使用できた指標数・データがない指標と、「判定根拠を表示」（各指標のスコア・元の値・基準値との比較・年度・出典）が出ます。統計指標の重なりを示すもので、施策の必要性、住民の実態、個人の困難度を断定するものではありません。</p>
+          <h3>生活場面別課題マップ</h3>
+          <p>地域課題・住民目線・防災の指標のうち、4つの生活場面に関連する指標を横断して、丸め前のスコアが3.5以上（課題の重なり・広域連携と同じ判定ライン）の指標がいくつ重なっているかを色分けします。新しい基準値や総合スコアは作っていません。市町村をクリックすると、重なり数・判定に使用できた指標数・データがない指標と、「判定根拠を表示」（各指標のスコア・元の統計値・既存の基準値・両者の差・判定・年度・出典）が出ます。統計指標の重なりを示すもので、施策の必要性、住民の実態、個人の困難度を断定するものではありません。</p>
         </div>
       </div>
       <div class="map-toolbar">
@@ -630,12 +630,12 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <section class="block">
           <div class="k">Overview</div>
           <h2>このツールでできること</h2>
-          <p class="desc">地域課題カルテは8つの画面から構成されています。いずれも表示専用で、統計データは事前に埋め込まれています。</p>
+          <p class="desc">地域課題分析カルテは8つの画面から構成されています。いずれも表示専用で、統計データは事前に埋め込まれています。</p>
           <div class="screen-grid">
             <div class="screen-card"><div class="num">01</div><h3>地域課題マップ</h3><p>大阪府43市町村を7指標（行政の計画視点）のいずれかでコロプレス表示。行政区域境界（国土数値情報）を地理院タイル上に塗り分けます。</p></div>
             <div class="screen-card"><div class="num">02</div><h3>住民目線マップ</h3><p>買い物・医療・学校への行きやすさと地元消費の流出という4指標（住民の生活視点）で同じ地図をコロプレス表示します。</p></div>
             <div class="screen-card"><div class="num">03</div><h3>防災マップ</h3><p>土砂災害・水害・地震の揺れ・液状化の4つの災害リスクを、災害ごとに切り替えてコロプレス表示します。</p></div>
-            <div class="screen-card"><div class="num">04</div><h3>生活場面マップ</h3><p>買い物・日常の移動／通院・介護・見守り／子育て・学び・働く世代／災害時の避難・安全の4つの生活場面ごとに、関連する指標のうちスコア3.5以上のものがいくつ重なっているかを塗り分けます。</p></div>
+            <div class="screen-card"><div class="num">04</div><h3>生活場面別課題マップ</h3><p>高齢者の日常生活・移動／子育て・通学／車を利用しにくい住民の日常生活／災害時に支援が必要となりやすい生活環境の4つの生活場面ごとに、関連する指標のうちスコア3.5以上のものがいくつ重なっているかを塗り分けます。</p></div>
             <div class="screen-card"><div class="num">05</div><h3>一覧表</h3><p>43市町村の15指標を1つの表に並べて並べ替えられます。スコアと元の統計値を切り替えられ、CSVで保存できます。</p></div>
             <div class="screen-card"><div class="num">06</div><h3>市町村カルテ</h3><p>市町村ごとの基礎情報と、地域課題マップ7指標・住民目線マップ4指標・防災マップ4指標のレーダーチャート。それらを横断した生活場面別課題と、RESASの将来人口・業種別事業所数も参考表示します。</p></div>
             <div class="screen-card"><div class="num">07</div><h3>分析レポート</h3><p>全域／地域ブロック／市町村を指定し、3つのマップの15指標のスコアから共通課題・生活場面別課題・支援方針をルールベースで文章化します（外部API呼び出しなし）。</p></div>
@@ -914,14 +914,14 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
         <section class="block" id="scene-logic">
           <div class="k">7 &middot; Life scenes</div>
           <h2>生活場面別課題</h2>
-          <p class="desc">地域課題マップ・住民目線マップ・防災マップの指標を、住民の4つの生活場面に分けて横断的にまとめたものです。生活場面マップ・市町村カルテ・分析レポートは、同じ場面の構成・判定条件・欠損値処理を使っています。既存の各指標の名称・数値・判定基準・欠損値処理は変えていません。</p>
+          <p class="desc">地域課題マップ・住民目線マップ・防災マップの指標を、住民の4つの生活場面に分けて横断的にまとめたものです。生活場面別課題マップ・市町村カルテ・分析レポートは、同じ場面の構成・判定条件・欠損値処理を使っています。既存の各指標の名称・数値・判定基準・欠損値処理は変えていません。</p>
           <div class="table-wrap">
             <table>
               <tr><th>生活場面</th><th>関連する指標</th><th>見ている点</th></tr>
-              <tr><td>買い物・日常の移動</td><td class="src">買い物の不便さ・公共交通・地元で買えない度（3指標）</td><td class="src">近くで食料品を買えるか、車以外で移動しやすいか、地元で買い物が済むか</td></tr>
-              <tr><td>通院・介護・見守り</td><td class="src">医療への行きにくさ・公共交通・高齢化・高齢者の見守り（4指標）</td><td class="src">診療所に通いやすいか、通院の足があるか、支える側に対して高齢者が多いか、一人暮らし高齢者が多いか</td></tr>
-              <tr><td>子育て・学び・働く世代</td><td class="src">学校への通いにくさ・担い手不足・人口減少（3指標）</td><td class="src">学校に通いやすいか、子育て・働く世代が減っていないか、人口が減っていないか</td></tr>
-              <tr><td>災害時の避難・安全</td><td class="src">土砂災害・水害・地震の揺れ・液状化・高齢者の見守り（5指標）</td><td class="src">4つの災害リスクと、避難に支援が必要になりやすい一人暮らし高齢者の多さ</td></tr>
+              <tr><td>高齢者の日常生活・移動</td><td class="src">高齢化・高齢者の見守り・公共交通・買い物の不便さ・医療への行きにくさ（5指標）</td><td class="src">高齢者や一人暮らし高齢者が多いか、車以外で移動しやすいか、近くで食料品を買えるか、診療所に通いやすいか</td></tr>
+              <tr><td>子育て・通学</td><td class="src">学校への通いにくさ・公共交通・医療への行きにくさ・人口減少・土砂災害・水害・地震の揺れ・液状化（8指標）</td><td class="src">学校に通いやすいか、車以外で移動しやすいか、診療所に通いやすいか、人口が減っていないか、4つの災害リスク</td></tr>
+              <tr><td>車を利用しにくい住民の日常生活</td><td class="src">公共交通・買い物の不便さ・医療への行きにくさ（3指標）<br>参考値：鉄道駅1km圏に住む人の割合（重なり数に含めない）</td><td class="src">車以外で移動しやすいか、近くで食料品を買えるか、診療所に通いやすいか</td></tr>
+              <tr><td>災害時に支援が必要となりやすい生活環境</td><td class="src">高齢化・高齢者の見守り・公共交通・土砂災害・水害・地震の揺れ・液状化（7指標）</td><td class="src">高齢者や一人暮らし高齢者が多いか、車以外で移動しやすいか、4つの災害リスク</td></tr>
             </table>
           </div>
           <div class="idx-grid" style="margin-top:14px;">
@@ -930,16 +930,16 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
               <p class="how">関連する指標のうち、丸め前のスコアが3.5以上のものを「課題が高い」として数え、その件数を「課題の重なり数」とします。3.5は分析レポートの「課題の重なり」「広域連携」と同じ判定ラインで、生活場面のために新しい基準値は作っていません。場面ごとの平均などの総合スコアも作っていません。重なり数は「0件」「1件」「2件」「3件以上」に分けて表示します。</p>
             </div>
             <div class="idx-card">
-              <div class="head"><h4>欠損値の扱い</h4></div>
-              <p class="how">データなしの指標は数えず、0点や3点として扱いません。「判定に使用できた指標数」と「データがない指標」を必ず併記します（例：河内長野市・東大阪市の「買い物・日常の移動」は、地元で買えない度がデータなしのため2指標で判定）。関連する指標がすべてデータなしの場合は「データ不足」とし、分析を行いません（現在のデータでは該当する市町村・場面はありません）。</p>
+              <div class="head"><h4>判定根拠の見方</h4></div>
+              <p class="how">各指標の「判定根拠」には、元の統計値・既存の基準値・両者の差を並べています。基準値は、その指標のスコアが3点になる元の統計値で、既存のスコアの式から求めたものです（例：公共交通は府内中央値27.8%、水害は「0%で1点、20ポイントごとに1点」の式から40%）。医療・学校は小規模自治体補正後の密度を常用対数で点数化しているため、補正後の密度と基準値の差に加えて「基準値の何倍か」も示します。判定ライン3.5に相当する元の統計値も添えています。</p>
             </div>
             <div class="idx-card">
-              <div class="head"><h4>分析レポートでの書き方</h4></div>
-              <p class="how">関連する指標が3件以上重なっている生活場面から順に示します。2件以上重なっている場面には「関連する複数の統計指標で課題が高くなっており、この生活場面について追加確認の必要性が示されています。」と書きます。1市町村を選んだときは同規模の団体と、地域ブロックを選んだときは大阪府全域と、府全域を選んだときは地域ブロックどうしで、区分別の団体数を比べます。</p>
+              <div class="head"><h4>欠損値と参考値の扱い</h4></div>
+              <p class="how">データなしの指標は数えず、0点や3点として扱いません。「判定に使用できた指標数」と「データがない指標」を必ず併記し、関連する指標がすべてデータなしの場合は「データ不足」として分析しません（現在のデータでは、4つの場面の関連指標にデータなしはありません）。「車を利用しにくい住民の日常生活」の鉄道駅1km圏に住む人の割合は、スコア化されていない統計のため参考値として表示するだけで、重なり数・判定に使用できた指標数には含めません。</p>
             </div>
             <div class="idx-card">
-              <div class="head"><h4>含めていない指標と注意</h4></div>
-              <p class="how">空き家・DXは特定の生活場面に対応づけにくいため含めていません（地域課題マップ・カルテでは従来どおり表示）。「公共交通」と「高齢者の見守り」は2つの場面に関連するため、両方で数えます。生活場面別課題は統計指標の重なりを示すもので、施策の必要性、住民の実態、個人の困難度を断定するものではありません。</p>
+              <div class="head"><h4>分析レポートでの書き方と注意</h4></div>
+              <p class="how">関連する指標が3件以上重なっている生活場面から順に示し、2件以上重なっている場面には「関連する複数の統計指標で課題が高くなっており、この生活場面について追加確認の必要性が示されています。」と書きます。1市町村を選んだときは同規模の団体と、地域ブロックを選んだときは大阪府全域と、府全域を選んだときは地域ブロックどうしで比べます。空き家・担い手不足・DX・地元で買えない度はどの場面にも含めていません。「公共交通」など複数の場面に関連する指標は、それぞれの場面で数えます。生活場面別課題は統計指標の重なりを示すもので、施策の必要性、住民の実態、個人の困難度を断定するものではありません。</p>
             </div>
           </div>
         </section>
@@ -1564,7 +1564,7 @@ var NAV=[
   {key:'map', label:'地域課題マップ', icon:'🗺️'},
   {key:'resident', label:'住民目線マップ', icon:'🧑‍🤝‍🧑'},
   {key:'hazard', label:'防災マップ', icon:'🌊'},
-  {key:'scene', label:'生活場面マップ', icon:'🧩'},
+  {key:'scene', label:'生活場面別課題マップ', icon:'🧩'},
   {key:'list', label:'一覧表', icon:'📋'},
   {key:'karte', label:'市町村カルテ', icon:'🗂️'},
   {key:'ai', label:'分析レポート', icon:'✨'},
@@ -1574,7 +1574,7 @@ var TITLES={
   map:['地域課題マップ','大阪府内市町村の7指標を俯瞰します'],
   resident:['住民目線マップ','買い物・医療・学校への行きやすさから見た地域課題'],
   hazard:['防災マップ','土砂災害・水害・地震の揺れ・液状化の4つの災害リスク'],
-  scene:['生活場面マップ','4つの生活場面ごとに、関連する指標の課題の重なりを横断して表示'],
+  scene:['生活場面別課題マップ','4つの生活場面ごとに、関連する指標の課題の重なりを横断して表示'],
   list:['一覧表','43市町村×15指標の並べ替えとCSV保存'],
   karte:['市町村カルテ','市町村ごとの詳細プロファイル'],
   ai:['分析レポート','課題の要約と支援方針のドラフト生成'],
@@ -1615,19 +1615,68 @@ var OSAKA_GEOJSON = {"type":"FeatureCollection","features":[{"type":"Feature","p
    ・場面ごとの総合スコア（平均など）は作らない。数えるのは3.5以上の指標の件数だけ
    ・データなしの指標は数えず（0点や3点として扱わない）、判定に使用できた指標数を併記する。関連指標がすべてデータなしならデータ不足
    ・地図・市町村カルテ・分析レポートは、すべてこの sceneResult() の結果を表示する（場面の構成・判定条件・欠損値処理を1か所にまとめる）
-   空き家・DXは特定の生活場面に対応づけにくいため含めない（地域課題マップ・カルテでは従来どおり表示） */
+   空き家・担い手不足・DX・地元で買えない度は、4つの生活場面のどれにも割り当てていない（地域課題マップ・住民目線マップ・カルテでは従来どおり表示）
+   refs は参考値：スコア化されていない統計なので、表示はするが重なり数には含めない */
 /* 「課題が高い」とする判定ライン（丸め前のスコア）。分析レポートの課題の重なり・広域連携・生活場面別課題で共通 */
 var HIGH_LINE = 3.5;
 var LIFE_SCENES = [
-  {key:'shopping', label:'買い物・日常の移動', icon:'🛒', keys:['food','transit','leakage'],
-    why:'近くで食料品を買えるか、車以外で移動しやすいか、地元で買い物が済むか'},
-  {key:'care', label:'通院・介護・見守り', icon:'🏥', keys:['clinic','transit','aging','community'],
-    why:'診療所に通いやすいか、通院の足があるか、支える側に対して高齢者が多いか、一人暮らし高齢者が多いか'},
-  {key:'childcare', label:'子育て・学び・働く世代', icon:'🏫', keys:['school','successor','population'],
-    why:'学校に通いやすいか、子育て・働く世代が減っていないか、人口が減っていないか'},
-  {key:'disaster', label:'災害時の避難・安全', icon:'🌊', keys:['landslide','flood','quake','liquefy','community'],
-    why:'4つの災害リスクと、避難に支援が必要になりやすい一人暮らし高齢者の多さ'}
+  {key:'elderly', label:'高齢者の日常生活・移動', icon:'🧓', keys:['aging','community','transit','food','clinic'],
+    why:'高齢者や一人暮らし高齢者が多いか、車以外で移動しやすいか、近くで食料品を買えるか、診療所に通いやすいか'},
+  {key:'child', label:'子育て・通学', icon:'🏫', keys:['school','transit','clinic','population','landslide','flood','quake','liquefy'],
+    why:'学校に通いやすいか、車以外で移動しやすいか、診療所に通いやすいか、人口が減っていないか、4つの災害リスク'},
+  {key:'nocar', label:'車を利用しにくい住民の日常生活', icon:'🚶', keys:['transit','food','clinic'], refs:['railCover1km'],
+    why:'車以外で移動しやすいか、近くで食料品を買えるか、診療所に通いやすいか'},
+  {key:'disaster', label:'災害時に支援が必要となりやすい生活環境', icon:'🌊', keys:['aging','community','transit','landslide','flood','quake','liquefy'],
+    why:'高齢者や一人暮らし高齢者が多いか、車以外で移動しやすいか、4つの災害リスク'}
 ];
+/* 参考値（スコア化されていない統計）。生活場面には表示するが、重なり数・判定に使用できた指標数には含めない */
+var SCENE_REFS = {
+  railCover1km:{label:'鉄道駅1km圏に住む人の割合', v:function(m){ return m.railCover1km; }, unit:'%', d:1,
+    year:'鉄道 国土数値情報N02-23、人口2020年', source:'国土数値情報 鉄道データ（N02-23）＋ 国勢調査250mメッシュ人口'}
+};
+/* 判定根拠に出す「基準値」＝スコア3点に相当する元の統計値。既存のスコア式から逆算したもので、新しい基準ではない。
+   既存の式は score = 3 + dir × (f(x) − center) / step の形（f は恒等、医療・学校は常用対数）。
+   防災の4指標は score = 1 + x / step なので center = 2 × step（0で1点の式を3点の位置に置き直しただけ）。
+   判定ライン（HIGH_LINE）に相当する元の値も同じ式から求める */
+var SCENE_BASE = {
+  population:{x:function(m){ return m.popChangeRate; }, center:0, step:1/1.1, dir:-1, unit:'%/年', d:2, what:'増減0%（スコア3点）', xname:'人口増減率'},
+  aging:{x:function(m){ return m.agingRate; }, center:31.5, step:5.5, dir:1, unit:'%', d:1, what:'スコア3点に相当する高齢化率', xname:'高齢化率'},
+  transit:{x:function(m){ return m.carCommuteRate; }, center:27.8, step:11.2, dir:1, unit:'%', d:1, what:'府内中央値（スコア3点）', xname:'自家用車利用率'},
+  community:{x:function(m){ return m.aloneElderlyRate; }, center:13.4, step:1.3, dir:1, unit:'%', d:1, what:'府内中央値（スコア3点）', xname:'65歳以上単独世帯率'},
+  food:{x:function(m){ return m.foodAccessRate; }, center:29.29, step:6.4, dir:1, unit:'%', d:2, what:'府内中央値（スコア3点）', xname:'食料品アクセス困難人口割合'},
+  clinic:{x:function(m){ return m.clinicDensityAdj; }, log:true, center:2.60, step:0.19, dir:-1, unit:'施設/100km²', d:1,
+    what:'補正後の密度の常用対数2.60（スコア3点）', xname:'補正後の診療所密度', adjusted:true},
+  school:{x:function(m){ return m.schoolDensityAdj; }, log:true, center:1.81, step:0.14, dir:-1, unit:'校/100km²', d:1,
+    what:'補正後の密度の常用対数1.81（スコア3点）', xname:'補正後の学校密度', adjusted:true},
+  landslide:{x:function(m){ return m.hazardCount/m.areaKm2; }, center:4.4, step:2.2, dir:1, unit:'区域/km²', d:1, what:'スコア3点に相当する密度（0区域/km²で1点、2.2区域/km²ごとに1点）', xname:'土砂災害警戒区域の密度'},
+  flood:{x:function(m){ return m.floodExposure; }, center:40, step:20, dir:1, unit:'%', d:1, what:'スコア3点に相当する割合（0%で1点、20ポイントごとに1点）', xname:'浸水想定区域に住む人の割合'},
+  quake:{x:function(m){ return m.quakeProb6s; }, center:9, step:4.5, dir:1, unit:'%', d:1, what:'スコア3点に相当する確率（0%で1点、4.5ポイントごとに1点）', xname:'震度6強以上の確率'},
+  liquefy:{x:function(m){ return m.liquefyRate; }, center:24, step:12, dir:1, unit:'%', d:1, what:'スコア3点に相当する割合（0%で1点、12ポイントごとに1点）', xname:'液状化しやすい地形に住む人の割合'}
+};
+function baseValueOf(b, level){ var f = b.center + b.dir*(level-3)*b.step; return b.log ? Math.pow(10, f) : f; }
+/* 元の統計値と基準値の比較（値・基準値・差・方向・判定ラインに相当する値） */
+function baseCompare(m, key){
+  var b = SCENE_BASE[key]; if(!b) return null;
+  var x = b.x(m); x = isNum(x) ? x : null;
+  var base = baseValueOf(b, 3), line = baseValueOf(b, HIGH_LINE);
+  var diff = x==null ? null : x - base;
+  var worse = diff==null ? null : (diff*b.dir > 0 ? 1 : (diff*b.dir < 0 ? -1 : 0));
+  return {b:b, x:x, base:base, line:line, diff:diff, ratio:(x!=null && b.log) ? x/base : null, worse:worse};
+}
+function baseDiffUnit(b){ return /^%/.test(b.unit) ? 'ポイント' : b.unit; }
+function fmtBase(v, b){ var t=v.toFixed(b.d); return (t.charAt(0)==='-' ? '−'+t.slice(1) : t)+b.unit; }
+function fmtDiff(c){
+  var b=c.b, d=c.diff;
+  var t = (d>0?'+':(d<0?'−':'±'))+Math.abs(d).toFixed(b.d)+baseDiffUnit(b);
+  if(c.ratio!=null) t += '（基準値の'+c.ratio.toFixed(2)+'倍）';
+  return t;
+}
+function worseText(c){
+  if(c.worse==null) return '';
+  if(c.worse===0) return '基準値と同じ';
+  var hi = c.diff>0 ? '基準値より高い' : '基準値より低い';
+  return hi+'＝'+(c.worse>0 ? '課題が大きい方向' : '課題が小さい方向');
+}
 var SCENE_BY_KEY = {}; LIFE_SCENES.forEach(function(sc){ SCENE_BY_KEY[sc.key]=sc; });
 /* 重なり数の区分。3件以上はまとめる。関連指標がすべてデータなしのときはデータ不足 */
 var SCENE_CLASSES = [
@@ -1660,15 +1709,18 @@ function sceneResult(m, scene){
   var missing = items.filter(function(i){ return i.raw==null; });
   var high = used.filter(function(i){ return i.high; }).sort(function(a,b){ return b.raw-a.raw; });
   var count = used.length ? high.length : null;
-  return {scene:scene, items:items, total:items.length, used:used, missing:missing, high:high, count:count, cls:sceneClass(count)};
+  /* 参考値は表示のみ（重なり数・判定に使用できた指標数には含めない） */
+  var refs = (scene.refs || []).map(function(k){ var R=SCENE_REFS[k], v=R.v(m); return {key:k, label:R.label, v:isNum(v) ? v : null, R:R}; });
+  return {scene:scene, items:items, total:items.length, used:used, missing:missing, high:high, count:count, cls:sceneClass(count), refs:refs};
 }
 function sceneLabels(items){ return items.map(function(i){ return i.label; }).join('・'); }
+function sceneRefText(ref){ return ref.label+' '+(ref.v==null ? naHtml() : '<span class="mono">'+ref.v.toFixed(ref.R.d)+ref.R.unit+'</span>'); }
 function sceneClsHtml(r){
   return '<span class="scene-cls"><i style="background:'+r.cls.color+'"></i>'+r.cls.label+'</span>';
 }
 /* 5項目（関連する指標数・判定に使用できた指標数・課題が高い指標・重なり数・データがない指標）。カルテとポップアップで共通 */
 function sceneFactsHtml(r){
-  return '<dl class="scene-facts" data-scene="'+r.scene.key+'" data-count="'+(r.count==null?'na':r.count)+'" data-used="'+r.used.length+'" data-total="'+r.total+'" data-missing="'+r.missing.map(function(i){return i.key;}).join(',')+'" data-high="'+r.high.map(function(i){return i.key;}).join(',')+'">'+
+  return '<dl class="scene-facts" data-scene="'+r.scene.key+'" data-count="'+(r.count==null?'na':r.count)+'" data-used="'+r.used.length+'" data-total="'+r.total+'" data-missing="'+r.missing.map(function(i){return i.key;}).join(',')+'" data-high="'+r.high.map(function(i){return i.key;}).join(',')+'" data-refs="'+r.refs.map(function(x){return x.key;}).join(',')+'">'+
     '<dt>関連する指標数</dt><dd>'+r.total+'指標（'+sceneLabels(r.items)+'）</dd>'+
     '<dt>判定に使用できた指標数</dt><dd>'+r.used.length+' / '+r.total+'指標</dd>'+
     '<dt>課題が高いと判定された指標</dt><dd>'+(r.count==null ? naHtml('関連する指標がすべてデータなし') :
@@ -1677,32 +1729,53 @@ function sceneFactsHtml(r){
       '<b class="mono">'+r.count+'</b>件（区分：'+sceneClsHtml(r)+'）')+'</dd>'+
     '<dt>データがない指標</dt><dd>'+(r.missing.length ? r.missing.map(function(i){
       return i.label+' '+naHtml(INDICATOR_META[i.key].naReason); }).join('・') : 'なし')+'</dd>'+
+    (r.refs.length ? '<dt>参考値（重なり数に含めない）</dt><dd>'+r.refs.map(sceneRefText).join('・')+
+      '<br><span class="base">スコア化されていない統計のため、課題の重なり数・判定に使用できた指標数には含めていません。</span></dd>' : '')+
   '</dl>';
 }
-/* 各指標の判定根拠：スコア・元の値・基準値との比較・年度・出典 */
+/* 各指標の判定根拠：スコア・元の統計値・既存の基準値・両者の差・判定・年度・出典 */
 function sceneIndicatorHtml(m, it){
   var meta = INDICATOR_META[it.key];
+  var c = baseCompare(m, it.key);
   var judge = it.raw==null
     ? naHtml(meta.naReason)+' 判定に使わない（0点や3点として扱わない）'
     : (it.high
       ? '<span class="judge-high">丸め前 <span class="mono">'+it.raw.toFixed(2)+'</span> ≥ 判定ライン <span class="mono">'+HIGH_LINE.toFixed(1)+'</span> → 課題が高い</span>'
       : '<span class="judge-low">丸め前 <span class="mono">'+it.raw.toFixed(2)+'</span> &lt; 判定ライン <span class="mono">'+HIGH_LINE.toFixed(1)+'</span> → 高いとは判定しない</span>');
+  if(c) judge += '<br><span class="base">判定ライン'+HIGH_LINE.toFixed(1)+'は'+c.b.xname+' <span class="mono">'+fmtBase(c.line, c.b)+'</span>'+
+    (c.b.dir>0 ? '以上' : '以下')+'に相当</span>';
+  var rows =
+      '<dt>スコア</dt><dd>'+(it.score==null ? naHtml(meta.naReason) : '<b class="mono">'+it.score+'</b> / 5（丸め前 <span class="mono">'+it.raw.toFixed(2)+'</span>）')+'</dd>'+
+      '<dt>元の統計値</dt><dd>'+meta.name+' '+metaValueHtml(it.key, m)+'</dd>';
+  if(c){
+    if(c.b.adjusted) rows += '<dt>比較に使う値</dt><dd>'+c.b.xname+'（小規模自治体補正後） '+(c.x==null ? naHtml(meta.naReason) : '<span class="mono">'+fmtBase(c.x, c.b)+'</span>')+'</dd>';
+    rows += '<dt>基準値</dt><dd><span class="mono">'+fmtBase(c.base, c.b)+'</span>（'+c.b.what+'）</dd>'+
+      '<dt>基準値との差</dt><dd>'+(c.x==null ? naHtml(meta.naReason) :
+        '<b class="mono">'+fmtDiff(c)+'</b>（'+worseText(c)+'）')+'</dd>';
+  }
+  rows += '<dt>判定</dt><dd>'+judge+'<br><span class="base">スコアの算出方法：'+meta.base+'</span></dd>'+
+      '<dt>年度</dt><dd>'+meta.year+'</dd>'+
+      '<dt>出典</dt><dd>'+meta.source+'</dd>';
   return '<div class="scene-ind" data-scene-ind="'+it.key+'">'+
     '<div class="hd">'+it.label+'<span class="grp">'+it.group+'マップの指標</span>'+kindBadge(meta.kind)+'</div>'+
-    '<dl>'+
-      '<dt>スコア</dt><dd>'+(it.score==null ? naHtml(meta.naReason) : '<b class="mono">'+it.score+'</b> / 5（丸め前 <span class="mono">'+it.raw.toFixed(2)+'</span>）')+'</dd>'+
-      '<dt>元の値</dt><dd>'+meta.name+' '+metaValueHtml(it.key, m)+'</dd>'+
-      '<dt>基準値との比較</dt><dd>'+judge+'<br><span class="base">スコアの基準値：'+meta.base+'</span></dd>'+
-      '<dt>年度</dt><dd>'+meta.year+'</dd>'+
-      '<dt>出典</dt><dd>'+meta.source+'</dd>'+
-    '</dl></div>';
+    '<dl>'+rows+'</dl></div>';
+}
+/* 参考値の根拠（スコア化していないので、基準値・判定はない） */
+function sceneRefHtml(ref){
+  return '<div class="scene-ind" data-scene-ref="'+ref.key+'">'+
+    '<div class="hd">'+ref.label+'<span class="grp">参考値（重なり数に含めない）</span></div>'+
+    '<dl><dt>元の統計値</dt><dd>'+(ref.v==null ? naHtml() : '<span class="mono">'+ref.v.toFixed(ref.R.d)+ref.R.unit+'</span>')+'</dd>'+
+    '<dt>判定</dt><dd>スコア化されていないため判定しない（基準値・判定ラインなし）</dd>'+
+    '<dt>年度</dt><dd>'+ref.R.year+'</dd><dt>出典</dt><dd>'+ref.R.source+'</dd></dl></div>';
 }
 var SCENE_RULE = '判定条件：関連する指標のうち、丸め前のスコアが'+HIGH_LINE.toFixed(1)+'以上のものを「課題が高い」として数えます（分析レポートの「課題の重なり」「広域連携」と同じ判定ライン）。データなしの指標は数えず、関連する指標がすべてデータなしの場合はデータ不足とします。';
+var SCENE_BASE_NOTE = '基準値は各指標のスコアが3点になる元の統計値で、既存のスコアの式から求めたものです（新しい基準ではありません）。';
 var SCENE_CAUTION = '生活場面別課題は、関連する統計指標のスコアの重なりを示すものです。施策の必要性、住民の実態、個人の困難度を断定するものではありません。';
 function sceneEvidenceHtml(m, r){
-  return '<p class="scene-rule">'+SCENE_RULE+'</p>'+r.items.map(function(it){ return sceneIndicatorHtml(m, it); }).join('');
+  return '<p class="scene-rule">'+SCENE_RULE+SCENE_BASE_NOTE+'</p>'+r.items.map(function(it){ return sceneIndicatorHtml(m, it); }).join('')+
+    r.refs.map(sceneRefHtml).join('');
 }
-/* 生活場面マップのポップアップ */
+/* 生活場面別課題マップのポップアップ */
 function scenePopup(m, sceneKey){
   var r = sceneResult(m, SCENE_BY_KEY[sceneKey]);
   return '<div class="muni-popup">'+
@@ -1714,7 +1787,7 @@ function scenePopup(m, sceneKey){
     '<button type="button" data-goto="'+m.id+'">市町村カルテを見る</button>'+
     '</div>';
 }
-/* 生活場面マップの凡例：選んだ場面の関連指標数と、区分ごとの団体数 */
+/* 生活場面別課題マップの凡例：選んだ場面の関連指標数と、区分ごとの団体数 */
 function sceneLegendHtml(sceneKey){
   var sc = SCENE_BY_KEY[sceneKey];
   var n = {}; SCENE_CLASSES.forEach(function(c){ n[c.key]=0; });
@@ -1729,6 +1802,7 @@ function sceneMapNote(sceneKey){
   var el = document.getElementById('sceneMapNote');
   if(el) el.innerHTML = '<b>'+sc.icon+' '+sc.label+'</b> の関連指標：'+sc.keys.map(function(k){
       return INDICATOR_LABEL[k]+'（'+INDICATOR_GROUP[k]+'）'; }).join('・')+
+    ((sc.refs||[]).length ? '。参考値（重なり数に含めない）：'+sc.refs.map(function(k){ return SCENE_REFS[k].label; }).join('・') : '')+
     '。見ている点：'+sc.why+'。'+SCENE_RULE+'凡例の（ ）内は団体数です。';
 }
 
@@ -1782,7 +1856,7 @@ function choroplethPopup(cfg, m, cat){
     '<button type="button" data-goto="'+m.id+'">市町村カルテを見る</button>'+
     '</div>';
 }
-/* 地図の共通部品。生活場面マップは色・ポップアップ・選択肢・凡例を cfg.color / popup / options / legend で差し替える
+/* 地図の共通部品。生活場面別課題マップは色・ポップアップ・選択肢・凡例を cfg.color / popup / options / legend で差し替える
    （地域課題・住民目線・防災の3マップはこれらを指定せず、従来どおりスコアで塗る） */
 function createChoropleth(cfg){
   var map=null, layers={}, category=cfg.initial || 'composite', maxBounds=null, openAt=null;
@@ -1808,7 +1882,7 @@ function createChoropleth(cfg){
     sel.value = category;
     sel.addEventListener('change', function(){
       category=sel.value;
-      var reopen = cfg.popup ? openAt : null;   // 生活場面マップは、開いている吹き出しを新しい場面の内容で開き直す
+      var reopen = cfg.popup ? openAt : null;   // 生活場面別課題マップは、開いている吹き出しを新しい場面の内容で開き直す
       recolor(); drawLegend();
       if(reopen && map){ map.closePopup(); layers[reopen.id].openPopup(reopen.latlng); }
     });
@@ -1892,7 +1966,7 @@ var MAPS = {
     value:function(m, cat){ return cat==='composite' ? m.hazardMax : m.hazardScores[cat]; },
     summary:function(m){ return '最も高い災害：<b>'+m.hazardTop.label+'</b>（<b class="mono">'+m.hazardMax+'</b> / 5）'; }
   }),
-  /* 生活場面マップ：スコアではなく課題の重なり数の区分で塗る（場面ごとの総合スコアは作らない） */
+  /* 生活場面別課題マップ：スコアではなく課題の重なり数の区分で塗る（場面ごとの総合スコアは作らない） */
   scene: createChoropleth({
     canvasId:'sceneMapCanvas', selectId:'sceneMapCategorySelect', legendId:'sceneMapLegend',
     initial:LIFE_SCENES[0].key,
@@ -2367,7 +2441,7 @@ function renderKarte(){
 function sceneKarteHtml(m){
   return '<section class="karte-sec" id="k-scene"><h4>生活場面別課題（地域課題・住民目線・防災の横断まとめ）</h4>'+
     '<div class="card">'+
-      '<p class="scene-lead">上の地域課題・住民目線・防災の指標を4つの生活場面に分けて、関連する指標のうち課題が高い（丸め前のスコアが'+HIGH_LINE.toFixed(1)+'以上）ものがいくつ重なっているかをまとめています。新しい基準値や場面ごとの総合スコアは作っていません。<b>生活場面名を押すと</b>、関連する各指標のスコア・元の統計値・基準値との比較・年度・出典を表示します。</p>'+
+      '<p class="scene-lead">上の地域課題・住民目線・防災の指標を4つの生活場面に分けて、関連する指標のうち課題が高い（丸め前のスコアが'+HIGH_LINE.toFixed(1)+'以上）ものがいくつ重なっているかをまとめています。新しい基準値や場面ごとの総合スコアは作っていません。<b>生活場面名を押すと</b>、関連する各指標のスコア・元の統計値・既存の基準値・両者の差・判定・年度・出典を表示します。</p>'+
       '<div class="scene-grid">'+LIFE_SCENES.map(function(sc){
         var r = sceneResult(m, sc);
         return '<div class="scene-card" data-scene-card="'+sc.key+'">'+
@@ -2387,7 +2461,7 @@ function toggleSceneCard(btn, open){
   btn.setAttribute('aria-expanded', next ? 'true' : 'false');
   panel.hidden = !next;
 }
-/* 生活場面マップの吹き出しからカルテに来たときは、その場面を開いて表示する */
+/* 生活場面別課題マップの吹き出しからカルテに来たときは、その場面を開いて表示する */
 function openKarteScene(sceneKey){
   var card = document.querySelector('[data-scene-card="'+sceneKey+'"]');
   if(!card) return;
@@ -2762,6 +2836,12 @@ function generateReport(scope){
 }
 /* 分析レポートの「生活場面別課題」。地図・カルテと同じ sceneResult() を使い、生活上の困難を断定しない表現にする */
 var SCENE_PHRASE = '関連する複数の統計指標で課題が高くなっており、この生活場面について追加確認の必要性が示されています。';
+/* 課題が高い指標の元の統計値と基準値の差（判定根拠と同じ baseCompare を使う） */
+function sceneBaseBrief(m, key){
+  var c = baseCompare(m, key);
+  if(!c || c.x==null) return '';
+  return '、'+c.b.xname+' '+fmtBase(c.x, c.b)+'、基準値 '+fmtBase(c.base, c.b)+'との差 '+fmtDiff(c);
+}
 function sceneRank(r){ return r.count==null ? -1 : r.count; }
 /* 団体の一覧を区分ごとに数える */
 function sceneDist(list, sc){
@@ -2796,12 +2876,13 @@ function sceneReport(list){
       }
       var t = head+'課題の重なり '+r.count+'件（区分：'+r.cls.label+'）、判定に使用できた指標 '+r.used.length+' / '+r.total+'指標。';
       t += r.high.length
-        ? '課題が高いと判定された指標：'+r.high.map(function(i){ return i.label+'（'+i.raw.toFixed(2)+'）'; }).join('・')+'。'
+        ? '課題が高いと判定された指標：'+r.high.map(function(i){ return i.label+'（丸め前スコア'+i.raw.toFixed(2)+sceneBaseBrief(m, i.key)+'）'; }).join('・')+'。'
         : '課題が高いと判定された指標はありません。';
       if(r.count>=2) t += SCENE_PHRASE;
       t += r.missing.length
         ? 'データがない指標：'+sceneLabels(r.missing)+'。この場面は、取得できた'+r.used.length+'指標だけで分析しています。'
         : 'データがない指標：なし。';
+      if(r.refs.length) t += '参考値：'+r.refs.map(function(x){ return x.label+' '+(x.v==null ? NA_TEXT : x.v.toFixed(x.R.d)+x.R.unit); }).join('・')+'（スコア化されていないため、重なり数には含めていません）。';
       var pd = sceneDist(peers, r.scene);
       var ge = peers.filter(function(x){ var c=sceneResult(x, r.scene).count; return c!=null && c>=r.count; }).length;
       t += '同規模の団体（'+PEER_LABELS[m.peerGroup]+' '+peers.length+'団体、本団体を含む）の区分別団体数は '+sceneDistText(pd)+
@@ -2837,6 +2918,13 @@ function sceneReport(list){
       }
       t += '。';
       if(d.na.length) t += namesText(d.na, 43)+'は関連する指標がすべてデータなしのため、データ不足として分析を行っていません。';
+      (sc.refs || []).forEach(function(k){
+        var R = SCENE_REFS[k];
+        var vs = list.filter(function(m){ return isNum(R.v(m)); }).sort(function(a,b){ return R.v(a)-R.v(b); });
+        if(!vs.length) return;
+        var lo = vs[0], hi = vs[vs.length-1];
+        t += '参考値：'+R.label+'は、この範囲で最小 '+R.v(lo).toFixed(R.d)+R.unit+'（'+lo.name+'）〜最大 '+R.v(hi).toFixed(R.d)+R.unit+'（'+hi.name+'）（スコア化されていないため、重なり数には含めていません）。';
+      });
       /* 比較：地域ブロックは大阪府全域と、府全域は地域ブロック間で比べる */
       var nPlus = d.c2.length + d.c3.length, nJudged = list.length - d.na.length;
       if(!all){
@@ -2888,7 +2976,7 @@ function runAiAnalysis(){
    print() がすぐ戻るため、その場合はHTMLファイルを直接開いて印刷するよう案内する */
 function printView(title, msgId){
   document.getElementById('printHeader').textContent =
-    '地域課題カルテ（ベータ版）　'+title+'　｜　印刷日 '+new Date().toLocaleDateString('ja-JP')+'　｜　大阪府 市町村局振興課（公的統計をもとにしたスコア化。国・府の公式評価ではありません）';
+    '地域課題分析カルテ（ベータ版）　'+title+'　｜　印刷日 '+new Date().toLocaleDateString('ja-JP')+'　｜　大阪府 市町村局振興課（公的統計をもとにしたスコア化。国・府の公式評価ではありません）';
   var msg = msgId && document.getElementById(msgId);
   if(msg) msg.hidden = true;
   var t = Date.now();
