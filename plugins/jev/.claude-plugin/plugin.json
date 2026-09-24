@@ -1,0 +1,8 @@
+{
+  "name": "jev",
+  "version": "1.0.0",
+  "description": "MCP server for the Jev API (TypeSafe AI): evaluate state against typed questions and get back structured choice, score, and boolean (noul) decisions with confidence.",
+  "author": {
+    "name": "machida111"
+  }
+}
