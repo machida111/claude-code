@@ -387,7 +387,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
       <div class="view-head">
         <div>
           <h3>分析レポート</h3>
-          <p>対象範囲を選び「分析を生成」を押すと、共通課題・特徴的な課題・住民目線で見た課題・支援方針・広域連携の可能性をまとめます。</p>
+          <p>対象範囲を選び「分析を生成」を押すと、共通課題・特徴的な課題・住民目線で見た課題・重なっている課題・悪化が目立つ変化・支援方針・広域連携の可能性をまとめます。</p>
         </div>
       </div>
       <div class="card">
@@ -451,6 +451,8 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
               <tr><td>AI・RPA・生成AI導入状況（DX）</td><td class="src">総務省「地方自治体におけるAI・RPAの実証実験・導入状況等調査」</td><td class="src">令和7年度。導入済・実証実験中の団体一覧に掲載がない団体は未導入として扱う。</td></tr>
               <tr><td>手続のオンライン化状況（DX）</td><td class="src">総務省「自治体DX・情報化推進概要」個別資料<br>（オンライン利用状況調査）</td><td class="src">令和7年4月1日現在（令和8年9月18日公表）。重点計画対象手続のうち「オンライン化済」の数。</td></tr>
               <tr><td>マイナンバーカード保有率（カルテのみ）</td><td class="src">総務省「マイナンバーカードの交付・保有状況」</td><td class="src">令和8年8月末時点。人口に対する保有枚数の割合。カルテに参考表示（スコア化なし）。</td></tr>
+              <tr><td>生産年齢人口・民営事業所数（担い手不足・変化）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」（国勢調査・経済センサス‐活動調査）</td><td class="src">15〜64歳人口の2015→2020年の増減率。民営事業所数の2016→2021年の増減（カルテ・分析レポートの参考）。</td></tr>
+              <tr><td>浸水想定区域（防災）</td><td class="src">国土数値情報 洪水浸水想定区域（A31a、2024年度・国管理＋府管理河川）・高潮浸水想定区域（A49）・津波浸水想定（A40）<br>＋ e-Stat 2020年国勢調査1kmメッシュ人口</td><td class="src">床上浸水以上が想定される区域に住む人の割合。メッシュ内の人口は均等に配分した近似。</td></tr>
               <tr><td>土砂災害警戒区域数</td><td class="src">大阪府「土砂災害防止法の指定状況」</td><td class="src">土砂災害警戒区域（イエローゾーン）の指定数。市街地中心部は指定なし（0件）の市町村が複数ある。</td></tr>
               <tr><td>自家用車利用率（公共交通）</td><td class="src">e-Stat 2020年国勢調査<br>「利用交通手段」（統計表0003454514）</td><td class="src">15歳以上の自宅外就業者・通学者のうち、通勤・通学に自家用車を利用する人の割合。複数手段の併用があるため各手段の割合の合計は100%を超える。</td></tr>
               <tr><td>鉄道駅1km圏人口（カルテのみ）</td><td class="src">国土数値情報 鉄道データ（N02-23）<br>＋ e-Stat 2020年国勢調査1kmメッシュ人口</td><td class="src">駅から半径1km圏内に住む人の割合。1kmメッシュを5×5に等分し人口を均等配分して算出。カルテに参考表示（スコア化なし）。</td></tr>
@@ -513,22 +515,24 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
               <div class="formula">score = 3 + (自家用車利用率(%) − 27.8) / 11.2</div>
             </div>
             <div class="idx-card">
-              <div class="head"><h4>地域コミュニティ</h4><span class="badge real">実データ</span></div>
+              <div class="head"><h4>高齢者の見守り</h4><span class="badge real">実データ</span></div>
               <div class="inputs">入力：65歳以上世帯員の単独世帯の割合（国勢調査）</div>
-              <p class="how">高齢者の一人暮らし世帯が多いほど、見守りや自治会活動などの地域の担い手が細りやすいとみなしています。自治会加入率のような直接統計は市町村ごとに集計方法が異なり全市町村分をそろえられないため、この指標を代理として使用しています。</p>
+              <p class="how">一人暮らしの高齢者が多いほど、安否確認・見守り・生活支援の必要が大きいとみなしています。以前は「地域コミュニティ」という名前でしたが、自治会加入率など地域のつながりを直接表す統計は市町村ごとに集計方法が異なり全市町村分をそろえられないため、測っている中身どおりの名前に改めました。</p>
               <div class="formula">score = 3 + (65歳以上単独世帯率(%) − 13.4) / 1.3</div>
             </div>
             <div class="idx-card">
               <div class="head"><h4>担い手不足</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：高齢就業者割合（65歳以上、国勢調査）</div>
-              <p class="how">就業者のうち65歳以上が占める割合。この割合が高い市町村ほど、農業や商店など現場の担い手が高齢層に偏っており、後継者不足のリスクが大きいとみなしています。</p>
-              <div class="formula">score = 3 + (高齢就業者割合(%) − 21.3) / 1.2</div>
+              <div class="inputs">入力：生産年齢人口（15〜64歳）の増減率（2015→2020年、国勢調査）</div>
+              <p class="how">地域の仕事や活動を支える働き手の世代がどれだけ減っているかを直接測ります。中央値−4.9%を基準に、3.4ポイントの差を1点分としています。能勢町（−21.9%）・豊能町（−20.9%）で最も大きく減り、箕面市（+5.6%）・守口市（+3.9%）では増えています。以前使っていた「高齢就業者割合」は、高齢者が元気に働き続けている町ほど課題が大きく出てしまい、良い面と悪い面を区別できないため使うのをやめました。民営事業所数の増減（2016→2021年）も検討しましたが、小さな町では数件の開業で大きく振れ、働き手が2割減った町でも数値が打ち消されてしまうため、スコアには使わず分析レポートの「変化」とカルテの参考値にしています。</p>
+              <div class="formula">score = 3 − (生産年齢人口の増減率(%) − (−4.9)) / 3.4</div>
             </div>
             <div class="idx-card">
               <div class="head"><h4>防災</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：土砂災害警戒区域数（大阪府指定）÷ 面積</div>
-              <p class="how">面積あたりの土砂災害警戒区域数が多いほど高スコア。市街地中心部（大阪市・守口市・摂津市など）は区域指定がなく0件です。洪水・高潮・地震など他の災害リスクは含まれておらず、土砂災害リスクに限定した指標です。</p>
-              <div class="formula">score = 1 + (土砂災害警戒区域数 / 面積km2) / 2.2</div>
+              <div class="inputs">入力：土砂災害警戒区域数（大阪府指定）÷ 面積／洪水・高潮・津波の浸水想定区域に住む人の割合（国土数値情報＋2020年国勢調査メッシュ人口）</div>
+              <p class="how">土砂災害と水害をそれぞれ1〜5で評価し、高い方をスコアにします。水害は、床上浸水以上（洪水・高潮は0.5m以上、津波は0.3m以上）が想定される区域に住む人の割合で、洪水は想定最大規模の降雨、国管理河川（淀川・大和川など）と府管理河川の両方を含みます。門真市96%・守口市85%・大阪市77%と、淀川・寝屋川流域と大阪湾岸で高く出ます。2つを平均しないのは、門真市（水害）や能勢町（土砂災害）のように片方だけが深刻な市町村が中程度に埋もれてしまうためです。地震（揺れ・液状化）は市町村間の差を表す全市町村共通のデータがそろわないため含んでいません。</p>
+              <div class="formula">土砂 = 1 + (土砂災害警戒区域数 / 面積km2) / 2.2
+水害 = 1 + 浸水想定区域の人口割合(%) / 20
+score = 土砂 と 水害 の高い方</div>
             </div>
             <div class="idx-card">
               <div class="head"><h4>DX（行政デジタル化の遅れ）</h4><span class="badge real">実データ</span></div>
@@ -608,7 +612,7 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
           <h2>総合スコアの算出</h2>
           <p class="desc">各マップの「総合」表示やカルテのレーダーチャートで使う総合スコアは、それぞれの指標群の単純平均です。重み付けはしていません。「空き家」がデータなしの5町村は、残り7指標の平均を総合スコアとします。</p>
           <div class="idx-card" style="margin-top:18px; max-width:560px;">
-            <div class="formula">地域課題マップ 総合スコア = (人口減少 + 高齢化 + 空き家 + 公共交通 + 地域コミュニティ + 担い手不足 + 防災 + DX) / 8
+            <div class="formula">地域課題マップ 総合スコア = (人口減少 + 高齢化 + 空き家 + 公共交通 + 高齢者の見守り + 担い手不足 + 防災 + DX) / 8
 住民目線マップ 総合スコア = (買い物の不便さ + 医療への行きにくさ + 学校への通いにくさ + 地元で買えない度) / 4</div>
           </div>
         </section>
@@ -630,10 +634,20 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
               <div class="head"><h4>隣の市町村と組む</h4></div>
               <p class="how">「広域連携の可能性」は、境界線を接する市町村の組のうち、同じ課題（地域課題8指標・住民目線4指標のいずれか）が両方ともスコア3.5以上のものを名指しで挙げます。府外の隣接団体は対象外です。</p>
             </div>
+            <div class="idx-card">
+              <div class="head"><h4>課題の重なりを見る</h4></div>
+              <p class="how">「高齢化×公共交通→高齢者の移動手段」「高齢者の見守り×防災→一人暮らし高齢者の避難支援」のように、2つの課題が同時に高い（どちらも3.5以上）ときに必要になる支援を10通りの組み合わせで判定します。重なりがあれば「今後の支援の方向性」の先頭に置きます。</p>
+            </div>
+            <div class="idx-card">
+              <div class="head"><h4>変化を見る</h4></div>
+              <p class="how">高齢化率の上昇幅（2015→2020）、民営事業所数の増減（2016→2021）、2050年の推計人口、飲食料品店数の増減（2016→2021、RESAS）の4つについて、同規模グループの他団体と比べて標準偏差の0.8倍以上悪化しているものを「悪化が目立つ変化」として挙げます。飲食料品店は2016年に5件未満の団体では振れが大きいため対象外です。</p>
+            </div>
           </div>
           <div class="idx-card" style="margin-top:14px; max-width:640px;">
             <div class="formula">特徴的な課題：丸める前のスコア − 同規模グループの平均 ≥ 0.8（1市町村のみ選択時は0.5）
-広域連携：隣接する2団体の丸める前のスコアがともに3.5以上の指標</div>
+広域連携：隣接する2団体の丸める前のスコアがともに3.5以上の指標
+課題の重なり：同じ団体で2つの指標がともに3.5以上
+悪化が目立つ変化：(自団体の変化 − 同規模グループ平均) ÷ 標準偏差 ≥ 0.8</div>
           </div>
         </section>
 
@@ -645,7 +659,7 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
             <div>
               <p>地域課題マップの8指標・住民目線マップの4指標はすべて、その課題に対応する公的統計を直接スコア化しています。推定値による代用はどの指標でも行っていません。ただし「公共交通」は自家用車の利用率という<b>住民の行動から測った指標</b>である点に注意してください。自家用車の利用には公共交通の便以外の要因（勤め先の位置、世帯の所得、駐車場の有無など）も影響します。また対象は通勤・通学者であり、通勤も通学もしていない住民（高齢者など）の移動手段は含みません。</p>
               <p>当初は国土交通省の定義（鉄道駅1km圏・バス停300m圏の外を公共交通空白地域とする）に沿って空白地域の人口割合を算出することも検討しましたが、国土数値情報のバス停留所データに事業者単位の欠落があり（忠岡町・高石市・柏原市などでバス停が0〜数件しか収録されていない）、市町村間の比較に使える精度がなかったため採用していません。鉄道駅のみのカバー率は駅位置データが完全なため、カルテに参考値として表示しています（ただし高槻市のようにバス網で支えられている市では低く出ます）。</p>
-              <p>また「防災」は土砂災害警戒区域数に基づくもので、洪水・高潮・地震などの他の災害リスクは含みません。「DX」は総務省調査の「導入しているか」「オンライン化しているか」を数えたもので、導入したAIがどの業務でどれだけ使われているか、オンライン申請が実際にどれだけ使われているかまでは測っていません。またAI・RPA・生成AIの調査結果は導入団体の一覧形式のため、一覧に掲載がない団体を「未導入」として扱っています（未回答の団体を含む可能性があります）。「空き家」は能勢町・田尻町・岬町・太子町・千早赤阪村の5町村で調査結果が未公表のため、地図・カルテ・分析レポートのいずれでも「データなし」として扱い、推定値による代用はしていません。本ツールは<b>ベータ版</b>で、指標の選び方・算出方法は利用者の意見を踏まえて今後変更することがあります。各指標は個別の統計を組み合わせた大阪府市町村局振興課によるスコア化であり、<b>国や大阪府による公式な評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
+              <p>また「防災」は土砂災害と水害（洪水・高潮・津波）を対象とし、地震の揺れ・液状化は含みません。水害の人口割合は1kmメッシュの人口をメッシュ内で均等に配分した近似値です。「DX」は総務省調査の「導入しているか」「オンライン化しているか」を数えたもので、導入したAIがどの業務でどれだけ使われているか、オンライン申請が実際にどれだけ使われているかまでは測っていません。またAI・RPA・生成AIの調査結果は導入団体の一覧形式のため、一覧に掲載がない団体を「未導入」として扱っています（未回答の団体を含む可能性があります）。「空き家」は能勢町・田尻町・岬町・太子町・千早赤阪村の5町村で調査結果が未公表のため、地図・カルテ・分析レポートのいずれでも「データなし」として扱い、推定値による代用はしていません。本ツールは<b>ベータ版</b>で、指標の選び方・算出方法は利用者の意見を踏まえて今後変更することがあります。各指標は個別の統計を組み合わせた大阪府市町村局振興課によるスコア化であり、<b>国や大阪府による公式な評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
             </div>
           </div>
         </section>
@@ -670,7 +684,7 @@ var CATEGORIES=[
   {key:'aging', label:'高齢化'},
   {key:'vacant', label:'空き家'},
   {key:'transit', label:'公共交通'},
-  {key:'community', label:'地域コミュニティ'},
+  {key:'community', label:'高齢者の見守り'},
   {key:'successor', label:'担い手不足'},
   {key:'disaster', label:'防災'},
   {key:'dx', label:'DX'}
@@ -691,7 +705,7 @@ var REGIONS={
    面積＝国土地理院全国都道府県市区町村別面積調、財政力指数＝総務省 地方財政状況調査（直近公表年度）
    空き家率(%)＝総務省 令和5年住宅・土地統計調査（人口小規模な5町村は未公表のためnull。空き家指標はデータなしとして扱い総合スコアから除外）
    65歳以上単独世帯率(%)＝e-Stat 社会・人口統計体系「市区町村データ」（2020年度）
-   高齢就業者割合(%,65歳以上)＝同上（2020年度）
+   高齢就業者割合(%,65歳以上)＝同上（2020年度）※現在はスコアに使っていない（担い手不足は生産年齢人口の増減率に変更）
    マイナンバーカード保有率(%)＝総務省「マイナンバーカードの交付・保有状況」（令和8年8月末時点）
    土砂災害警戒区域数＝大阪府「土砂災害防止法の指定状況」
    [id, 名称, 地域, 緯度, 経度, 人口, 人口増減率%, 高齢化率%, 面積km2, 世帯数, 財政力指数,
@@ -802,12 +816,71 @@ var DX_ADMIN = {
   kumatori:[2,2,1,36,47], tajiri:[0,0,0,6,35], misaki:[1,0,1,32,48]
 };
 
+/* ===================== 担い手・変化・水害データ =====================
+   WORK_AGE_CHANGE: 生産年齢人口（15〜64歳）の増減率%（2015→2020年、国勢調査。e-Stat 社会・人口統計体系 A1302）
+   ESTABLISHMENTS: 民営事業所数 [2016年, 2021年]（経済センサス‐活動調査。e-Stat 社会・人口統計体系 C2108）
+   AGING_RISE: 高齢化率の上昇幅（2015→2020年、ポイント。同 A1303÷A1101）
+   FLOOD_EXPOSURE: 浸水想定区域に住む人の割合% [合計, 洪水, 高潮, 津波]。国土数値情報の洪水浸水想定区域
+   （想定最大規模、国管理河川＝近畿地方整備局分＋府管理河川、2024年度版）・高潮浸水想定区域（2021年度版）・
+   津波浸水想定（2016年度版）のうち、床上浸水以上（洪水・高潮は浸水深0.5m以上、津波は0.3m以上）の区域に、
+   2020年国勢調査1kmメッシュ人口（各メッシュを10×10に等分し人口を均等配分）が何割含まれるかを算出。
+   合計は3種類の区域のいずれかに入る人の割合（重複は1回だけ数える）。 */
+var WORK_AGE_CHANGE = {
+  osaka:0.24, sakai:-4.90, ikeda:-0.97, toyonaka:0.43, suita:-0.43, takatsuki:-2.92,
+  ibaraki:0.30, minoh:5.62, settsu:-0.52, shimamoto:-0.43, toyono:-20.93, nose:-21.91,
+  moriguchi:3.94, hirakata:-8.90, neyagawa:-9.53, daito:-5.00, kadoma:-4.91, shijonawate:-1.94,
+  katano:-4.51, yao:-3.34, kashiwara:-7.70, higashiosaka:-3.99, tondabayashi:-9.23, kawachinagano:-11.37,
+  matsubara:-5.64, habikino:-6.21, fujiidera:-5.11, osakasayama:-2.97, taishi:-9.56, kanan:-8.75,
+  chihayaakasaka:-16.09, izumiotsu:-3.88, izumi:-4.13, takaishi:-3.56, tadaoka:-3.49, kishiwada:-5.75,
+  kaizuka:-6.72, izumisano:-2.09, sennan:-5.31, hannan:-10.56, kumatori:-6.89, tajiri:0.99,
+  misaki:-13.43
+};
+var ESTABLISHMENTS = {
+  osaka:[179252,177184], sakai:[28733,27315], ikeda:[3647,3629], toyonaka:[13044,13180], suita:[11526,11703],
+  takatsuki:[9320,9224], ibaraki:[9279,8945], minoh:[4215,4159], settsu:[4082,3935], shimamoto:[610,583],
+  toyono:[311,379], nose:[365,383], moriguchi:[6127,5881], hirakata:[10074,9839], neyagawa:[7096,6742],
+  daito:[4606,4208], kadoma:[5462,5128], shijonawate:[1862,1848], katano:[1934,1930], yao:[11940,10930],
+  kashiwara:[2268,2200], higashiosaka:[24644,24408], tondabayashi:[3304,3388], kawachinagano:[2701,2688], matsubara:[4607,4362],
+  habikino:[3638,3394], fujiidera:[2665,2581], osakasayama:[1835,1761], taishi:[402,355], kanan:[491,490],
+  chihayaakasaka:[198,194], izumiotsu:[3269,3033], izumi:[5887,5742], takaishi:[2036,1884], tadaoka:[580,608],
+  kishiwada:[7230,7050], kaizuka:[3295,3139], izumisano:[4694,4636], sennan:[2128,1943], hannan:[1506,1459],
+  kumatori:[1239,1154], tajiri:[386,347], misaki:[452,391]
+};
+var AGING_RISE = {
+  osaka:-0.26, sakai:1.52, ikeda:0.91, toyonaka:0.96, suita:0.42, takatsuki:1.51,
+  ibaraki:0.68, minoh:1.19, settsu:1.01, shimamoto:1.92, toyono:8.52, nose:6.69,
+  moriguchi:1.19, hirakata:1.68, neyagawa:0.97, daito:1.13, kadoma:1.96, shijonawate:2.02,
+  katano:2.53, yao:1.26, kashiwara:2.70, higashiosaka:0.70, tondabayashi:3.12, kawachinagano:4.30,
+  matsubara:1.54, habikino:2.38, fujiidera:1.77, osakasayama:1.43, taishi:3.71, kanan:2.25,
+  chihayaakasaka:4.82, izumiotsu:1.73, izumi:2.83, takaishi:1.23, tadaoka:1.46, kishiwada:2.22,
+  kaizuka:2.45, izumisano:1.47, sennan:2.67, hannan:4.63, kumatori:2.75, tajiri:0.86,
+  misaki:4.16
+};
+var FLOOD_EXPOSURE = {
+  osaka:[77.3,59.7,48.0,25.5], sakai:[17.4,11.8,13.1,5.3], ikeda:[17.9,17.9,0.0,0.0], toyonaka:[22.8,22.3,18.9,0.0],
+  suita:[22.9,22.1,13.7,0.1], takatsuki:[50.3,50.3,0.0,0.0], ibaraki:[44.2,44.2,0.0,0.0], minoh:[1.1,1.1,0.0,0.0],
+  settsu:[68.2,68.2,0.0,0.0], shimamoto:[42.0,42.0,0.0,0.0], toyono:[0.3,0.3,0.0,0.0], nose:[4.9,4.9,0.0,0.0],
+  moriguchi:[85.1,85.1,0.0,0.0], hirakata:[27.8,27.8,0.0,0.0], neyagawa:[50.8,50.8,0.0,0.0], daito:[61.5,61.5,0.0,0.0],
+  kadoma:[96.3,96.3,0.0,0.0], shijonawate:[6.1,6.1,0.0,0.0], katano:[5.8,5.8,0.0,0.0], yao:[36.6,36.6,0.0,0.0],
+  kashiwara:[38.9,38.9,0.0,0.0], higashiosaka:[29.1,29.1,0.0,0.0], tondabayashi:[9.6,9.6,0.0,0.0], kawachinagano:[6.4,6.4,0.0,0.0],
+  matsubara:[22.7,22.7,0.0,0.0], habikino:[21.3,21.3,0.0,0.0], fujiidera:[48.3,48.3,0.0,0.0], osakasayama:[1.7,1.7,0.0,0.0],
+  taishi:[6.2,6.2,0.0,0.0], kanan:[10.3,10.3,0.0,0.0], chihayaakasaka:[1.4,1.4,0.0,0.0], izumiotsu:[68.5,45.6,46.2,17.4],
+  izumi:[13.2,12.8,0.5,0.0], takaishi:[55.3,20.5,53.6,33.1], tadaoka:[85.4,82.6,25.2,10.3], kishiwada:[25.5,19.2,13.1,5.7],
+  kaizuka:[14.7,6.4,12.4,3.2], izumisano:[11.4,3.7,9.3,1.0], sennan:[12.6,11.3,9.1,0.7], hannan:[9.4,7.3,6.0,2.0],
+  kumatori:[4.4,4.4,0.0,0.0], tajiri:[63.6,58.9,43.3,5.9], misaki:[10.0,3.3,7.4,3.0]
+};
+
 /* 実データ（percentile: 25%→約2点, 50%→3点, 75%→約4点）をスコア化する共通変換 */
 function scaleScore(x, center, step){ return clampRound(3 + (x - center) / step); }
 
 /* 1〜5に丸める前の連続値。地図・カルテの表示は丸めた整数を使うが、分析レポートの比較は
    丸めによる情報の欠落（例：高齢化率29%と33%がどちらも3になる）を避けるためこちらを使う */
 function clamp15(v){ return Math.max(1, Math.min(5, v)); }
+/* 防災：土砂災害と水害（洪水・高潮・津波）をそれぞれ1〜5にし、高い方を採る。
+   平均すると、片方だけが深刻な市町村（門真市＝水害、能勢町＝土砂災害）が中程度に埋もれるため */
+function landslideRaw(m){ return clamp15(1 + (m.hazardCount / m.areaKm2) / 2.2); }
+function floodRaw(m){ return clamp15(1 + m.floodExposure / 20); }
+function disasterRaw(m){ return Math.max(landslideRaw(m), floodRaw(m)); }
 function computeRawScores(m){
   var adoptScore = 5 - m.dxAdoptPoints * 4 / 3;
   var onlineScore = clamp15(3 - (m.onlineDoneRate - 72.5) / 17);
@@ -817,8 +890,8 @@ function computeRawScores(m){
     vacant: (m.vacantRate!=null) ? clamp15(3 + (m.vacantRate - 13.4) / 1.6) : null,
     transit: clamp15(3 + (m.carCommuteRate - 27.8) / 11.2),
     community: clamp15(3 + (m.aloneElderlyRate - 13.4) / 1.3),
-    successor: clamp15(3 + (m.elderlyWorkerRate - 21.3) / 1.2),
-    disaster: clamp15(1 + (m.hazardCount / m.areaKm2) / 2.2),
+    successor: clamp15(3 - (m.workAgeChange + 4.9) / 3.4),
+    disaster: disasterRaw(m),
     dx: clamp15((adoptScore + onlineScore) / 2)
   };
 }
@@ -828,8 +901,8 @@ function computeScores(m){
   var vacant = (m.vacantRate!=null) ? scaleScore(m.vacantRate, 13.4, 1.6) : null;
   var transit = scaleScore(m.carCommuteRate, 27.8, 11.2);
   var community = scaleScore(m.aloneElderlyRate, 13.4, 1.3);
-  var successor = scaleScore(m.elderlyWorkerRate, 21.3, 1.2);
-  var disaster = clampRound(1 + (m.hazardCount / m.areaKm2) / 2.2);
+  var successor = clampRound(3 - (m.workAgeChange + 4.9) / 3.4);
+  var disaster = clampRound(disasterRaw(m));
   /* 役所側のデジタル化を2つの面から測り平均する：
      ①AI・RPA・生成AIの導入（導入済1点・実証中0.5点、0〜3点）→ 3点で1、0点で5
      ②重点計画対象手続のオンライン化済の割合 → 中央値72.5%を3点、17ポイントで1点 */
@@ -841,6 +914,12 @@ function computeScores(m){
 MUNIS.forEach(function(m){
   m.carCommuteRate = CAR_COMMUTE_RATE[m.id];
   m.railCover1km = RAIL_COVER_1KM[m.id];
+  m.workAgeChange = WORK_AGE_CHANGE[m.id];
+  m.est2016 = ESTABLISHMENTS[m.id][0]; m.est2021 = ESTABLISHMENTS[m.id][1];
+  m.estChange = (m.est2021 / m.est2016 - 1) * 100;
+  m.agingRise = AGING_RISE[m.id];
+  var fe = FLOOD_EXPOSURE[m.id];
+  m.floodExposure = fe[0]; m.floodRiver = fe[1]; m.floodSurge = fe[2]; m.floodTsunami = fe[3];
   var d = DX_ADMIN[m.id];
   m.dxAi = d[0]; m.dxRpa = d[1]; m.dxGenai = d[2];
   m.dxAdoptPoints = (d[0] + d[1] + d[2]) / 2;
@@ -1313,6 +1392,9 @@ function renderKarte(){
           statTile('将来人口増減率（2020→2050）', m.popRate2050.toFixed(1)+'%')+
           statTile('介護施設定員（高齢者千人当たり）', m.nursingPer1k.toFixed(1)+'人分')+
           statTile('鉄道駅1km圏に住む人の割合', m.railCover1km.toFixed(1)+'%')+
+          statTile('生産年齢人口の増減（2015→2020）', (m.workAgeChange>0?'+':'')+m.workAgeChange.toFixed(1)+'%')+
+          statTile('民営事業所数（2016→2021）', fmtNum(m.est2016)+'→'+fmtNum(m.est2021)+'（'+(m.estChange>0?'+':'')+m.estChange.toFixed(1)+'%）')+
+          statTile('浸水想定区域に住む人の割合', m.floodExposure.toFixed(1)+'%')+
           statTile('AI／RPA／生成AI', [m.dxAi,m.dxRpa,m.dxGenai].map(function(v){return v===2?'導入済':(v===1?'実証中':'未導入');}).join('／'))+
           statTile('オンライン化済の手続', m.onlineDone+' / '+m.onlineApplicable+'件（'+m.onlineDoneRate.toFixed(0)+'%）')+
           statTile('マイナンバーカード保有率', m.cardRate.toFixed(1)+'%')+
@@ -1442,8 +1524,14 @@ var RAW_STAT = {
   vacant: function(m){ return m.vacantRate==null ? null : {v:m.vacantRate, f:function(x){return x.toFixed(1)+'%';}, name:'空き家率'}; },
   transit: function(m){ return {v:m.carCommuteRate, f:function(x){return x.toFixed(1)+'%';}, name:'通勤・通学の自家用車利用率'}; },
   community: function(m){ return {v:m.aloneElderlyRate, f:function(x){return x.toFixed(1)+'%';}, name:'65歳以上単独世帯率'}; },
-  successor: function(m){ return {v:m.elderlyWorkerRate, f:function(x){return x.toFixed(1)+'%';}, name:'高齢就業者割合'}; },
-  disaster: function(m){ return {v:m.hazardCount/m.areaKm2, f:function(x){return x.toFixed(1)+'区域/km²';}, name:'土砂災害警戒区域の密度'}; },
+  successor: function(m){ return {v:m.workAgeChange, f:function(x){return (x>0?'+':'')+x.toFixed(1)+'%';}, name:'生産年齢人口の増減率（2015→2020）'}; },
+  /* 防災は団体ごとに土砂・水害の高い方を採るため、比較相手には本人と同じ種類（kind）の値を使う */
+  disaster: function(m, kind){
+    var useLand = kind ? kind==='landslide' : landslideRaw(m) >= floodRaw(m);
+    return useLand
+      ? {v:m.hazardCount/m.areaKm2, f:function(x){return x.toFixed(1)+'区域/km²';}, name:'土砂災害警戒区域の密度', key:'landslide'}
+      : {v:m.floodExposure, f:function(x){return x.toFixed(1)+'%';}, name:'浸水想定区域に住む人の割合', key:'flood'};
+  },
   dx: function(m){ return {v:m.onlineDoneRate, f:function(x){return x.toFixed(0)+'%';}, name:'手続のオンライン化済割合'}; }
 };
 function avgOf(arr){ return arr.length ? arr.reduce(function(s,v){return s+v;},0)/arr.length : null; }
@@ -1457,7 +1545,7 @@ function peerGaps(m){
     if(!vals.length) return null;
     var peerAvg = avgOf(vals);
     var st = RAW_STAT[c.key](m);
-    var stVals = others.map(function(x){ var r=RAW_STAT[c.key](x); return r?r.v:null; }).filter(function(v){return v!=null;});
+    var stVals = others.map(function(x){ var r=RAW_STAT[c.key](x, st && st.key); return r?r.v:null; }).filter(function(v){return v!=null;});
     var group = peersOf(m).filter(function(x){return x.rawScores[c.key]!=null;})
       .sort(function(a,b){return b.rawScores[c.key]-a.rawScores[c.key];});
     return {key:c.key, label:c.label, mine:mine, peerAvg:peerAvg, gap:mine-peerAvg,
@@ -1476,7 +1564,7 @@ var COOP_TEXT = {
   aging:'地域包括ケアや介護人材の確保を共同で進める',
   vacant:'空き家バンクの共通化・相談窓口の共同設置',
   transit:'デマンド交通・コミュニティバスの市町村をまたぐ共同運行',
-  community:'見守り・地域活動の担い手育成講座の共同開催',
+  community:'見守りネットワーク・配食サービスの共同運営',
   successor:'事業承継・人材マッチングの広域での共同実施',
   disaster:'相互応援協定・合同防災訓練・避難所の相互利用',
   dx:'電子申請基盤・AI・RPAの共同調達や共同利用',
@@ -1501,6 +1589,58 @@ function sharedHigh(a, b){
 function coopSentence(a, b, shared){
   var labels = shared.slice(0,3).map(function(x){return '「'+x.label+'」';}).join('');
   return a.name+'と'+b.name+'（隣接）はともに'+labels+'の課題が高い。'+COOP_TEXT[shared[0].key]+'が考えられる。';
+}
+
+/* 課題の重なり：2つの課題が同時に高いときに必要になる支援（1指標ずつでは出てこないもの） */
+var COMBO_RULES = [
+  {a:'aging', b:'transit', label:'高齢化 × 公共交通', text:'車を運転できなくなった高齢者の移動手段（デマンド交通・移送サービス・免許返納後の支援）の確保が急務。'},
+  {a:'aging', b:'food', label:'高齢化 × 買い物の不便さ', text:'高齢者の買い物支援（移動販売・宅配・買い物バス）が必要。'},
+  {a:'aging', b:'clinic', label:'高齢化 × 医療への行きにくさ', text:'通院支援・在宅医療・オンライン診療の組み合わせで、高齢者の医療へのアクセスを確保する必要がある。'},
+  {a:'community', b:'disaster', label:'高齢者の見守り × 防災', text:'一人暮らし高齢者の避難支援（個別避難計画・避難時の声かけ体制）を優先して整える必要がある。'},
+  {a:'aging', b:'dx', label:'高齢化 × DX', text:'手続のオンライン化を進めつつ、高齢者向けのデジタル支援（スマホ教室・窓口での操作支援）を並行させる必要がある。'},
+  {a:'successor', b:'population', label:'担い手不足 × 人口減少', text:'働き手世代の流出が人口減少を加速させている。移住・定住と地元での就労（事業承継・人材マッチング）をセットで進める必要がある。'},
+  {a:'vacant', b:'population', label:'空き家 × 人口減少', text:'増える空き家を移住・二地域居住の受け皿として活用する余地がある。'},
+  {a:'transit', b:'clinic', label:'公共交通 × 医療への行きにくさ', text:'公共交通で医療機関に行きにくく、通院の足（通院バス・乗合タクシー）の確保が必要。'},
+  {a:'school', b:'successor', label:'学校への通いにくさ × 担い手不足', text:'子育て世代が減り学校の小規模化が進みやすい。通学支援と、子育て世代の定住策を合わせて検討する必要がある。'},
+  {a:'leakage', b:'food', label:'地元で買えない度 × 買い物の不便さ', text:'地元の店が成り立ちにくく、住民は域外へ買い物に出ている。地元商業の維持と移動手段の確保を合わせて考える必要がある。'}
+];
+function rawOf(m, key){
+  if(m.rawScores.hasOwnProperty(key)) return m.rawScores[key];
+  return m.residentRawScores[key];
+}
+function comboHits(list){
+  return COMBO_RULES.map(function(r){
+    var hit = list.filter(function(m){
+      var a=rawOf(m,r.a), b=rawOf(m,r.b);
+      return a!=null && b!=null && a>=HIGH_LINE && b>=HIGH_LINE;
+    });
+    var strength = hit.reduce(function(s,m){ return s + rawOf(m,r.a) + rawOf(m,r.b); }, 0);
+    return {rule:r, hit:hit, strength:strength};
+  }).filter(function(x){ return x.hit.length; })
+    .sort(function(p,q){ return q.hit.length-p.hit.length || q.strength-p.strength; });
+}
+
+/* 変化：同規模グループの中で悪化が目立つもの。badは「大きいほど悪い」向きにそろえた値 */
+var TRENDS = [
+  {key:'agingRise', label:'高齢化の進み方', bad:function(m){return m.agingRise;}, fmt:function(m){return '高齢化率が5年で'+m.agingRise.toFixed(1)+'ポイント上昇（2015→2020）';}},
+  {key:'estChange', label:'事業所の減り方', bad:function(m){return -m.estChange;}, fmt:function(m){return '民営事業所が'+fmtNum(m.est2016)+'→'+fmtNum(m.est2021)+'（'+(m.estChange>0?'+':'')+m.estChange.toFixed(1)+'%、2016→2021）';}},
+  {key:'pop2050', label:'将来の人口減少', bad:function(m){return -m.popRate2050;}, fmt:function(m){return '2050年の推計人口が2020年比'+m.popRate2050.toFixed(1)+'%';}},
+  {key:'foodStores', label:'食料品店の減り方', bad:function(m){
+      var i=m.industry[2]; if(!i || i.count2016==null || i.count2021==null || i.count2016<5) return null;
+      return -(i.count2021/i.count2016-1)*100; },
+    fmt:function(m){ var i=m.industry[2]; return '飲食料品店が'+i.count2016+'→'+i.count2021+'件（'+((i.count2021/i.count2016-1)*100).toFixed(0)+'%、2016→2021）'; }}
+];
+function sd(arr){ var a=avgOf(arr); return Math.sqrt(avgOf(arr.map(function(v){return (v-a)*(v-a);}))); }
+/* 自分以外の同規模グループと比べて、標準偏差の何倍悪いか */
+function trendFlags(m){
+  var others = peersOf(m).filter(function(x){ return x.id!==m.id; });
+  return TRENDS.map(function(t){
+    var mine=t.bad(m); if(mine==null) return null;
+    var vals=others.map(t.bad).filter(function(v){return v!=null;});
+    if(vals.length<3) return null;
+    var s=sd(vals); if(!s) return null;
+    return {t:t, z:(mine-avgOf(vals))/s};
+  }).filter(function(x){ return x && x.z>=0.8; }).sort(function(a,b){ return b.z-a.z; });
 }
 
 function generateReport(scope){
@@ -1561,12 +1701,37 @@ function generateReport(scope){
     aging:'地域包括ケア体制の強化と、生活支援サービス（買い物・移動支援等）の充実を図る。',
     vacant:'空き家バンクの活用促進と、危険家屋の除却・活用支援制度の周知を強化する。',
     transit:'コミュニティバス・デマンド交通の再編検討と、広域路線との接続改善を進める。',
-    community:'地域おこし協力隊等の外部人材活用と、自治会・NPOへの活動支援を拡充する。',
-    successor:'事業承継支援や地域人材マッチング事業と連携し、担い手育成を進める。',
-    disaster:'避難計画の再点検と、要配慮者支援体制・広域応援協定の強化を図る。',
+    community:'一人暮らし高齢者の見守りネットワーク（民生委員・事業者・配食等）と、通いの場づくりを強化する。',
+    successor:'働き手世代の転入・定着策（住まい・子育て・就労支援）と、事業承継・人材マッチングを組み合わせて進める。',
+    disaster:'想定される災害（土砂災害・浸水）に応じた避難計画の再点検と、要配慮者支援体制・広域応援協定の強化を図る。',
     dx:'窓口手続きのオンライン化と、職員のDXリテラシー向上研修を優先的に実施する。'
   };
-  var direction = common.map(function(c){ return actionMap[c.key]; });
+  /* 課題の重なり（#4）：重なりがあればそれを支援の方向性の先頭に置き、残りを単独の課題で補う */
+  var combos = comboHits(list).slice(0,3);
+  var overlap = combos.map(function(x){
+    return single
+      ? '「'+x.rule.label+'」がともに高い。'+x.rule.text
+      : '「'+x.rule.label+'」がともに高い団体が'+x.hit.length+'団体（'+x.hit.slice(0,4).map(function(m){return m.name;}).join('・')+(x.hit.length>4?'など':'')+'）。'+x.rule.text;
+  });
+  if(!overlap.length) overlap=['2つ以上の課題が同時に高い（スコア3.5以上）組み合わせは見られない。'];
+  var covered={}; combos.forEach(function(x){ covered[x.rule.a]=covered[x.rule.b]=true; });
+  var direction = combos.map(function(x){ return x.rule.text.replace(/。$/,'')+'（'+x.rule.label+'）。'; })
+    .concat(common.filter(function(c){ return !covered[c.key]; }).map(function(c){ return actionMap[c.key]; }))
+    .slice(0,4);
+
+  /* 変化（#5）：同規模グループの中で悪化が目立つもの */
+  var trend=[];
+  if(single){
+    trend = trendFlags(list[0]).slice(0,3).map(function(f){
+      return f.t.fmt(list[0])+'。'+PEER_LABELS[list[0].peerGroup]+'の中でも「'+f.t.label+'」が目立つ。';
+    });
+    if(!trend.length) trend=['同規模の団体と比べて、特に悪化が目立つ変化は見られない。'];
+  } else {
+    trend = list.map(function(m){ var f=trendFlags(m)[0]; return f ? {m:m,f:f} : null; })
+      .filter(function(x){return x;}).sort(function(a,b){return b.f.z-a.f.z;}).slice(0,4)
+      .map(function(x){ return x.m.name+'：'+x.f.t.fmt(x.m)+'（同規模の団体の中で「'+x.f.t.label+'」が目立つ）。'; });
+    if(!trend.length) trend=['同規模の団体と比べて、特に悪化が目立つ変化は見られない。'];
+  }
 
   /* 広域連携：境界を接する市町村の組で、高い課題（連続値3.5以上）が共通するものを名指しで挙げる */
   var coop=[];
@@ -1606,6 +1771,8 @@ function generateReport(scope){
     distinctive: distinctive,
     resident: resident,
     single: single,
+    overlap: overlap,
+    trend: trend,
     peerLabel: single ? PEER_LABELS[list[0].peerGroup]+'（'+peersOf(list[0]).length+'団体）' : null,
     direction: direction,
     cooperation: coop
@@ -1626,6 +1793,8 @@ function runAiAnalysis(){
       aiBlock(report.single ? '🔷 主な課題' : '🔷 共通課題', report.common)+
       aiBlock(report.single ? '🔶 同規模の団体との比較（'+report.peerLabel+'）' : '🔶 特徴的な課題（同規模の団体と比べて）', report.distinctive)+
       aiBlock('🧑‍🤝‍🧑 住民目線で見た課題', report.resident)+
+      aiBlock('🔗 重なっている課題', report.overlap)+
+      aiBlock('📉 悪化が目立つ変化（同規模の団体と比べて）', report.trend)+
       aiBlock('🧭 今後の支援の方向性', report.direction)+
       aiBlock('🤝 広域連携の可能性（隣接する市町村）', report.cooperation)+
     '</div>'+
