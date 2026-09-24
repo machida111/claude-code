@@ -419,7 +419,8 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
           <a href="#indicators">2. 8指標の計算方法（地域課題マップ）</a>
           <a href="#resident-indicators">3. 4指標の計算方法（住民目線マップ）</a>
           <a href="#composite">4. 総合スコア</a>
-          <a href="#caution">5. 利用上の注意</a>
+          <a href="#report-logic">5. 分析レポートの判定方法</a>
+          <a href="#caution">6. 利用上の注意</a>
         </nav>
 
         <section class="block">
@@ -612,8 +613,32 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
           </div>
         </section>
 
+        <section class="block" id="report-logic">
+          <div class="k">5 &middot; Analysis report</div>
+          <h2>分析レポートの判定方法</h2>
+          <p class="desc">分析レポートは外部APIを使わず、次のルールで文章を組み立てています。</p>
+          <div class="idx-grid">
+            <div class="idx-card">
+              <div class="head"><h4>丸める前の値で比べる</h4></div>
+              <p class="how">地図やカルテのスコアは1〜5の整数ですが、レポートでは丸める前の連続値で比べています。たとえば高齢化率29%と33%はどちらも「3」になりますが、レポートではこの差を区別します。</p>
+            </div>
+            <div class="idx-card">
+              <div class="head"><h4>同じ規模の団体と比べる</h4></div>
+              <p class="how">「特徴的な課題」は、各市町村を人口規模が近い団体（自分を除く）の平均と比べて、最も上回っている指標を拾います。グループは「政令市・中核市」（9団体）「人口10万人以上の一般市」（13団体）「人口10万人未満の一般市」（11団体）「町村」（10団体）の4つです。総務省「類似団体区分」の人口規模の考え方に沿った府内での簡易区分で、公式の類似団体区分そのものではありません。</p>
+            </div>
+            <div class="idx-card">
+              <div class="head"><h4>隣の市町村と組む</h4></div>
+              <p class="how">「広域連携の可能性」は、境界線を接する市町村の組のうち、同じ課題（地域課題8指標・住民目線4指標のいずれか）が両方ともスコア3.5以上のものを名指しで挙げます。府外の隣接団体は対象外です。</p>
+            </div>
+          </div>
+          <div class="idx-card" style="margin-top:14px; max-width:640px;">
+            <div class="formula">特徴的な課題：丸める前のスコア − 同規模グループの平均 ≥ 0.8（1市町村のみ選択時は0.5）
+広域連携：隣接する2団体の丸める前のスコアがともに3.5以上の指標</div>
+          </div>
+        </section>
+
         <section class="block" id="caution">
-          <div class="k">5 &middot; Caution</div>
+          <div class="k">6 &middot; Caution</div>
           <h2>利用上の注意</h2>
           <div class="callout crit">
             <div class="mark">!</div>
@@ -780,6 +805,23 @@ var DX_ADMIN = {
 /* 実データ（percentile: 25%→約2点, 50%→3点, 75%→約4点）をスコア化する共通変換 */
 function scaleScore(x, center, step){ return clampRound(3 + (x - center) / step); }
 
+/* 1〜5に丸める前の連続値。地図・カルテの表示は丸めた整数を使うが、分析レポートの比較は
+   丸めによる情報の欠落（例：高齢化率29%と33%がどちらも3になる）を避けるためこちらを使う */
+function clamp15(v){ return Math.max(1, Math.min(5, v)); }
+function computeRawScores(m){
+  var adoptScore = 5 - m.dxAdoptPoints * 4 / 3;
+  var onlineScore = clamp15(3 - (m.onlineDoneRate - 72.5) / 17);
+  return {
+    population: clamp15(3 - m.popChangeRate*1.1),
+    aging: clamp15((m.agingRate-15)/5.5),
+    vacant: (m.vacantRate!=null) ? clamp15(3 + (m.vacantRate - 13.4) / 1.6) : null,
+    transit: clamp15(3 + (m.carCommuteRate - 27.8) / 11.2),
+    community: clamp15(3 + (m.aloneElderlyRate - 13.4) / 1.3),
+    successor: clamp15(3 + (m.elderlyWorkerRate - 21.3) / 1.2),
+    disaster: clamp15(1 + (m.hazardCount / m.areaKm2) / 2.2),
+    dx: clamp15((adoptScore + onlineScore) / 2)
+  };
+}
 function computeScores(m){
   var depop = clampRound(3 - m.popChangeRate*1.1);
   var aging = clampRound((m.agingRate-15)/5.5);
@@ -805,6 +847,7 @@ MUNIS.forEach(function(m){
   m.onlineDone = d[3]; m.onlineApplicable = d[4];
   m.onlineDoneRate = d[3] / d[4] * 100;
   m.scores = computeScores(m);
+  m.rawScores = computeRawScores(m);
   var sum=0,n=0; CATEGORIES.forEach(function(c){ var v=m.scores[c.key]; if(v!=null){ sum+=v; n++; } });
   m.composite = sum/n;
 });
@@ -964,9 +1007,75 @@ MUNIS.forEach(function(m){
     school: residentScaleScore(Math.log10(m.schoolDensityAdj), 1.81, 0.14),
     leakage: (m.leakageRate!=null) ? residentScaleScore(m.leakageRate, -5.6, 6) : 3
   };
+  m.residentRawScores = {
+    food: clamp15(3 + (m.foodAccessRate - 29.29) / 6.4),
+    clinic: clamp15(3 - (Math.log10(m.clinicDensityAdj) - 2.60) / 0.19),
+    school: clamp15(3 - (Math.log10(m.schoolDensityAdj) - 1.81) / 0.14),
+    leakage: (m.leakageRate!=null) ? clamp15(3 - (m.leakageRate + 5.6) / 6) : 3
+  };
   var sum=0,n=0; RESIDENT_CATEGORIES.forEach(function(c){ sum+=m.residentScores[c.key]; n++; });
   m.residentComposite = sum/n;
 });
+
+/* ===================== 同規模グループ・隣接関係（分析レポート用） =====================
+   同規模グループ：行政区分と人口規模で大阪府43市町村を4つに分ける（総務省「類似団体区分」の
+   人口規模の考え方に沿った府内での簡易区分。公式の類似団体区分そのものではない）。
+   千早赤阪村（人口約5千人）と大阪市（約275万人）を同じ物差しで比べると「規模を見れば当たり前」の
+   結論しか出ないため、レポートでは同じグループ内の平均と比べる。 */
+var CORE_CITIES = ['osaka','sakai','toyonaka','suita','takatsuki','hirakata','yao','neyagawa','higashiosaka'];
+var PEER_LABELS = { core:'政令市・中核市', cityL:'人口10万人以上の一般市', cityS:'人口10万人未満の一般市', town:'町村' };
+MUNIS.forEach(function(m){
+  if(CORE_CITIES.indexOf(m.id)>=0) m.peerGroup='core';
+  else if(/[町村]$/.test(m.name)) m.peerGroup='town';
+  else m.peerGroup = m.population>=100000 ? 'cityL' : 'cityS';
+});
+function peersOf(m){ return MUNIS.filter(function(x){ return x.peerGroup===m.peerGroup; }); }
+/* 隣接関係：市町村境界（国土数値情報N03）で境界線を共有する市町村。府外の隣接団体は含まない */
+var ADJACENT = {
+  osaka:['daito','higashiosaka','kadoma','matsubara','moriguchi','sakai','settsu','suita','toyonaka','yao'],
+  sakai:['habikino','izumi','kawachinagano','matsubara','osaka','osakasayama','takaishi','tondabayashi'],
+  kishiwada:['izumi','kaizuka','tadaoka'],
+  toyonaka:['ikeda','minoh','osaka','suita'],
+  ikeda:['minoh','toyonaka'],
+  suita:['ibaraki','minoh','osaka','settsu','toyonaka'],
+  izumiotsu:['izumi','tadaoka','takaishi'],
+  takatsuki:['hirakata','ibaraki','neyagawa','settsu','shimamoto'],
+  kaizuka:['izumisano','kishiwada','kumatori'],
+  moriguchi:['kadoma','neyagawa','osaka','settsu'],
+  hirakata:['katano','neyagawa','shimamoto','takatsuki'],
+  ibaraki:['minoh','settsu','suita','takatsuki','toyono'],
+  yao:['fujiidera','higashiosaka','kashiwara','matsubara','osaka'],
+  izumisano:['kaizuka','kumatori','sennan','tajiri'],
+  tondabayashi:['chihayaakasaka','habikino','kanan','kawachinagano','osakasayama','sakai','taishi'],
+  neyagawa:['daito','hirakata','kadoma','katano','moriguchi','settsu','shijonawate','takatsuki'],
+  kawachinagano:['chihayaakasaka','izumi','osakasayama','sakai','tondabayashi'],
+  matsubara:['fujiidera','habikino','osaka','sakai','yao'],
+  daito:['higashiosaka','kadoma','neyagawa','osaka','shijonawate'],
+  izumi:['izumiotsu','kawachinagano','kishiwada','sakai','tadaoka','takaishi'],
+  minoh:['ibaraki','ikeda','suita','toyonaka','toyono'],
+  kashiwara:['fujiidera','habikino','yao'],
+  habikino:['fujiidera','kashiwara','matsubara','sakai','taishi','tondabayashi'],
+  kadoma:['daito','moriguchi','neyagawa','osaka'],
+  settsu:['ibaraki','moriguchi','neyagawa','osaka','suita','takatsuki'],
+  takaishi:['izumi','izumiotsu','sakai'],
+  fujiidera:['habikino','kashiwara','matsubara','yao'],
+  higashiosaka:['daito','osaka','yao'],
+  sennan:['hannan','izumisano','tajiri'],
+  shijonawate:['daito','katano','neyagawa'],
+  katano:['hirakata','neyagawa','shijonawate'],
+  osakasayama:['kawachinagano','sakai','tondabayashi'],
+  hannan:['misaki','sennan'],
+  shimamoto:['hirakata','takatsuki'],
+  toyono:['ibaraki','minoh','nose'],
+  nose:['toyono'],
+  tadaoka:['izumi','izumiotsu','kishiwada'],
+  kumatori:['izumisano','kaizuka'],
+  tajiri:['izumisano','sennan'],
+  misaki:['hannan'],
+  taishi:['habikino','kanan','tondabayashi'],
+  kanan:['chihayaakasaka','taishi','tondabayashi'],
+  chihayaakasaka:['kanan','kawachinagano','tondabayashi']
+};
 
 function sevHex(score){
   if(score==null) return NODATA_HEX;
@@ -1186,7 +1295,7 @@ function renderKarte(){
     '<div class="karte-header" style="margin-bottom:16px;">'+
       '<div><button class="btn btn-ghost btn-sm" id="backToMap">← 地図に戻る</button>'+
       '<h3 style="margin-top:8px;">'+m.name+'</h3>'+
-      '<p style="color:var(--ink-muted); font-size:13px;">'+REGIONS[m.region].label+' ・ 地域課題 総合スコア <b class="mono">'+m.composite.toFixed(1)+'</b> / 5.0 ・ 住民目線 総合スコア <b class="mono">'+m.residentComposite.toFixed(1)+'</b> / 5.0</p></div>'+
+      '<p style="color:var(--ink-muted); font-size:13px;">'+REGIONS[m.region].label+' ・ 同規模グループ：'+PEER_LABELS[m.peerGroup]+' ・ 地域課題 総合スコア <b class="mono">'+m.composite.toFixed(1)+'</b> / 5.0 ・ 住民目線 総合スコア <b class="mono">'+m.residentComposite.toFixed(1)+'</b> / 5.0</p></div>'+
       '<div style="display:flex; gap:8px;"><button class="btn btn-primary" id="karteToAi">分析レポートを見る</button></div>'+
     '</div>'+
     '<div class="grid grid-2">'+
@@ -1326,57 +1435,114 @@ function scopeMunis(){
   var m=MUNI_BY_ID[target];
   return {label:m.name, list:[m]};
 }
+/* 指標ごとの元の統計値（レポート本文で「スコア」ではなく実際の値で説明するため） */
+var RAW_STAT = {
+  population: function(m){ return {v:m.popChangeRate, f:function(x){return (x>0?'+':'')+x.toFixed(2)+'%/年';}, name:'人口増減率'}; },
+  aging: function(m){ return {v:m.agingRate, f:function(x){return x.toFixed(1)+'%';}, name:'高齢化率'}; },
+  vacant: function(m){ return m.vacantRate==null ? null : {v:m.vacantRate, f:function(x){return x.toFixed(1)+'%';}, name:'空き家率'}; },
+  transit: function(m){ return {v:m.carCommuteRate, f:function(x){return x.toFixed(1)+'%';}, name:'通勤・通学の自家用車利用率'}; },
+  community: function(m){ return {v:m.aloneElderlyRate, f:function(x){return x.toFixed(1)+'%';}, name:'65歳以上単独世帯率'}; },
+  successor: function(m){ return {v:m.elderlyWorkerRate, f:function(x){return x.toFixed(1)+'%';}, name:'高齢就業者割合'}; },
+  disaster: function(m){ return {v:m.hazardCount/m.areaKm2, f:function(x){return x.toFixed(1)+'区域/km²';}, name:'土砂災害警戒区域の密度'}; },
+  dx: function(m){ return {v:m.onlineDoneRate, f:function(x){return x.toFixed(0)+'%';}, name:'手続のオンライン化済割合'}; }
+};
+function avgOf(arr){ return arr.length ? arr.reduce(function(s,v){return s+v;},0)/arr.length : null; }
+/* 同規模グループ内の平均（自分自身は除く）との差を指標ごとに求める */
+function peerGaps(m){
+  var others = peersOf(m).filter(function(x){ return x.id!==m.id; });
+  return CATEGORIES.map(function(c){
+    var mine = m.rawScores[c.key];
+    if(mine==null) return null;
+    var vals = others.map(function(x){return x.rawScores[c.key];}).filter(function(v){return v!=null;});
+    if(!vals.length) return null;
+    var peerAvg = avgOf(vals);
+    var st = RAW_STAT[c.key](m);
+    var stVals = others.map(function(x){ var r=RAW_STAT[c.key](x); return r?r.v:null; }).filter(function(v){return v!=null;});
+    var group = peersOf(m).filter(function(x){return x.rawScores[c.key]!=null;})
+      .sort(function(a,b){return b.rawScores[c.key]-a.rawScores[c.key];});
+    return {key:c.key, label:c.label, mine:mine, peerAvg:peerAvg, gap:mine-peerAvg,
+      stat:st, statPeerAvg:avgOf(stVals), rank:group.indexOf(m)+1, groupSize:group.length};
+  }).filter(function(g){return g!=null;});
+}
+function gapSentence(m, g, withName){
+  var peerN = peersOf(m).length;
+  var head = (withName ? m.name+'は' : '')+'「'+g.label+'」';
+  var stat = g.stat ? '（'+g.stat.name+' '+g.stat.f(g.stat.v)+'、同グループ平均 '+g.stat.f(g.statPeerAvg)+'）' : '';
+  var rank = g.rank===1 ? '最も' : g.rank+'番目に';
+  return head+'の課題が'+PEER_LABELS[m.peerGroup]+'（'+peerN+'団体）の中で'+rank+'大きい'+stat+'。';
+}
+var COOP_TEXT = {
+  population:'合同の移住・定住促進（相談窓口・お試し居住の共同実施）',
+  aging:'地域包括ケアや介護人材の確保を共同で進める',
+  vacant:'空き家バンクの共通化・相談窓口の共同設置',
+  transit:'デマンド交通・コミュニティバスの市町村をまたぐ共同運行',
+  community:'見守り・地域活動の担い手育成講座の共同開催',
+  successor:'事業承継・人材マッチングの広域での共同実施',
+  disaster:'相互応援協定・合同防災訓練・避難所の相互利用',
+  dx:'電子申請基盤・AI・RPAの共同調達や共同利用',
+  food:'移動販売車・買い物バスの共同運行',
+  clinic:'巡回診療・オンライン診療・通院支援の共同実施',
+  school:'スクールバスの共同運行や学校施設の相互利用',
+  leakage:'広域での商業振興・共通の地域ポイントなど'
+};
+var HIGH_LINE = 3.5;
+function highIssues(m){
+  var out=[];
+  CATEGORIES.forEach(function(c){ var v=m.rawScores[c.key]; if(v!=null && v>=HIGH_LINE) out.push({key:c.key,label:c.label,v:v}); });
+  RESIDENT_CATEGORIES.forEach(function(c){ var v=m.residentRawScores[c.key]; if(v>=HIGH_LINE) out.push({key:c.key,label:c.label,v:v}); });
+  return out;
+}
+function sharedHigh(a, b){
+  var hb={}; highIssues(b).forEach(function(x){hb[x.key]=x;});
+  return highIssues(a).filter(function(x){return hb[x.key];})
+    .map(function(x){ return {key:x.key, label:x.label, v:(x.v+hb[x.key].v)/2}; })
+    .sort(function(p,q){return q.v-p.v;});
+}
+function coopSentence(a, b, shared){
+  var labels = shared.slice(0,3).map(function(x){return '「'+x.label+'」';}).join('');
+  return a.name+'と'+b.name+'（隣接）はともに'+labels+'の課題が高い。'+COOP_TEXT[shared[0].key]+'が考えられる。';
+}
+
 function generateReport(scope){
   var list=scope.list;
+  var single = list.length===1;
+
+  /* 共通課題：丸める前の連続値で平均する */
   var avg={}; CATEGORIES.forEach(function(c){
-    var vals=list.map(function(m){return m.scores[c.key];}).filter(function(v){return v!=null;});
-    avg[c.key]=vals.length ? vals.reduce(function(s,v){return s+v;},0)/vals.length : null;
+    avg[c.key]=avgOf(list.map(function(m){return m.rawScores[c.key];}).filter(function(v){return v!=null;}));
   });
   var sortedAvg=CATEGORIES.map(function(c){return {key:c.key,label:c.label,v:avg[c.key]};}).filter(function(c){return c.v!=null;}).sort(function(a,b){return b.v-a.v;});
   var common = sortedAvg.filter(function(c){return c.v>=3.3;}).slice(0,3);
   if(!common.length) common=sortedAvg.slice(0,2);
 
-  /* 同じ市町村が「特徴的な課題」に何度も並ぶと域内の見取り図にならないため、1市町村につき1件に絞る */
+  /* 特徴的な課題：各市町村を同規模グループの平均と比べ、最も上回っている指標を1件ずつ拾う */
   var distinctive=[];
-  var seenMuni={};
-  CATEGORIES.forEach(function(c){
-    var maxM=list.filter(function(m){return m.scores[c.key]!=null;}).sort(function(a,b){return b.scores[c.key]-a.scores[c.key];})[0];
-    if(maxM && maxM.scores[c.key]>=4 && (maxM.scores[c.key]-avg[c.key])>=1 && !seenMuni[maxM.id]){
-      distinctive.push(maxM.name+'は「'+c.label+'」課題が特に高い水準（スコア'+maxM.scores[c.key]+'）。');
-      seenMuni[maxM.id]=true;
+  if(single){
+    var m0=list[0];
+    var gaps=peerGaps(m0).sort(function(a,b){return b.gap-a.gap;});
+    distinctive = gaps.filter(function(g){return g.gap>=0.5;}).slice(0,3).map(function(g){ return gapSentence(m0,g,false); });
+    if(!distinctive.length) distinctive=['同規模の団体と比べて突出して高い課題はない。'];
+    var best = gaps.filter(function(g){return g.gap<=-0.8;}).sort(function(a,b){return a.gap-b.gap;})[0];
+    if(best){
+      distinctive.push('一方「'+best.label+'」の課題は'+PEER_LABELS[m0.peerGroup]+'の中で小さい側'+
+        (best.stat ? '（'+best.stat.name+' '+best.stat.f(best.stat.v)+'、同グループ平均 '+best.stat.f(best.statPeerAvg)+'）' : '')+'。');
     }
-  });
-  distinctive = distinctive.slice(0,4);
-  if(!distinctive.length && list.length>1){
-    var topOne=list.slice().sort(function(a,b){return b.composite-a.composite;})[0];
-    distinctive.push(topOne.name+'は総合スコアが域内で最も高く、重点的な支援対象として検討の余地がある。');
-  }
-  /* 1市町村のみを選んだ場合、平均＝その市町村の値なので「共通課題」と同じ内容になる。
-     代わりに大阪府全体と比べてどの指標が突出しているかを示す */
-  if(list.length===1){
-    var only=list[0];
-    distinctive = CATEGORIES.map(function(c){
-      if(only.scores[c.key]==null) return null;
-      var vals=MUNIS.map(function(m){return m.scores[c.key];}).filter(function(v){return v!=null;});
-      var prefAvg=vals.reduce(function(s,v){return s+v;},0)/vals.length;
-      return {label:c.label, v:only.scores[c.key], gap:only.scores[c.key]-prefAvg, prefAvg:prefAvg};
-    }).filter(function(c){return c && c.gap>=0.8;})
-      .sort(function(a,b){return b.gap-a.gap;}).slice(0,3)
-      .map(function(c){
-        return '「'+c.label+'」はスコア'+c.v+'で、大阪府平均'+c.prefAvg.toFixed(1)+'を'+c.gap.toFixed(1)+'ポイント上回る。';
-      });
-    if(!distinctive.length) distinctive=['府平均を大きく上回る指標はなく、課題は特定分野に偏っていない。'];
+  } else {
+    var cands = list.map(function(m){
+      var top = peerGaps(m).sort(function(a,b){return b.gap-a.gap;})[0];
+      return top && top.gap>=0.8 ? {m:m, g:top} : null;
+    }).filter(function(x){return x;}).sort(function(a,b){return b.g.gap-a.g.gap;});
+    distinctive = cands.slice(0,5).map(function(x){ return gapSentence(x.m, x.g, true); });
+    if(!distinctive.length) distinctive=['同規模の団体と比べて突出して高い課題を持つ市町村はない。'];
   }
 
-  /* 住民目線マップの4指標（生活のしにくさ）も併せて示す */
+  /* 住民目線の4指標（連続値の平均） */
   var rAvg={}; RESIDENT_CATEGORIES.forEach(function(c){
-    var vals=list.map(function(m){return m.residentScores[c.key];});
-    rAvg[c.key]=vals.reduce(function(s,v){return s+v;},0)/vals.length;
+    rAvg[c.key]=avgOf(list.map(function(m){return m.residentRawScores[c.key];}));
   });
   var sortedRAvg=RESIDENT_CATEGORIES.map(function(c){return {key:c.key,label:c.label,v:rAvg[c.key]};})
     .sort(function(a,b){return b.v-a.v;});
   var residentLines = sortedRAvg.filter(function(c){return c.v>=3.3;}).slice(0,3);
-  if(!residentLines.length) residentLines=sortedRAvg.slice(0,1);
   var residentNoteMap={
     food:'店舗まで距離があり自動車を使いにくい高齢者が多く、移動販売・買い物支援・移動手段の確保が課題。',
     clinic:'住んでいる場所に対して診療所の密度が低く、通院の足と一次医療へのアクセス確保が課題。',
@@ -1384,39 +1550,53 @@ function generateReport(scope){
     leakage:'日常の買い物や飲食が域外に流出しており、地元商業の維持・空き店舗活用が課題。'
   };
   var resident = residentLines.map(function(c){
-    return '「'+c.label+'」の'+(list.length===1?'スコアが':'平均スコアが')+c.v.toFixed(1)+'。'+residentNoteMap[c.key];
+    return '「'+c.label+'」の'+(single?'スコアが':'平均スコアが')+c.v.toFixed(1)+'。'+residentNoteMap[c.key];
   });
+  if(!resident.length){
+    resident=['住民目線の4指標に大きな課題は見られない（最も高い「'+sortedRAvg[0].label+'」でもスコア'+sortedRAvg[0].v.toFixed(1)+'）。'];
+  }
 
-  var direction = common.map(function(c){
-    var actionMap={
-      population:'転入促進・関係人口創出策の強化と、既存住民の定住満足度向上策の両輪で推進する。',
-      aging:'地域包括ケア体制の強化と、生活支援サービス（買い物・移動支援等）の充実を図る。',
-      vacant:'空き家バンクの活用促進と、危険家屋の除却・活用支援制度の周知を強化する。',
-      transit:'コミュニティバス・デマンド交通の再編検討と、広域路線との接続改善を進める。',
-      community:'地域おこし協力隊等の外部人材活用と、自治会・NPOへの活動支援を拡充する。',
-      successor:'事業承継支援や地域人材マッチング事業と連携し、担い手育成を進める。',
-      disaster:'避難計画の再点検と、要配慮者支援体制・広域応援協定の強化を図る。',
-      dx:'窓口手続きのオンライン化と、職員のDXリテラシー向上研修を優先的に実施する。'
-    };
-    return actionMap[c.key];
-  });
+  var actionMap={
+    population:'転入促進・関係人口創出策の強化と、既存住民の定住満足度向上策の両輪で推進する。',
+    aging:'地域包括ケア体制の強化と、生活支援サービス（買い物・移動支援等）の充実を図る。',
+    vacant:'空き家バンクの活用促進と、危険家屋の除却・活用支援制度の周知を強化する。',
+    transit:'コミュニティバス・デマンド交通の再編検討と、広域路線との接続改善を進める。',
+    community:'地域おこし協力隊等の外部人材活用と、自治会・NPOへの活動支援を拡充する。',
+    successor:'事業承継支援や地域人材マッチング事業と連携し、担い手育成を進める。',
+    disaster:'避難計画の再点検と、要配慮者支援体制・広域応援協定の強化を図る。',
+    dx:'窓口手続きのオンライン化と、職員のDXリテラシー向上研修を優先的に実施する。'
+  };
+  var direction = common.map(function(c){ return actionMap[c.key]; });
 
+  /* 広域連携：境界を接する市町村の組で、高い課題（連続値3.5以上）が共通するものを名指しで挙げる */
   var coop=[];
-  sortedAvg.slice(0,2).forEach(function(c){
-    var coopMap={
-      population:'近隣市町村と合同の移住・定住促進キャンペーンを検討する余地がある。',
-      aging:'医療・介護資源を近隣市町村と共同利用する広域連携が有効。',
-      vacant:'空き家バンクのプラットフォームを近隣市町村と共通化し、利便性を高める。',
-      transit:'広域幹線路線と各市町村のコミュニティ交通を接続する広域交通計画を検討する。',
-      community:'地域活動人材の合同育成講座を近隣市町村と共催する余地がある。',
-      successor:'商工会・農業団体と連携した広域の人材マッチング事業を検討する。',
-      disaster:'近隣市町村間の相互応援協定・合同防災訓練の拡充が有効。',
-      dx:'システム・電子申請基盤の共同利用によりコスト効率を高める余地がある。'
-    };
-    coop.push(coopMap[c.key]);
-  });
+  if(single){
+    var me=list[0];
+    (ADJACENT[me.id]||[]).map(function(id){ var nb=MUNI_BY_ID[id]; return {nb:nb, sh:sharedHigh(me, nb)}; })
+      .filter(function(x){return x.sh.length;})
+      .sort(function(a,b){return b.sh.length-a.sh.length || b.sh[0].v-a.sh[0].v;})
+      .slice(0,3).forEach(function(x){ coop.push(coopSentence(me, x.nb, x.sh)); });
+  } else {
+    var inScope={}; list.forEach(function(m){inScope[m.id]=true;});
+    var pairs=[];
+    list.forEach(function(a){
+      (ADJACENT[a.id]||[]).forEach(function(id){
+        if(!inScope[id] || id<a.id) return;
+        var sh=sharedHigh(a, MUNI_BY_ID[id]);
+        if(sh.length) pairs.push({a:a, b:MUNI_BY_ID[id], sh:sh});
+      });
+    });
+    pairs.sort(function(p,q){return q.sh.length-p.sh.length || q.sh[0].v-p.sh[0].v;});
+    /* 同じ市町村ばかり並ばないよう、1市町村の登場は2組まで */
+    var used={};
+    pairs.forEach(function(p){
+      if(coop.length>=4 || (used[p.a.id]||0)>=2 || (used[p.b.id]||0)>=2) return;
+      coop.push(coopSentence(p.a, p.b, p.sh));
+      used[p.a.id]=(used[p.a.id]||0)+1; used[p.b.id]=(used[p.b.id]||0)+1;
+    });
+  }
+  if(!coop.length) coop=['隣接する市町村の間で、共通して高い課題（スコア3.5以上）は見つからなかった。'];
 
-  var single = list.length===1;
   return {
     common: common.map(function(c){
       return single
@@ -1426,8 +1606,9 @@ function generateReport(scope){
     distinctive: distinctive,
     resident: resident,
     single: single,
+    peerLabel: single ? PEER_LABELS[list[0].peerGroup]+'（'+peersOf(list[0]).length+'団体）' : null,
     direction: direction,
-    cooperation: Array.from(new Set(coop))
+    cooperation: coop
   };
 }
 function renderAi(){
@@ -1443,10 +1624,10 @@ function runAiAnalysis(){
     '<div class="section-title">分析結果：'+scope.label+' <span class="count">'+scope.list.length+'市町村</span></div>'+
     '<div class="ai-report">'+
       aiBlock(report.single ? '🔷 主な課題' : '🔷 共通課題', report.common)+
-      aiBlock(report.single ? '🔶 大阪府平均との差' : '🔶 特徴的な課題', report.distinctive)+
+      aiBlock(report.single ? '🔶 同規模の団体との比較（'+report.peerLabel+'）' : '🔶 特徴的な課題（同規模の団体と比べて）', report.distinctive)+
       aiBlock('🧑‍🤝‍🧑 住民目線で見た課題', report.resident)+
       aiBlock('🧭 今後の支援の方向性', report.direction)+
-      aiBlock('🤝 広域連携の可能性', report.cooperation)+
+      aiBlock('🤝 広域連携の可能性（隣接する市町村）', report.cooperation)+
     '</div>'+
     '<p style="font-size:11px; color:var(--ink-faint); margin-top:14px;">※統計データからルールベースで自動生成しています（外部API呼び出しなし）。</p>';
 }
