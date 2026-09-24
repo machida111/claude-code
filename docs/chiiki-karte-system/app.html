@@ -438,7 +438,9 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
               <tr><td>財政力指数</td><td class="src">総務省 地方財政状況調査</td><td class="src">直近公表年度。1に近いほど自主財源の割合が高い。</td></tr>
               <tr><td>空き家率</td><td class="src">総務省統計局 令和5年住宅・土地統計調査</td><td class="src">人口規模の小さい5町村（能勢町・田尻町・岬町・太子町・千早赤阪村）は未公表。これらの町村は空き家指標を「データなし」として扱い、総合スコアの算出から除外する。</td></tr>
               <tr><td>65歳以上単独世帯率・高齢就業者割合</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">2020年度公表値（2020年国勢調査ベース）。</td></tr>
-              <tr><td>マイナンバーカード保有率</td><td class="src">総務省「マイナンバーカードの交付・保有状況」</td><td class="src">令和8年8月末時点。人口に対する保有枚数の割合。</td></tr>
+              <tr><td>AI・RPA・生成AI導入状況（DX）</td><td class="src">総務省「地方自治体におけるAI・RPAの実証実験・導入状況等調査」</td><td class="src">令和7年度。導入済・実証実験中の団体一覧に掲載がない団体は未導入として扱う。</td></tr>
+              <tr><td>手続のオンライン化状況（DX）</td><td class="src">総務省「自治体DX・情報化推進概要」個別資料<br>（オンライン利用状況調査）</td><td class="src">令和7年4月1日現在（令和8年9月18日公表）。重点計画対象手続のうち「オンライン化済」の数。</td></tr>
+              <tr><td>マイナンバーカード保有率（カルテのみ）</td><td class="src">総務省「マイナンバーカードの交付・保有状況」</td><td class="src">令和8年8月末時点。人口に対する保有枚数の割合。カルテに参考表示（スコア化なし）。</td></tr>
               <tr><td>土砂災害警戒区域数</td><td class="src">大阪府「土砂災害防止法の指定状況」</td><td class="src">土砂災害警戒区域（イエローゾーン）の指定数。市街地中心部は指定なし（0件）の市町村が複数ある。</td></tr>
               <tr><td>自家用車利用率（公共交通）</td><td class="src">e-Stat 2020年国勢調査<br>「利用交通手段」（統計表0003454514）</td><td class="src">15歳以上の自宅外就業者・通学者のうち、通勤・通学に自家用車を利用する人の割合。複数手段の併用があるため各手段の割合の合計は100%を超える。</td></tr>
               <tr><td>鉄道駅1km圏人口（カルテのみ）</td><td class="src">国土数値情報 鉄道データ（N02-23）<br>＋ e-Stat 2020年国勢調査1kmメッシュ人口</td><td class="src">駅から半径1km圏内に住む人の割合。1kmメッシュを5×5に等分し人口を均等配分して算出。カルテに参考表示（スコア化なし）。</td></tr>
@@ -520,9 +522,10 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
             </div>
             <div class="idx-card">
               <div class="head"><h4>DX（行政デジタル化の遅れ）</h4><span class="badge real">実データ</span></div>
-              <div class="inputs">入力：マイナンバーカード保有率（総務省、令和8年8月末）</div>
-              <p class="how">保有率が低い市町村ほど高スコア。43市町村の保有率は75.9%〜86.9%とばらつきが小さいため、中央値83.1%を基準に1.3ポイントの差を1点分としています。行政DXの中でもデジタルID普及の一側面を表す指標である点に留意してください。</p>
-              <div class="formula">score = 3 − (マイナンバーカード保有率(%) − 83.1) / 1.3</div>
+              <div class="inputs">入力：AI・RPA・生成AIの導入状況（総務省、令和7年度）／重点計画対象手続のオンライン化状況（総務省「自治体DX・情報化推進概要」、令和7年4月1日現在）</div>
+              <p class="how">役所側のデジタル化を2つの面から測り、平均しています。①AI・RPA・生成AIをそれぞれ導入済1点・実証実験中0.5点として合計（0〜3点）し、3点なら1、0点なら5。②図書館予約・粗大ごみ・児童手当・保育・介護・転出入など、国の重点計画でオンライン化を求められている手続のうち「オンライン化済」の割合を、中央値72.5%を基準に17ポイントで1点分としています。住民側の普及率であるマイナンバーカード保有率は、行政のデジタル化の遅れそのものではないため、カルテの参考値に移しました。</p>
+              <div class="formula">導入点 = AI + RPA + 生成AI（導入済1・実証中0.5・未導入0）
+score = ((5 − 導入点 × 4/3) + (3 − (オンライン化済割合(%) − 72.5) / 17)) / 2</div>
             </div>
           </div>
         </section>
@@ -608,7 +611,7 @@ K：期待施設数が5件になる可住地面積（指標ごとに固定値）
             <div>
               <p>地域課題マップの8指標・住民目線マップの4指標はすべて、その課題に対応する公的統計を直接スコア化しています。推定値による代用はどの指標でも行っていません。ただし「公共交通」は自家用車の利用率という<b>住民の行動から測った指標</b>である点に注意してください。自家用車の利用には公共交通の便以外の要因（勤め先の位置、世帯の所得、駐車場の有無など）も影響します。また対象は通勤・通学者であり、通勤も通学もしていない住民（高齢者など）の移動手段は含みません。</p>
               <p>当初は国土交通省の定義（鉄道駅1km圏・バス停300m圏の外を公共交通空白地域とする）に沿って空白地域の人口割合を算出することも検討しましたが、国土数値情報のバス停留所データに事業者単位の欠落があり（忠岡町・高石市・柏原市などでバス停が0〜数件しか収録されていない）、市町村間の比較に使える精度がなかったため採用していません。鉄道駅のみのカバー率は駅位置データが完全なため、カルテに参考値として表示しています（ただし高槻市のようにバス網で支えられている市では低く出ます）。</p>
-              <p>また「防災」は土砂災害警戒区域数に基づくもので、洪水・高潮・地震などの他の災害リスクは含みません。「DX」はマイナンバーカード保有率に基づくもので、行政デジタル化の一側面（デジタルID普及）を表すにとどまります。「空き家」は能勢町・田尻町・岬町・太子町・千早赤阪村の5町村で調査結果が未公表のため、地図・カルテ・分析レポートのいずれでも「データなし」として扱い、推定値による代用はしていません。各指標は個別の統計を組み合わせた大阪府市町村局振興課によるスコア化であり、<b>国や大阪府による公式な評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
+              <p>また「防災」は土砂災害警戒区域数に基づくもので、洪水・高潮・地震などの他の災害リスクは含みません。「DX」は総務省調査の「導入しているか」「オンライン化しているか」を数えたもので、導入したAIがどの業務でどれだけ使われているか、オンライン申請が実際にどれだけ使われているかまでは測っていません。またAI・RPA・生成AIの調査結果は導入団体の一覧形式のため、一覧に掲載がない団体を「未導入」として扱っています（未回答の団体を含む可能性があります）。「空き家」は能勢町・田尻町・岬町・太子町・千早赤阪村の5町村で調査結果が未公表のため、地図・カルテ・分析レポートのいずれでも「データなし」として扱い、推定値による代用はしていません。各指標は個別の統計を組み合わせた大阪府市町村局振興課によるスコア化であり、<b>国や大阪府による公式な評価結果ではありません</b>。個別市町村の政策判断に用いる際は、現場の実態確認や関連部署へのヒアリングと合わせて利用してください。</p>
             </div>
           </div>
         </section>
@@ -744,6 +747,27 @@ var RAIL_COVER_1KM = {
   kumatori:22.6, tajiri:97.3, misaki:75.3
 };
 
+/* ===================== 行政DXデータ =====================
+   DX_ADMIN: [AI, RPA, 生成AI, オンライン化済の手続数, 対象手続数]
+   AI・RPA・生成AI＝総務省「地方自治体におけるAI・RPAの実証実験・導入状況等調査」（令和7年度）。
+   2=導入済, 1=実証実験中, 0=未導入（調査結果の導入団体一覧に掲載がない団体。未回答を含む可能性がある）。
+   オンライン化済の手続数＝総務省「自治体DX・情報化推進概要」個別資料（令和7年4月1日現在）の
+   オンライン利用状況調査。重点計画で対象となっている手続（図書館予約・粗大ごみ・児童手当・保育・介護・
+   転出入など）のうち、その団体で「オンライン化済」の手続の数と、「済」「未」いずれかの対象手続の数。 */
+var DX_ADMIN = {
+  osaka:[2,2,2,33,47], sakai:[2,2,2,47,48], ikeda:[2,0,1,32,46], toyonaka:[2,2,2,46,48],
+  suita:[2,2,1,41,48], takatsuki:[2,2,0,36,47], ibaraki:[2,2,2,37,47], minoh:[1,2,2,37,45],
+  settsu:[2,2,2,12,47], shimamoto:[2,2,2,31,46], toyono:[0,0,0,4,46], nose:[0,0,0,34,48],
+  moriguchi:[2,2,1,39,47], hirakata:[2,2,1,37,45], neyagawa:[2,2,2,38,48], daito:[2,2,1,36,47],
+  kadoma:[2,2,0,45,47], shijonawate:[2,2,1,24,48], katano:[2,2,1,17,46], yao:[2,2,2,36,47],
+  kashiwara:[2,0,2,35,46], higashiosaka:[2,2,2,37,48], tondabayashi:[2,2,2,16,45], kawachinagano:[2,0,2,35,47],
+  matsubara:[2,2,2,11,46], habikino:[2,2,2,43,47], fujiidera:[2,2,2,19,43], osakasayama:[2,2,2,19,46],
+  taishi:[0,0,1,34,45], kanan:[0,2,0,7,49], chihayaakasaka:[0,0,0,11,43], izumiotsu:[2,2,2,25,47],
+  izumi:[2,2,2,37,47], takaishi:[0,0,0,34,48], tadaoka:[2,0,0,21,47], kishiwada:[2,2,2,32,47],
+  kaizuka:[1,2,0,29,40], izumisano:[2,2,0,27,41], sennan:[2,0,1,35,47], hannan:[2,0,2,36,47],
+  kumatori:[2,2,1,36,47], tajiri:[0,0,0,6,35], misaki:[1,0,1,32,48]
+};
+
 /* 実データ（percentile: 25%→約2点, 50%→3点, 75%→約4点）をスコア化する共通変換 */
 function scaleScore(x, center, step){ return clampRound(3 + (x - center) / step); }
 
@@ -755,12 +779,22 @@ function computeScores(m){
   var community = scaleScore(m.aloneElderlyRate, 13.4, 1.3);
   var successor = scaleScore(m.elderlyWorkerRate, 21.3, 1.2);
   var disaster = clampRound(1 + (m.hazardCount / m.areaKm2) / 2.2);
-  var dx = clampRound(3 - (m.cardRate - 83.1) / 1.3);
+  /* 役所側のデジタル化を2つの面から測り平均する：
+     ①AI・RPA・生成AIの導入（導入済1点・実証中0.5点、0〜3点）→ 3点で1、0点で5
+     ②重点計画対象手続のオンライン化済の割合 → 中央値72.5%を3点、17ポイントで1点 */
+  var adoptScore = 5 - m.dxAdoptPoints * 4 / 3;
+  var onlineScore = Math.max(1, Math.min(5, 3 - (m.onlineDoneRate - 72.5) / 17));
+  var dx = clampRound((adoptScore + onlineScore) / 2);
   return {population:depop, aging:aging, vacant:vacant, transit:transit, community:community, successor:successor, disaster:disaster, dx:dx};
 }
 MUNIS.forEach(function(m){
   m.carCommuteRate = CAR_COMMUTE_RATE[m.id];
   m.railCover1km = RAIL_COVER_1KM[m.id];
+  var d = DX_ADMIN[m.id];
+  m.dxAi = d[0]; m.dxRpa = d[1]; m.dxGenai = d[2];
+  m.dxAdoptPoints = (d[0] + d[1] + d[2]) / 2;
+  m.onlineDone = d[3]; m.onlineApplicable = d[4];
+  m.onlineDoneRate = d[3] / d[4] * 100;
   m.scores = computeScores(m);
   var sum=0,n=0; CATEGORIES.forEach(function(c){ var v=m.scores[c.key]; if(v!=null){ sum+=v; n++; } });
   m.composite = sum/n;
@@ -1161,6 +1195,9 @@ function renderKarte(){
           statTile('将来人口増減率（2020→2050）', m.popRate2050.toFixed(1)+'%')+
           statTile('介護施設定員（高齢者千人当たり）', m.nursingPer1k.toFixed(1)+'人分')+
           statTile('鉄道駅1km圏に住む人の割合', m.railCover1km.toFixed(1)+'%')+
+          statTile('AI／RPA／生成AI', [m.dxAi,m.dxRpa,m.dxGenai].map(function(v){return v===2?'導入済':(v===1?'実証中':'未導入');}).join('／'))+
+          statTile('オンライン化済の手続', m.onlineDone+' / '+m.onlineApplicable+'件（'+m.onlineDoneRate.toFixed(0)+'%）')+
+          statTile('マイナンバーカード保有率', m.cardRate.toFixed(1)+'%')+
         '</div>'+
       '</div>'+
       '<div class="card">'+
