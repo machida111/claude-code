@@ -437,7 +437,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
       <div class="view-head">
         <div>
           <h3>地域課題マップ</h3>
-          <p>国土地理院の地図上に市町村の境界を塗り分けて表示します。市町村をクリックすると市町村カルテに移動します。</p>
+          <p>国土地理院の地図上に市町村の境界を塗り分けて表示します。市町村をクリックすると、スコアと元の統計値、「判定根拠を表示」（年度・基準値・出典・区分）が出ます。そこから市町村カルテにも移動できます。</p>
         </div>
       </div>
       <div class="map-toolbar">
@@ -668,7 +668,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
             <div class="idx-card">
               <div class="head"><h4>公共交通</h4><span class="badge" data-ind="transit"></span></div>
               <div class="inputs">入力：通勤・通学に自家用車を利用する人の割合（2020年国勢調査「利用交通手段」）</div>
-              <p class="how">公共交通で用が足りる地域では鉄道・バス・自転車・徒歩が選べますが、路線や便数が足りない地域では自家用車に頼らざるを得ません。その割合を、住民が実際に取っている行動として直接測った指標です。中央値27.8%を基準に、11.2ポイントの差を1点分としています。大阪市10.5%（最低）から能勢町75.7%（最高）まで分布します。</p>
+              <p class="how">公共交通で用が足りる地域では鉄道・バス・自転車・徒歩が選べますが、路線や便数が足りない地域では自家用車に頼らざるを得ません。公共交通の便そのもの（路線・便数）を全市町村でそろえて測れる統計がないため、自家用車に頼る人の割合で代えた<b>代理指標</b>です。中央値27.8%を基準に、11.2ポイントの差を1点分としています。大阪市10.5%（最低）から能勢町75.7%（最高）まで分布します。</p>
               <p class="how">路線バスの走り方（路線・便数）から測ることも検討しましたが、国土数値情報のバス停留所データ（2022年）・バスルートデータ（2022年）はいずれも事業者やコミュニティバスの収録漏れがあり（忠岡町は空港リムジンのみ、柏原市は4路線のみ）、便数も含まれないため使っていません。なお、国勢調査は2020年時点のため、その後の路線の廃止・縮小（2023年12月の金剛自動車の路線バス廃止など）は反映されていません。南河内の町村では、現状はこのスコアより厳しい可能性があります。</p>
               <div class="formula">score = 3 + (自家用車利用率(%) − 27.8) / 11.2</div>
             </div>
@@ -712,7 +712,7 @@ score = ((5 − 導入点 × 4/3) + (3 − (オンライン化済割合(%) − 7
             <div class="idx-card">
               <div class="head"><h4>買い物の不便さ</h4><span class="badge" data-ind="food"></span></div>
               <div class="inputs">入力：食料品アクセス困難人口割合（65歳以上、農林水産省「食料品アクセスマップ」2020年）</div>
-              <p class="how">店舗まで直線距離500m以上で、かつ自動車を利用しにくい65歳以上住民の割合。500mメッシュ単位の店舗立地と国勢調査人口から国が算出したもので、施設数ではなく「実際に買い物に困っている人がどれだけいるか」を直接表します。府内中央値29.29%を基準に、6.4ポイントの差を1点分としています。割合が高いほど高スコア（課題が大きい）。</p>
+              <p class="how">店舗まで直線距離500m以上で、かつ自動車を利用しにくい65歳以上住民の割合。500mメッシュ単位の店舗立地と国勢調査人口から国が算出したもので、施設数ではなく、店舗までの距離と自動車の使いにくさから、買い物が困難な高齢者の割合を国が推計した値です。府内中央値29.29%を基準に、6.4ポイントの差を1点分としています。割合が高いほど高スコア（課題が大きい）。</p>
               <div class="formula">score = 3 + (食料品アクセス困難率(%) − 29.29) / 6.4</div>
             </div>
             <div class="idx-card">
@@ -1977,12 +1977,12 @@ function renderKarte(){
       '<div class="card">'+
         '<div class="section-title">基本指標</div>'+
         '<div class="stat-grid">'+
-          statTile('人口', fmtNum(m.population)+'人')+
-          statTile('人口増減率（年率）', (m.popChangeRate>0?'+':'')+m.popChangeRate.toFixed(2)+'%')+
-          statTile('高齢化率', m.agingRate.toFixed(1)+'%')+
+          statTile('人口（2020年）', fmtNum(m.population)+'人')+
+          statTile('人口増減率（2015→2020年、年率）', (m.popChangeRate>0?'+':'')+m.popChangeRate.toFixed(2)+'%')+
+          statTile('高齢化率（2020年）', m.agingRate.toFixed(1)+'%')+
           statTile('面積', m.areaKm2.toFixed(2)+' km²')+
           statTile('可住地面積', m.habitableKm2.toFixed(2)+' km²')+
-          statTile('世帯数', fmtNum(m.households)+'世帯')+
+          statTile('世帯数（2020年）', fmtNum(m.households)+'世帯')+
           statTile('財政力指数', m.fiscalIndex.toFixed(2))+
           statTile('将来人口（2050年推計）', fmtNum(m.pop2050)+'人')+
           statTile('将来人口増減率（2020→2050）', m.popRate2050.toFixed(1)+'%')+
