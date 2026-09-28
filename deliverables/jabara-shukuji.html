@@ -87,7 +87,7 @@
   .sheet .sheet-label{position:absolute; top:2mm; left:2mm; font-size:9px; color:var(--ink-400); font-family:"Zen Kaku Gothic New",sans-serif;}
   .panel-strip{position:absolute; inset:0; display:flex; flex-direction:row; justify-content:flex-start;}
   .panel{
-    position:relative; height:100%; flex:none; display:grid; place-items:center;
+    position:relative; height:100%; flex:none; display:grid; align-items:center; justify-items:start;
     writing-mode:vertical-rl; text-orientation:mixed; font-family:"HGS行書体","HG行書体","Shippori Mincho",serif;
     padding:6mm 0; overflow:hidden;
   }
@@ -111,7 +111,7 @@
     font-family:"HGS行書体","HG行書体","Shippori Mincho",serif; padding:6mm 20mm 6mm 4mm; overflow:hidden;
   }
   .cover-panel .cover-title, .cover-panel .cover-subtitle{
-    writing-mode:vertical-rl; text-orientation:mixed; height:100%; display:grid; place-items:center; overflow:hidden;
+    writing-mode:vertical-rl; text-orientation:mixed; height:100%; display:grid; align-items:center; justify-items:start; overflow:hidden;
   }
   .cover-panel .fold-guide{ position:absolute; left:0; top:0; bottom:0; width:0; border-left:1px dashed var(--fold-line); }
   .cover-panel .fold-label{
