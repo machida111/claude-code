@@ -119,6 +119,17 @@
     writing-mode:horizontal-tb; background:var(--sheet-bg); padding:0 2px;
   }
   .cover-panel.overflow-warn{outline:2px solid var(--vermilion-600); outline-offset:-2px;}
+
+  .glue-tab{
+    position:relative; height:100%; flex:none;
+    border-right:1px dashed var(--fold-line);
+    background:repeating-linear-gradient(135deg, rgba(178,58,46,.08) 0 3px, transparent 3px 8px);
+  }
+  .glue-tab .glue-label{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    writing-mode:vertical-rl; text-orientation:mixed; font-size:8.5px; letter-spacing:.15em;
+    color:var(--fold-line); font-family:"Zen Kaku Gothic New",sans-serif; white-space:nowrap;
+  }
   .cover-fields{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
   @media (max-width:640px){.cover-fields{grid-template-columns:1fr;}}
   .cover-enable-row{display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:13px; color:var(--ink-600);}
@@ -161,7 +172,7 @@
       </div>
       <div>
         <label class="field-label" for="coverSpan">表紙パネルの幅（折り幅の何個分か）</label>
-        <input type="number" id="coverSpan" value="3" step="1" min="1"> 個分
+        <input type="number" id="coverSpan" value="2" step="1" min="1"> 個分
       </div>
       <div></div>
       <div>
@@ -181,7 +192,7 @@
     <div class="settings-grid">
       <div>
         <label class="field-label" for="panelWidth">折り幅（1パネルの横幅）</label>
-        <input type="number" id="panelWidth" value="5.15" step="0.05" min="2"> cm
+        <input type="number" id="panelWidth" value="6.8" step="0.05" min="2"> cm
       </div>
       <div>
         <label class="field-label" for="marginCm">用紙の余白（上下左右）</label>
@@ -200,7 +211,7 @@
         <input type="number" id="maxLines" value="3" step="1" min="1"> 行
       </div>
     </div>
-    <div class="hint">元のテンプレートと同じく、1枚目の紙の右端から折り幅ぶん測って山折り→谷折りを繰り返します。2枚目以降は前の紙の続きとして同じ折り幅で並びます。余白を小さくしすぎるとプリンターによっては端が印刷されないことがあります（多くの機種は3〜5mm程度が下限）。端が切れる場合は余白を広げてください。</div>
+    <div class="hint">元のテンプレートと同じく、1枚目の紙の右端から折り幅ぶん測って山折り→谷折りを繰り返します。2枚目以降は前の紙の続きとして同じ折り幅で並びます。用紙幅が折り幅でちょうど割り切れない場合、余った分は次の用紙と貼り合わせる「のりしろ」として紙の左端に自動で確保されます。余白を小さくしすぎるとプリンターによっては端が印刷されないことがあります（多くの機種は3〜5mm程度が下限）。端が切れる場合は余白を広げてください。</div>
   </div>
 
   <div class="card">
@@ -459,6 +470,17 @@
           coverEl.appendChild(cGuide); coverEl.appendChild(cLabel);
         }
         strip.appendChild(coverEl);
+      }
+
+      var contentWidth = sheetPanels.length * panelW + (isFirstSheet && useCover ? cWidth : 0);
+      var remainder = usableW - contentWidth;
+      var isLastSheet = sIdx === sheets.length - 1;
+      if(!isLastSheet && remainder > 0.05){
+        var glueTab = document.createElement('div'); glueTab.className = 'glue-tab';
+        glueTab.style.width = remainder + 'cm';
+        var glueLabel = document.createElement('div'); glueLabel.className = 'glue-label'; glueLabel.textContent = 'のりしろ';
+        glueTab.appendChild(glueLabel);
+        strip.insertBefore(glueTab, strip.firstChild);
       }
 
       sheet.appendChild(strip);
