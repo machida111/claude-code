@@ -1,0 +1,822 @@
+<title>蛇腹祝辞メーカー（Word読み込み版）</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700&family=Zen+Kaku+Gothic+New:wght@400;500;700;900&display=swap');
+
+  :root{
+    --paper-0:#ECEEE7; --paper-1:#FFFFFF;
+    --ink-900:#24303D; --ink-600:#5B6B7A; --ink-400:#8B968E;
+    --indigo-600:#2B4C6F; --vermilion-600:#B23A2E;
+    --line:#C9CEC0; --line-strong:#AEB6A2; --focus:#2B4C6F;
+    --sheet-bg:#FFFFFF; --sheet-ink:#24303D; --fold-line:#B23A2E;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper-0:#171B17; --paper-1:#20241F;
+      --ink-900:#E7E9E2; --ink-600:#9CA79A; --ink-400:#71796E;
+      --indigo-600:#7FA6CE; --vermilion-600:#E2685A;
+      --line:#3A4238; --line-strong:#4A5245; --focus:#7FA6CE;
+      --sheet-bg:#2A2E28; --sheet-ink:#E7E9E2; --fold-line:#E2685A;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper-0:#171B17; --paper-1:#20241F;
+    --ink-900:#E7E9E2; --ink-600:#9CA79A; --ink-400:#71796E;
+    --indigo-600:#7FA6CE; --vermilion-600:#E2685A;
+    --line:#3A4238; --line-strong:#4A5245; --focus:#7FA6CE;
+    --sheet-bg:#2A2E28; --sheet-ink:#E7E9E2; --fold-line:#E2685A;
+  }
+
+  *{box-sizing:border-box;}
+  body{background:var(--paper-0); color:var(--ink-900); font-family:"Zen Kaku Gothic New","Hiragino Sans",sans-serif;}
+  .app{max-width:1080px; margin:0 auto; padding:28px 20px 64px;}
+
+  header.hero{padding-bottom:18px; margin-bottom:22px; border-bottom:1px solid var(--line);}
+  header.hero .eyebrow{display:block; font-size:12px; letter-spacing:.14em; color:var(--indigo-600); font-weight:700; margin-bottom:6px;}
+  header.hero h1{font-family:"Shippori Mincho",serif; font-weight:700; font-size:clamp(21px,3vw,27px); margin:0 0 8px; text-wrap:balance;}
+  header.hero p{margin:0; color:var(--ink-600); font-size:13.5px; max-width:62ch; line-height:1.8;}
+
+  .btn{font:inherit; font-size:13px; font-weight:700; padding:9px 15px; border-radius:7px; cursor:pointer; border:1px solid var(--indigo-600); background:var(--indigo-600); color:var(--paper-1);}
+  .btn.secondary{background:transparent; color:var(--indigo-600);}
+  .btn.ghost{background:transparent; color:var(--ink-600); border-color:var(--line-strong); font-weight:500;}
+  .btn:hover{filter:brightness(1.08);}
+  button:focus-visible, input:focus-visible, textarea:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
+
+  .card{background:var(--paper-1); border:1px solid var(--line); border-radius:10px; padding:18px 20px; margin-bottom:18px;}
+  .card h2{font-family:"Shippori Mincho",serif; font-size:15.5px; margin:0 0 12px;}
+
+  .field-label{font-size:12.5px; color:var(--ink-600); font-weight:500; display:block; margin-bottom:5px;}
+  input[type=text], input[type=number], textarea{width:100%; font:inherit; font-size:13.5px; color:var(--ink-900); background:var(--paper-0); border:1px solid var(--line-strong); border-radius:6px; padding:8px 10px;}
+  textarea{resize:vertical; min-height:56px; line-height:1.7;}
+  .settings-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  @media (max-width:700px){.settings-grid{grid-template-columns:1fr 1fr;}}
+  .hint{font-size:11.5px; color:var(--ink-400); margin-top:4px;}
+
+  .panel-row{display:grid; grid-template-columns:44px 1fr 72px 34px; gap:10px; align-items:start; margin-bottom:10px;}
+  .panel-row .idx{display:flex; align-items:center; justify-content:center; min-height:38px; font-weight:700; color:var(--ink-600); font-size:12.5px;}
+  .panel-row .idx button:disabled{opacity:.35; cursor:default;}
+  .char-count{font-size:11px; color:var(--ink-400);}
+  .char-count.warn{color:var(--vermilion-600); font-weight:700;}
+  .ta-toolbar{display:flex; justify-content:space-between; align-items:center; margin-top:3px; gap:8px;}
+  .ruby-btn{font:inherit; font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:5px; border:1px solid var(--line-strong); background:var(--paper-0); color:var(--indigo-600); cursor:pointer; flex:none;}
+  .ruby-btn:hover{border-color:var(--indigo-600);}
+  .ruby-btn:focus-visible{outline:2px solid var(--focus); outline-offset:2px;}
+  .ruby-form{display:none; align-items:center; gap:6px; margin-top:6px; flex-wrap:wrap; background:var(--paper-0); border:1px solid var(--line-strong); border-radius:6px; padding:6px 8px;}
+  .ruby-form.open{display:flex;}
+  .ruby-form .rf-label{font-size:11.5px; color:var(--ink-600); white-space:nowrap;}
+  .ruby-form .rf-target{font-weight:700; color:var(--ink-900);}
+  .ruby-form input{width:110px; font-size:12.5px; padding:5px 7px;}
+  .ruby-form .rf-ok{font:inherit; font-size:11.5px; font-weight:700; padding:4px 10px; border-radius:5px; border:none; background:var(--indigo-600); color:var(--paper-1); cursor:pointer;}
+  .ruby-form .rf-cancel{font:inherit; font-size:11.5px; padding:4px 8px; border-radius:5px; border:1px solid var(--line-strong); background:transparent; color:var(--ink-600); cursor:pointer;}
+  .ruby-msg{font-size:11px; color:var(--vermilion-600); margin-top:4px;}
+  .fontsize-wrap{display:flex; flex-direction:column; gap:3px;}
+  .fontsize-wrap label{font-size:10px; color:var(--ink-600);}
+  .fontsize-wrap input{width:100%; font:inherit; font-size:12.5px; padding:6px 6px; border:1px solid var(--line-strong); border-radius:6px; background:var(--paper-0); color:var(--ink-900);}
+  .del-row-btn{width:32px; height:34px; border-radius:6px; border:1px solid var(--line-strong); background:var(--paper-0); color:var(--ink-600); cursor:pointer; font-size:15px;}
+  .del-row-btn:hover{border-color:var(--vermilion-600); color:var(--vermilion-600);}
+  .ruby-hint{font-size:11.5px; color:var(--ink-400); margin:6px 0 14px;}
+
+  .toolbar-row{display:flex; flex-wrap:wrap; gap:8px; justify-content:space-between; align-items:center; margin-bottom:16px;}
+  .status-msg{font-size:12.5px; color:var(--ink-600);}
+
+  .sheets-scroll{overflow-x:auto; padding-bottom:8px;}
+  .sheets-row{display:flex; gap:20px; align-items:flex-start;}
+  .sheet{
+    background:var(--sheet-bg); color:var(--sheet-ink); flex:none;
+    width:29.7cm; height:21cm; position:relative; box-shadow:0 1px 4px rgba(0,0,0,.15);
+    border:1px solid var(--line); overflow:hidden;
+  }
+  .sheet .sheet-label{position:absolute; top:2mm; left:2mm; font-size:9px; color:var(--ink-400); font-family:"Zen Kaku Gothic New",sans-serif;}
+  .panel-strip{position:absolute; inset:0; display:flex; flex-direction:row; justify-content:flex-start;}
+  .panel{
+    position:relative; height:100%; flex:none; display:grid; align-items:center; justify-items:start;
+    writing-mode:vertical-rl; text-orientation:mixed; font-family:"HGS行書体","HG行書体","Shippori Mincho",serif;
+    padding:6mm 0; overflow:hidden;
+  }
+  .panel .fold-guide{
+    position:absolute; left:0; top:0; bottom:0; width:0; border-left:1px dashed var(--fold-line);
+  }
+  .panel .fold-label{
+    position:absolute; left:-7px; top:3mm; font-size:8px; color:var(--fold-line); font-family:"Zen Kaku Gothic New",sans-serif;
+    writing-mode:horizontal-tb; background:var(--sheet-bg); padding:0 2px;
+  }
+  .panel rt{font-size:.5em;}
+  .panel.overflow-warn{outline:2px solid var(--vermilion-600); outline-offset:-2px;}
+  .overflow-badge{
+    position:absolute; bottom:3mm; left:50%; transform:translateX(-50%); writing-mode:horizontal-tb;
+    font-size:8px; font-weight:700; color:#fff; background:var(--vermilion-600); padding:2px 6px;
+    border-radius:3px; white-space:nowrap; z-index:9;
+  }
+
+  .cover-panel{
+    position:relative; height:100%; flex:none; display:flex; flex-direction:row-reverse;
+    font-family:"HGS行書体","HG行書体","Shippori Mincho",serif; padding:6mm 20mm 6mm 4mm; overflow:hidden;
+  }
+  .cover-panel .cover-title, .cover-panel .cover-subtitle{
+    writing-mode:vertical-rl; text-orientation:mixed; height:100%; display:grid; align-items:center; justify-items:start; overflow:hidden;
+  }
+  .cover-panel .fold-guide{ position:absolute; left:0; top:0; bottom:0; width:0; border-left:1px dashed var(--fold-line); }
+  .cover-panel .fold-label{
+    position:absolute; left:-7px; top:3mm; font-size:8px; color:var(--fold-line); font-family:"Zen Kaku Gothic New",sans-serif;
+    writing-mode:horizontal-tb; background:var(--sheet-bg); padding:0 2px;
+  }
+  .cover-panel.overflow-warn{outline:2px solid var(--vermilion-600); outline-offset:-2px;}
+
+  .glue-tab{
+    position:relative; height:100%; flex:none;
+    border-right:1px dashed var(--fold-line);
+    background:repeating-linear-gradient(135deg, rgba(178,58,46,.08) 0 3px, transparent 3px 8px);
+  }
+  .glue-tab .glue-label{
+    position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    writing-mode:vertical-rl; text-orientation:mixed; font-size:8.5px; letter-spacing:.15em;
+    color:var(--fold-line); font-family:"Zen Kaku Gothic New",sans-serif; white-space:nowrap;
+  }
+  .cover-fields{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  @media (max-width:640px){.cover-fields{grid-template-columns:1fr;}}
+  .cover-enable-row{display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:13px; color:var(--ink-600);}
+
+  @media print{
+    body{background:#fff;}
+    .app{padding:0; max-width:none;}
+    header.hero, .card, .toolbar-row{display:none !important;}
+    .sheets-scroll{overflow:visible;}
+    .sheets-row{display:block;}
+    .sheet{box-shadow:none; border:none; page-break-after:always; margin:0;}
+    @page{size:A4 landscape; margin:0;}
+  }
+</style>
+
+<div class="app">
+  <header class="hero">
+    <span class="eyebrow">大阪府 市町村振興課 事務支援</span>
+    <h1>蛇腹祝辞メーカー（Word読み込み版）</h1>
+    <p>Wordファイル（.docx）を読み込むと、テキストボックスごとの文言をそのままパネルに取り込みます。行数や振り仮名で中心がずれる問題はパネル幅を数値で固定することで解消し、折り位置には山折り・谷折りのガイド線を印刷します。</p>
+  </header>
+
+  <div class="card">
+    <h2>表紙（1枚目 右端パネル）</h2>
+    <div class="cover-enable-row">
+      <input type="checkbox" id="coverEnabled" checked>
+      <label for="coverEnabled">タイトル・サブタイトルの表紙パネルを1枚目の右端に追加する</label>
+    </div>
+    <div class="cover-fields">
+      <div>
+        <label class="field-label" for="coverTitle">タイトル（大）</label>
+        <textarea id="coverTitle" rows="3">○○市[まるまるし]　市制[しせい]施行[しこう]○○[まるまる]周年[しゅうねん]記念式典[きねんしきてん]</textarea>
+        <div id="coverTitleRuby"></div>
+      </div>
+      <div>
+        <label class="field-label" for="coverSubtitle">サブタイトル（小・日付や会場など）</label>
+        <textarea id="coverSubtitle" rows="3">令和[れいわ]○[まる]年[ねん]○月[まるがつ]○日[まるにち]（○[まる]）午前[ごぜん]○[まる]時[じ]　開式[かいしき]
+○○市[まるまるし]　○○会館[まるまるかいかん]</textarea>
+        <div id="coverSubtitleRuby"></div>
+        <div class="hint">「スペース自動調整」を押すと、1行目（日付）の先頭に全角5文字分、2行目（会場）の先頭に全角10文字分の空白を自動で入れます（既存の先頭空白は置き換えます）。</div>
+      </div>
+      <div>
+        <label class="field-label" for="coverSpan">表紙パネルの幅（折り幅の何個分か）</label>
+        <input type="number" id="coverSpan" value="1" step="1" min="1"> 個分
+      </div>
+      <div></div>
+      <div>
+        <label class="field-label" for="coverTitleSize">タイトル文字サイズ</label>
+        <input type="number" id="coverTitleSize" value="24" step="1" min="10"> pt
+      </div>
+      <div>
+        <label class="field-label" for="coverSubtitleSize">サブタイトル文字サイズ</label>
+        <input type="number" id="coverSubtitleSize" value="18" step="1" min="8"> pt
+      </div>
+    </div>
+    <div class="hint">振り仮名を付けたい文字をテキスト内で選択してから「ふりがなを付ける」ボタンを押してください。表紙パネルの幅は常に折り幅の整数倍になり、内部にも折り線が入るので、他のパネルと同じリズムで山折り・谷折りができます。</div>
+  </div>
+
+  <div class="card">
+    <h2>用紙・パネルの設定</h2>
+    <div class="settings-grid">
+      <div>
+        <label class="field-label" for="panelWidth">折り幅（1パネルの横幅）</label>
+        <input type="number" id="panelWidth" value="6.8" step="0.05" min="2"> cm
+      </div>
+      <div>
+        <label class="field-label" for="fontSize">文字サイズ</label>
+        <input type="number" id="fontSize" value="30" step="1" min="10"> pt
+      </div>
+      <div>
+        <label class="field-label">A4横に入るパネル数</label>
+        <div class="idx" style="justify-content:flex-start; height:38px;" id="panelsPerSheetDisplay">—</div>
+      </div>
+      <div>
+        <label class="field-label" for="maxLines">1パネル最大行数</label>
+        <input type="number" id="maxLines" value="3" step="1" min="1"> 行
+      </div>
+    </div>
+    <div class="field-label" style="margin-top:14px;">用紙の余白（上下と左右を独立設定）</div>
+    <div class="settings-grid" style="margin-top:6px;">
+      <div>
+        <label class="field-label" for="marginTop">上</label>
+        <input type="number" id="marginTop" value="1.3" step="0.05" min="0"> cm
+      </div>
+      <div>
+        <label class="field-label" for="marginBottom">下</label>
+        <input type="number" id="marginBottom" value="1.3" step="0.05" min="0"> cm
+      </div>
+      <div>
+        <label class="field-label" for="marginLeft">左</label>
+        <input type="number" id="marginLeft" value="0" step="0.05" min="0"> cm
+      </div>
+      <div>
+        <label class="field-label" for="marginRight">右</label>
+        <input type="number" id="marginRight" value="1.25" step="0.05" min="0"> cm
+      </div>
+    </div>
+    <div class="hint">元のテンプレートと同じく、1枚目の紙の右端から折り幅ぶん測って山折り→谷折りを繰り返します。2枚目以降は前の紙の続きとして同じ折り幅で並びます。用紙幅が折り幅でちょうど割り切れない場合、余った分は次の用紙と貼り合わせる「のりしろ」として紙の左端に自動で確保されます。左の余白を小さくしているのは、その分を「のりしろ」に回すためです。余白を小さくしすぎるとプリンターによっては端が印刷されないことがあります（多くの機種は3〜5mm程度が下限）。端が切れる場合は余白を広げてください。</div>
+  </div>
+
+  <div class="card">
+    <h2>Wordファイルを読み込む</h2>
+    <div class="ruby-hint">.docx形式のWordファイルを選択すると、ファイル内のテキストボックスを1つずつパネルとして読み込みます（テキストボックスが無い場合は本文の段落を読み込みます）。ふりがな（Wordのルビ機能）が設定されている場合はそのまま「文字[よみ]」の形式に変換されます。古い.doc形式は読み込めないため、Wordで「名前を付けて保存」→ファイルの種類を「Word文書（.docx）」にしてから読み込んでください。テキストボックスの並び順はファイル内部の順序になるため、実際の読み順と異なる場合はパネルごとの「▲」「▼」ボタンで並び替えてください。</div>
+    <input type="file" id="docxFileInput" accept=".docx">
+    <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
+      <button type="button" class="btn" id="docxApplyBtn" disabled>パネルに反映</button>
+      <span class="hint" id="docxConfirmMsg" style="margin:0;"></span>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>パネルごとの文言</h2>
+    <div class="ruby-hint">文字を選択して「ふりがなを付ける」ボタンを押すと、そのパネルの読みが正しい位置に付きます。改行すると次の行（列）に送られます。移動したい文字や文を選択して「前のパネルへ移動」「次のパネルへ移動」を押すと、隣のパネルとの境目を微調整できます。</div>
+    <div id="panelList"></div>
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <button type="button" class="btn ghost" id="addPanelBtn">＋ パネルを追加</button>
+      <button type="button" class="btn ghost" id="clearAllTextBtn">全パネルの文言を一括削除</button>
+      <span class="hint" id="clearAllConfirmMsg" style="margin:0;"></span>
+    </div>
+  </div>
+
+  <div class="toolbar-row">
+    <span class="status-msg" id="statusMsg">右から順にパネルが並びます。折り線（赤の点線）に沿って山折り・谷折りしてください。</span>
+    <button type="button" class="btn" id="printBtn">印刷</button>
+  </div>
+
+  <div class="sheets-scroll">
+    <div class="sheets-row" id="sheetsRow"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+(function(){
+  var panels = [
+    {text:'祝辞'},
+    {text:'本日[ほんじつ]、ここに'},
+    {text:'○○市[まるまるし]　市制[しせい]施行[しこう]\n○○[まるまる]周年[しゅうねん]記念式典[きねんしきてん]が'},
+    {text:'盛大[せいだい]に開催[かいさい]\nされますことを'},
+    {text:'心[こころ]よりお慶[よろこ]び\n申[もう]し上[あ]げます'},
+    {text:'令和[れいわ]○[まる]年[ねん]○月[まるがつ]○日[まるにち]\n　　　　○○市長[まるまるしちょう]　○○[まるまる]　○○[まるまる]'}
+  ];
+
+  var panelWidthInput = document.getElementById('panelWidth');
+  var marginTopInput = document.getElementById('marginTop');
+  var marginBottomInput = document.getElementById('marginBottom');
+  var marginLeftInput = document.getElementById('marginLeft');
+  var marginRightInput = document.getElementById('marginRight');
+  var fontSizeInput = document.getElementById('fontSize');
+  var maxLinesInput = document.getElementById('maxLines');
+  var panelList = document.getElementById('panelList');
+  var sheetsRow = document.getElementById('sheetsRow');
+  var panelsPerSheetDisplay = document.getElementById('panelsPerSheetDisplay');
+
+  var coverEnabled = document.getElementById('coverEnabled');
+  var coverTitle = document.getElementById('coverTitle');
+  var coverSubtitle = document.getElementById('coverSubtitle');
+  var coverSpan = document.getElementById('coverSpan');
+  var coverTitleSize = document.getElementById('coverTitleSize');
+  var coverSubtitleSize = document.getElementById('coverSubtitleSize');
+
+  var PAGE_W = 29.7, PAGE_H = 21;
+
+  function escapeHtml(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+  function renderRubyText(raw){
+    raw = raw || '';
+    var re = /([^\[\]\n]+?)\[([^\[\]\n]+)\]/g;
+    var result = '', lastIndex = 0, m;
+    while((m = re.exec(raw))){
+      result += escapeHtml(raw.slice(lastIndex, m.index));
+      result += '<ruby>'+escapeHtml(m[1])+'<rt>'+escapeHtml(m[2])+'</rt></ruby>';
+      lastIndex = re.lastIndex;
+    }
+    result += escapeHtml(raw.slice(lastIndex));
+    return result.replace(/\n/g, '<br>');
+  }
+
+  function panelCharCount(text){ return (text||'').replace(/\n/g,'').length; }
+
+  function makeRubyBtn(targetEl){
+    var wrap = document.createElement('div');
+    var btn = document.createElement('button'); btn.type='button'; btn.className='ruby-btn'; btn.textContent='ふりがなを付ける';
+    var msg = document.createElement('div'); msg.className='ruby-msg';
+
+    var form = document.createElement('div'); form.className='ruby-form';
+    var rfLabel = document.createElement('span'); rfLabel.className='rf-label';
+    var rfTarget = document.createElement('span'); rfTarget.className='rf-target';
+    rfLabel.appendChild(document.createTextNode('「'));
+    rfLabel.appendChild(rfTarget);
+    rfLabel.appendChild(document.createTextNode('」の読み：'));
+    var rfInput = document.createElement('input'); rfInput.type='text'; rfInput.placeholder='ひらがな';
+    var rfOk = document.createElement('button'); rfOk.type='button'; rfOk.className='rf-ok'; rfOk.textContent='追加';
+    var rfCancel = document.createElement('button'); rfCancel.type='button'; rfCancel.className='rf-cancel'; rfCancel.textContent='キャンセル';
+    form.appendChild(rfLabel); form.appendChild(rfInput); form.appendChild(rfOk); form.appendChild(rfCancel);
+
+    var pending = null;
+
+    function closeForm(){ form.classList.remove('open'); pending = null; rfInput.value=''; }
+
+    btn.addEventListener('click', function(){
+      msg.textContent = '';
+      var start = targetEl.selectionStart, end = targetEl.selectionEnd;
+      if(start === end){
+        msg.textContent = 'ふりがなを付けたい文字を、テキスト内でドラッグして選択してから押してください。';
+        return;
+      }
+      var val = targetEl.value;
+      var selected = val.slice(start, end);
+      if(selected.indexOf('[')>=0 || selected.indexOf(']')>=0){
+        msg.textContent = '選択範囲に「[」「]」が含まれています。ふりがなの範囲だけを選び直してください。';
+        return;
+      }
+      pending = {start:start, end:end, selected:selected};
+      rfTarget.textContent = selected;
+      form.classList.add('open');
+      rfInput.focus();
+    });
+
+    function commit(){
+      if(!pending) return;
+      var reading = rfInput.value.trim();
+      if(!reading) return;
+      var val = targetEl.value;
+      var newVal = val.slice(0, pending.start) + pending.selected + '[' + reading + ']' + val.slice(pending.end);
+      targetEl.value = newVal;
+      var newPos = pending.start + pending.selected.length + reading.length + 2;
+      closeForm();
+      targetEl.focus();
+      targetEl.setSelectionRange(newPos, newPos);
+      targetEl.dispatchEvent(new Event('input', {bubbles:true}));
+    }
+    rfOk.addEventListener('click', commit);
+    rfInput.addEventListener('keydown', function(e){
+      if(e.key==='Enter'){ e.preventDefault(); commit(); }
+      if(e.key==='Escape'){ e.preventDefault(); closeForm(); }
+    });
+    rfCancel.addEventListener('click', closeForm);
+
+    wrap.appendChild(btn); wrap.appendChild(msg); wrap.appendChild(form);
+    return wrap;
+  }
+
+  function renderPanelEditor(){
+    panelList.innerHTML = '';
+    var globalSize = parseFloat(fontSizeInput.value) || 30;
+    panels.forEach(function(p, idx){
+      var row = document.createElement('div'); row.className='panel-row';
+      var idxLabel = document.createElement('div'); idxLabel.className='idx'; idxLabel.style.flexDirection='column'; idxLabel.style.gap='2px';
+      var idxNum = document.createElement('div'); idxNum.textContent = (idx+1);
+      idxLabel.appendChild(idxNum);
+      var idxUpBtn = document.createElement('button'); idxUpBtn.type='button'; idxUpBtn.className='ruby-btn'; idxUpBtn.textContent='▲'; idxUpBtn.style.padding='1px 6px'; idxUpBtn.setAttribute('aria-label','このパネルを上に移動');
+      idxUpBtn.disabled = idx === 0;
+      idxUpBtn.addEventListener('click', function(){
+        if(idx===0) return;
+        var tmp = panels[idx-1]; panels[idx-1] = panels[idx]; panels[idx] = tmp;
+        renderPanelEditor(); renderSheets();
+      });
+      var idxDownBtn = document.createElement('button'); idxDownBtn.type='button'; idxDownBtn.className='ruby-btn'; idxDownBtn.textContent='▼'; idxDownBtn.style.padding='1px 6px'; idxDownBtn.setAttribute('aria-label','このパネルを下に移動');
+      idxDownBtn.disabled = idx === panels.length - 1;
+      idxDownBtn.addEventListener('click', function(){
+        if(idx===panels.length-1) return;
+        var tmp = panels[idx+1]; panels[idx+1] = panels[idx]; panels[idx] = tmp;
+        renderPanelEditor(); renderSheets();
+      });
+      idxLabel.appendChild(idxUpBtn); idxLabel.appendChild(idxDownBtn);
+
+      var taWrap = document.createElement('div');
+      var ta = document.createElement('textarea'); ta.value = p.text; ta.rows=2; ta.id='panel-text-'+idx;
+      var toolbar = document.createElement('div'); toolbar.className='ta-toolbar';
+      var countEl = document.createElement('div'); countEl.className='char-count'; countEl.id='char-count-'+idx;
+      function updateCount(){ countEl.textContent = panelCharCount(ta.value)+'文字'; }
+      updateCount();
+      ta.addEventListener('input', function(){ p.text = ta.value; updateCount(); renderSheets(); });
+      var taBtns = document.createElement('div'); taBtns.style.display='flex'; taBtns.style.alignItems='center'; taBtns.style.gap='6px';
+      var clearTextBtn = document.createElement('button'); clearTextBtn.type='button'; clearTextBtn.className='ruby-btn'; clearTextBtn.textContent='文言を消す';
+      clearTextBtn.addEventListener('click', function(){
+        ta.value = ''; p.text = ''; updateCount(); renderSheets();
+      });
+      taBtns.appendChild(clearTextBtn); taBtns.appendChild(makeRubyBtn(ta));
+      toolbar.appendChild(countEl); toolbar.appendChild(taBtns);
+      taWrap.appendChild(ta); taWrap.appendChild(toolbar);
+
+      var moveRow = document.createElement('div'); moveRow.className='ta-toolbar'; moveRow.style.marginTop='2px';
+      var moveMsg = document.createElement('div'); moveMsg.className='ruby-msg';
+      var moveBtns = document.createElement('div'); moveBtns.style.display='flex'; moveBtns.style.alignItems='center'; moveBtns.style.gap='6px';
+      function showMoveMsg(text){
+        moveMsg.textContent = text;
+        clearTimeout(moveMsg._t);
+        moveMsg._t = setTimeout(function(){ moveMsg.textContent = ''; }, 2500);
+      }
+      function makeMoveBtn(label, dir){
+        var btn = document.createElement('button'); btn.type='button'; btn.className='ruby-btn'; btn.textContent=label;
+        btn.addEventListener('click', function(){
+          var start = ta.selectionStart, end = ta.selectionEnd;
+          var moving = start !== end ? ta.value.slice(start, end) : '';
+          if(!moving){
+            showMoveMsg('移動したい文字をテキスト内で選択してから押してください。');
+            return;
+          }
+          var openCount = (moving.match(/\[/g)||[]).length;
+          var closeCount = (moving.match(/\]/g)||[]).length;
+          if(openCount !== closeCount){
+            showMoveMsg('ふりがなの［　］の途中では移動できません。選択範囲を調整してください。');
+            return;
+          }
+          var targetIdx = idx + dir;
+          if(targetIdx < 0 || targetIdx >= panels.length){ return; }
+          p.text = ta.value.slice(0, start) + ta.value.slice(end);
+          var target = panels[targetIdx];
+          target.text = dir < 0 ? (target.text + moving) : (moving + target.text);
+          renderPanelEditor(); renderSheets();
+        });
+        return btn;
+      }
+      if(idx > 0) moveBtns.appendChild(makeMoveBtn('◀ 前のパネルへ移動', -1));
+      if(idx < panels.length - 1) moveBtns.appendChild(makeMoveBtn('次のパネルへ移動 ▶', 1));
+      moveRow.appendChild(moveBtns); moveRow.appendChild(moveMsg);
+      taWrap.appendChild(moveRow);
+
+      var fsWrap = document.createElement('div'); fsWrap.className='fontsize-wrap';
+      var fsLabel = document.createElement('label'); fsLabel.textContent='文字サイズ'; fsLabel.setAttribute('for','panel-fs-'+idx);
+      var fsInput = document.createElement('input'); fsInput.type='number'; fsInput.id='panel-fs-'+idx; fsInput.min='6'; fsInput.step='1';
+      fsInput.placeholder = globalSize;
+      fsInput.value = p.fontSize || '';
+      fsInput.addEventListener('input', function(){
+        var v = parseFloat(fsInput.value);
+        p.fontSize = (fsInput.value==='' || isNaN(v)) ? null : v;
+        renderSheets();
+      });
+      fsWrap.appendChild(fsLabel); fsWrap.appendChild(fsInput);
+
+      var delBtn = document.createElement('button'); delBtn.type='button'; delBtn.className='del-row-btn'; delBtn.textContent='×';
+      delBtn.setAttribute('aria-label','このパネルを削除');
+      delBtn.addEventListener('click', function(){ panels.splice(idx,1); renderPanelEditor(); renderSheets(); });
+
+      row.appendChild(idxLabel); row.appendChild(taWrap); row.appendChild(fsWrap); row.appendChild(delBtn);
+      panelList.appendChild(row);
+    });
+  }
+
+  function foldLabel(globalFoldIdx){ return globalFoldIdx % 2 === 0 ? '山' : '谷'; }
+
+  function renderSheets(){
+    var panelW = parseFloat(panelWidthInput.value) || 6.8;
+    var marginTop = parseFloat(marginTopInput.value) || 0;
+    var marginBottom = parseFloat(marginBottomInput.value) || 0;
+    var marginLeft = parseFloat(marginLeftInput.value) || 0;
+    var marginRight = parseFloat(marginRightInput.value) || 0;
+    var fontSize = parseFloat(fontSizeInput.value) || 30;
+    var usableW = PAGE_W - marginLeft - marginRight;
+    var usableH = PAGE_H - marginTop - marginBottom;
+    var perSheet = Math.max(1, Math.floor(usableW / panelW));
+    panelsPerSheetDisplay.textContent = perSheet + ' パネル / 枚';
+
+    var useCover = coverEnabled.checked;
+    var cSpan = Math.max(1, parseInt(coverSpan.value, 10) || 2);
+    var cWidth = cSpan * panelW;
+    var perSheetFirst = useCover ? Math.max(1, Math.floor((usableW - cWidth) / panelW)) : perSheet;
+
+    var total = panels.length;
+    var sheets = [];
+    var i = 0;
+    if(total>0){
+      sheets.push(panels.slice(0, perSheetFirst));
+      i = perSheetFirst;
+      for(; i<total; i+=perSheet){ sheets.push(panels.slice(i, i+perSheet)); }
+    } else if(useCover){
+      sheets.push([]);
+    }
+
+    sheetsRow.innerHTML = '';
+    var globalStart = 0;
+    sheets.forEach(function(sheetPanels, sIdx){
+      var isFirstSheet = sIdx===0;
+      var sheet = document.createElement('div'); sheet.className='sheet';
+      var lbl = document.createElement('div'); lbl.className='sheet-label'; lbl.textContent = (sIdx+1)+'枚目 / 全'+sheets.length+'枚';
+      sheet.appendChild(lbl);
+
+      var strip = document.createElement('div'); strip.className='panel-strip';
+      strip.style.left = marginLeft+'cm'; strip.style.right = marginRight+'cm';
+      strip.style.top = marginTop+'cm'; strip.style.bottom = marginBottom+'cm';
+
+      for(var localIdx = sheetPanels.length - 1; localIdx >= 0; localIdx--){
+        var p = sheetPanels[localIdx];
+        var gIdx = globalStart + localIdx;
+        var panelEl = document.createElement('div'); panelEl.className='panel';
+        panelEl.style.width = panelW+'cm';
+        panelEl.style.fontSize = (p.fontSize || fontSize)+'pt';
+        panelEl.dataset.gidx = gIdx;
+
+        var textEl = document.createElement('div'); textEl.className='panel-text';
+        textEl.innerHTML = renderRubyText(p.text);
+        panelEl.appendChild(textEl);
+
+        if(gIdx < total - 1){
+          var guide = document.createElement('div'); guide.className='fold-guide';
+          var flabel = document.createElement('div'); flabel.className='fold-label'; flabel.textContent = foldLabel(gIdx);
+          panelEl.appendChild(guide); panelEl.appendChild(flabel);
+        }
+        strip.appendChild(panelEl);
+      }
+
+      if(isFirstSheet && useCover){
+        var coverEl = document.createElement('div'); coverEl.className='cover-panel';
+        coverEl.style.width = cWidth+'cm';
+        var titleFontPt = parseFloat(coverTitleSize.value)||24;
+        coverEl.style.gap = (titleFontPt * 0.035278) + 'cm';
+        var titleEl = document.createElement('div'); titleEl.className='cover-title';
+        titleEl.style.fontSize = titleFontPt+'pt';
+        titleEl.innerHTML = renderRubyText(coverTitle.value);
+        var subEl = document.createElement('div'); subEl.className='cover-subtitle';
+        subEl.style.fontSize = (parseFloat(coverSubtitleSize.value)||18)+'pt';
+        subEl.innerHTML = renderRubyText(coverSubtitle.value);
+        coverEl.appendChild(titleEl); coverEl.appendChild(subEl);
+        for(var ci=0; ci<cSpan; ci++){
+          if(ci===0 && total===0) continue;
+          var cGuide = document.createElement('div'); cGuide.className='fold-guide'; cGuide.style.left = (ci*panelW)+'cm';
+          var cLabel = document.createElement('div'); cLabel.className='fold-label'; cLabel.style.left = (ci*panelW-0.185)+'cm'; cLabel.textContent = foldLabel(-(1+ci));
+          coverEl.appendChild(cGuide); coverEl.appendChild(cLabel);
+        }
+        strip.appendChild(coverEl);
+      }
+
+      var contentWidth = sheetPanels.length * panelW + (isFirstSheet && useCover ? cWidth : 0);
+      var remainder = usableW - contentWidth;
+      var isLastSheet = sIdx === sheets.length - 1;
+      if(!isLastSheet && remainder > 0.05){
+        var glueTab = document.createElement('div'); glueTab.className = 'glue-tab';
+        glueTab.style.width = remainder + 'cm';
+        var glueLabel = document.createElement('div'); glueLabel.className = 'glue-label'; glueLabel.textContent = 'のりしろ';
+        glueTab.appendChild(glueLabel);
+        strip.insertBefore(glueTab, strip.firstChild);
+      }
+
+      sheet.appendChild(strip);
+      sheetsRow.appendChild(sheet);
+      globalStart += sheetPanels.length;
+    });
+
+    var overflowNums = [];
+    var lineOverNums = [];
+    var overflowSet = {};
+    var maxLinesVal = Math.max(1, parseInt(maxLinesInput.value, 10) || 3);
+    sheetsRow.querySelectorAll('.panel').forEach(function(panelEl){
+      var textEl = panelEl.querySelector('.panel-text');
+      var gi0 = Number(panelEl.dataset.gidx);
+      var srcPanel = panels[gi0];
+      var overflowsBox = textEl.scrollWidth > panelEl.clientWidth + 1;
+      var overLines = srcPanel ? srcPanel.text.split('\n').length > maxLinesVal : false;
+      if(overflowsBox || overLines){
+        panelEl.classList.add('overflow-warn');
+        var badge = document.createElement('div'); badge.className='overflow-badge';
+        badge.textContent = overLines ? '行数オーバー' : '文字数オーバー';
+        panelEl.appendChild(badge);
+        var gi = Number(panelEl.dataset.gidx);
+        overflowSet[gi] = true;
+        if(overLines) lineOverNums.push(gi + 1);
+        else overflowNums.push(gi + 1);
+      }
+    });
+    overflowNums.sort(function(a,b){ return a-b; });
+    lineOverNums.sort(function(a,b){ return a-b; });
+    panels.forEach(function(p, idx){
+      var countEl = document.getElementById('char-count-'+idx);
+      if(countEl) countEl.classList.toggle('warn', !!overflowSet[idx]);
+    });
+
+    var coverOverflow = false;
+    var coverEl2 = sheetsRow.querySelector('.cover-panel');
+    if(coverEl2){
+      var overflowed = Array.prototype.some.call(coverEl2.querySelectorAll('.cover-title, .cover-subtitle'), function(el){
+        return el.scrollWidth > coverEl2.clientWidth + 1;
+      });
+      if(overflowed){ coverEl2.classList.add('overflow-warn'); coverOverflow = true; }
+    }
+
+    var msg = '';
+    if(overflowNums.length) msg += '⚠ パネル '+overflowNums.join('・')+' は文字があふれています（赤枠）。文字を減らすかパネルを分けてください。';
+    if(lineOverNums.length) msg += (msg?' ':'') + '⚠ パネル '+lineOverNums.join('・')+' は最大'+(parseInt(maxLinesInput.value,10)||3)+'行を超えています（赤枠）。';
+    if(coverOverflow) msg += (msg?' ':'') + '⚠ 表紙パネルも文字があふれています。';
+    document.getElementById('statusMsg').textContent = msg || '右から順にパネルが並びます。折り線（赤の点線）に沿って山折り・谷折りしてください。';
+  }
+
+  document.getElementById('addPanelBtn').addEventListener('click', function(){
+    panels.push({text:''});
+    renderPanelEditor(); renderSheets();
+  });
+
+  var clearAllTextBtn = document.getElementById('clearAllTextBtn');
+  var clearAllConfirmMsg = document.getElementById('clearAllConfirmMsg');
+  var clearAllArmed = false;
+  var clearAllArmTimer = null;
+  clearAllTextBtn.addEventListener('click', function(){
+    if(!clearAllArmed){
+      clearAllArmed = true;
+      clearAllTextBtn.textContent = 'もう一度押すと全て空欄にします';
+      clearAllConfirmMsg.textContent = '全'+panels.length+'パネルの文言を空欄にします（パネル数はそのまま）。';
+      clearTimeout(clearAllArmTimer);
+      clearAllArmTimer = setTimeout(function(){
+        clearAllArmed = false;
+        clearAllTextBtn.textContent = '全パネルの文言を一括削除';
+        clearAllConfirmMsg.textContent = '';
+      }, 4000);
+      return;
+    }
+    clearTimeout(clearAllArmTimer);
+    clearAllArmed = false;
+    clearAllTextBtn.textContent = '全パネルの文言を一括削除';
+    panels.forEach(function(p){ p.text = ''; });
+    clearAllConfirmMsg.textContent = '全パネルの文言を空欄にしました。';
+    renderPanelEditor(); renderSheets();
+  });
+
+  var docxFileInput = document.getElementById('docxFileInput');
+  var docxApplyBtn = document.getElementById('docxApplyBtn');
+  var docxConfirmMsg = document.getElementById('docxConfirmMsg');
+  var docxArmed = false;
+  var docxArmTimer = null;
+  var pendingPanels = null;
+
+  function xmlGetAllText(node){
+    var out = [];
+    var ts = node.getElementsByTagName('w:t');
+    for(var i=0; i<ts.length; i++){ out.push(ts[i].textContent); }
+    return out.join('');
+  }
+
+  function xmlExtractRuns(node, out){
+    for(var i=0; i<node.childNodes.length; i++){
+      var child = node.childNodes[i];
+      if(child.nodeType !== 1) continue;
+      var tag = child.tagName;
+      if(tag === 'w:ruby'){
+        var baseEl = child.getElementsByTagName('w:rubyBase')[0];
+        var rtEl = child.getElementsByTagName('w:rt')[0];
+        var baseText = baseEl ? xmlGetAllText(baseEl) : '';
+        var rtText = rtEl ? xmlGetAllText(rtEl) : '';
+        if(baseText){ out.push(rtText ? (baseText+'['+rtText+']') : baseText); }
+        continue;
+      }
+      if(tag === 'w:t'){ out.push(child.textContent); continue; }
+      if(tag === 'w:tab'){ out.push('　'); continue; }
+      xmlExtractRuns(child, out);
+    }
+  }
+
+  function xmlParagraphText(pEl){
+    var out = [];
+    xmlExtractRuns(pEl, out);
+    return out.join('').trim();
+  }
+
+  function panelsFromParagraphs(container){
+    var lines = [];
+    var pList = container.getElementsByTagName('w:p');
+    for(var i=0; i<pList.length; i++){
+      var t = xmlParagraphText(pList[i]);
+      if(t) lines.push(t);
+    }
+    return lines;
+  }
+
+  function parseDocxXml(xmlText){
+    var xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
+    if(xmlDoc.getElementsByTagName('parsererror').length){
+      throw new Error('XML解析に失敗しました');
+    }
+    var result = [];
+    var txbxList = xmlDoc.getElementsByTagName('w:txbxContent');
+    for(var i=0; i<txbxList.length; i++){
+      var lines = panelsFromParagraphs(txbxList[i]);
+      if(lines.length) result.push({text: lines.join('\n')});
+    }
+    if(!result.length){
+      var body = xmlDoc.getElementsByTagName('w:body')[0];
+      if(body){
+        var lines2 = panelsFromParagraphs(body);
+        lines2.forEach(function(l){ result.push({text: l}); });
+      }
+    }
+    return result;
+  }
+
+  docxFileInput.addEventListener('change', function(){
+    pendingPanels = null;
+    docxApplyBtn.disabled = true;
+    docxArmed = false;
+    docxApplyBtn.textContent = 'パネルに反映';
+    docxConfirmMsg.textContent = '';
+    var file = docxFileInput.files[0];
+    if(!file) return;
+    if(!/\.docx$/i.test(file.name)){
+      docxConfirmMsg.textContent = '.docx形式のファイルを選択してください（.docは非対応です）。';
+      return;
+    }
+    if(typeof JSZip === 'undefined'){
+      docxConfirmMsg.textContent = '読み込み用ライブラリが読み込めませんでした。通信環境を確認して再度お試しください。';
+      return;
+    }
+    docxConfirmMsg.textContent = '読み込み中…';
+    file.arrayBuffer().then(function(buf){
+      return JSZip.loadAsync(buf);
+    }).then(function(zip){
+      var doc = zip.file('word/document.xml');
+      if(!doc) throw new Error('word/document.xmlが見つかりません');
+      return doc.async('string');
+    }).then(function(xmlText){
+      var parsed = parseDocxXml(xmlText);
+      if(!parsed.length){
+        docxConfirmMsg.textContent = 'テキストを検出できませんでした。ファイルの内容をご確認ください。';
+        return;
+      }
+      pendingPanels = parsed;
+      docxApplyBtn.disabled = false;
+      docxConfirmMsg.textContent = parsed.length+'個のテキストボックス（または段落）を検出しました。「パネルに反映」を押すと取り込みます。';
+    }).catch(function(err){
+      docxConfirmMsg.textContent = '読み込みに失敗しました：'+err.message;
+    });
+  });
+
+  docxApplyBtn.addEventListener('click', function(){
+    if(!pendingPanels || !pendingPanels.length) return;
+    var hasExisting = panels.some(function(p){ return p.text && p.text.trim(); });
+    if(hasExisting && !docxArmed){
+      docxArmed = true;
+      docxApplyBtn.textContent = 'もう一度押すと置き換えます';
+      docxConfirmMsg.textContent = '今のパネル一覧（'+panels.length+'件）を、読み込んだ内容（'+pendingPanels.length+'パネル）で置き換えます。';
+      clearTimeout(docxArmTimer);
+      docxArmTimer = setTimeout(function(){
+        docxArmed = false;
+        docxApplyBtn.textContent = 'パネルに反映';
+      }, 4000);
+      return;
+    }
+    clearTimeout(docxArmTimer);
+    docxArmed = false;
+    docxApplyBtn.textContent = 'パネルに反映';
+    panels = pendingPanels.map(function(p){ return {text: p.text}; });
+    renderPanelEditor(); renderSheets();
+    docxConfirmMsg.textContent = '反映しました（パネル '+panels.length+' 件）。順序が読み順と違う場合は各パネルの「▲」「▼」で並び替えてください。';
+  });
+
+  [panelWidthInput, marginTopInput, marginBottomInput, marginLeftInput, marginRightInput].forEach(function(el){
+    el.addEventListener('input', renderSheets);
+  });
+  fontSizeInput.addEventListener('input', function(){ renderPanelEditor(); renderSheets(); });
+  [coverEnabled, coverTitle, coverSubtitle, coverSpan, coverTitleSize, coverSubtitleSize].forEach(function(el){
+    el.addEventListener('input', renderSheets);
+    el.addEventListener('change', renderSheets);
+  });
+  document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
+
+  function makeClearBtn(targetEl){
+    var btn = document.createElement('button'); btn.type='button'; btn.className='ruby-btn'; btn.textContent='文言を消す';
+    btn.addEventListener('click', function(){
+      targetEl.value = ''; renderSheets();
+    });
+    return btn;
+  }
+
+  function makeSpaceAdjustBtn(targetEl, indents){
+    var btn = document.createElement('button'); btn.type='button'; btn.className='ruby-btn'; btn.textContent='スペース自動調整';
+    btn.addEventListener('click', function(){
+      var lines = targetEl.value.split('\n');
+      for(var li=0; li<indents.length && li<lines.length; li++){
+        lines[li] = lines[li].replace(/^[ 　]+/, '');
+        lines[li] = new Array(indents[li]+1).join('　') + lines[li];
+      }
+      targetEl.value = lines.join('\n');
+      renderSheets();
+    });
+    return btn;
+  }
+
+  var coverTitleBtns = document.createElement('div'); coverTitleBtns.style.display='flex'; coverTitleBtns.style.alignItems='center'; coverTitleBtns.style.gap='6px';
+  coverTitleBtns.appendChild(makeClearBtn(coverTitle));
+  coverTitleBtns.appendChild(makeRubyBtn(coverTitle));
+  document.getElementById('coverTitleRuby').appendChild(coverTitleBtns);
+
+  var coverSubtitleBtns = document.createElement('div'); coverSubtitleBtns.style.display='flex'; coverSubtitleBtns.style.alignItems='center'; coverSubtitleBtns.style.gap='6px'; coverSubtitleBtns.style.flexWrap='wrap';
+  coverSubtitleBtns.appendChild(makeClearBtn(coverSubtitle));
+  coverSubtitleBtns.appendChild(makeSpaceAdjustBtn(coverSubtitle, [5, 10]));
+  coverSubtitleBtns.appendChild(makeRubyBtn(coverSubtitle));
+  document.getElementById('coverSubtitleRuby').appendChild(coverSubtitleBtns);
+
+  renderPanelEditor();
+  renderSheets();
+})();
+</script>
