@@ -142,6 +142,7 @@
     .sheets-scroll{overflow:visible;}
     .sheets-row{display:block;}
     .sheet{box-shadow:none; border:none; page-break-after:always; margin:0;}
+    .sheet-label{display:none;}
     @page{size:A4 landscape; margin:0;}
   }
 </style>
@@ -552,11 +553,26 @@
         strip.appendChild(coverEl);
       }
 
+      // The glue tab's width comes from this sheet's full capacity (how many
+      // panels physically fit), not from how many panels actually landed on
+      // it — an under-filled last sheet otherwise inflates the tab to
+      // swallow the whole unused capacity instead of just the true
+      // doesn't-divide-evenly sliver. Any leftover under-fill becomes a
+      // separate, unlabeled blank spacer next to the tab, keeping the real
+      // panels flush against the right (reading-start) edge.
+      var perSheetForThis = isFirstSheet ? perSheetFirst : perSheet;
+      var capacityWidth = perSheetForThis * panelW + (isFirstSheet && useCover ? cWidth : 0);
+      var capacityRemainder = usableW - capacityWidth;
       var contentWidth = sheetPanels.length * panelW + (isFirstSheet && useCover ? cWidth : 0);
-      var remainder = usableW - contentWidth;
-      if(remainder > 0.05){
+      var underfillGap = capacityWidth - contentWidth;
+      if(underfillGap > 0.05){
+        var spacer = document.createElement('div'); spacer.className = 'glue-tab'; spacer.style.background = 'none'; spacer.style.borderRight = 'none';
+        spacer.style.width = underfillGap + 'cm';
+        strip.insertBefore(spacer, strip.firstChild);
+      }
+      if(capacityRemainder > 0.05){
         var glueTab = document.createElement('div'); glueTab.className = 'glue-tab';
-        glueTab.style.width = remainder + 'cm';
+        glueTab.style.width = capacityRemainder + 'cm';
         var glueLabel = document.createElement('div'); glueLabel.className = 'glue-label'; glueLabel.textContent = 'のりしろ';
         glueTab.appendChild(glueLabel);
         strip.insertBefore(glueTab, strip.firstChild);
