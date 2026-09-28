@@ -107,7 +107,7 @@
   }
 
   .cover-panel{
-    position:relative; height:100%; flex:none; display:flex; flex-direction:row-reverse; gap:4mm;
+    position:relative; height:100%; flex:none; display:flex; flex-direction:row-reverse;
     font-family:"HGS行書体","HG行書体","Shippori Mincho",serif; padding:6mm 20mm 6mm 4mm; overflow:hidden;
   }
   .cover-panel .cover-title, .cover-panel .cover-subtitle{
@@ -488,8 +488,10 @@
       if(isFirstSheet && useCover){
         var coverEl = document.createElement('div'); coverEl.className='cover-panel';
         coverEl.style.width = cWidth+'cm';
+        var titleFontPt = parseFloat(coverTitleSize.value)||24;
+        coverEl.style.gap = (titleFontPt * 0.035278) + 'cm';
         var titleEl = document.createElement('div'); titleEl.className='cover-title';
-        titleEl.style.fontSize = (parseFloat(coverTitleSize.value)||24)+'pt';
+        titleEl.style.fontSize = titleFontPt+'pt';
         titleEl.innerHTML = renderRubyText(coverTitle.value);
         var subEl = document.createElement('div'); subEl.className='cover-subtitle';
         subEl.style.fontSize = (parseFloat(coverSubtitleSize.value)||18)+'pt';
