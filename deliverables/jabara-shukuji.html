@@ -602,24 +602,34 @@
   var bulkArmed = false;
   var bulkArmTimer = null;
 
-  function estimatePanelCapacity(){
-    var panelW = parseFloat(panelWidthInput.value) || 6.8;
+  function capacityForLines(lines){
     var marginTop = parseFloat(marginTopInput.value) || 0;
     var marginBottom = parseFloat(marginBottomInput.value) || 0;
     var fontSize = parseFloat(fontSizeInput.value) || 30;
-    var maxLines = Math.max(1, parseInt(maxLinesInput.value, 10) || 3);
     var usableH = PAGE_H - marginTop - marginBottom;
     var emCm = fontSize * 0.035278; // 1pt ≈ 0.035278cm; vertical text advances ~1em per character
     var rows = Math.max(1, Math.floor(usableH / emCm));
-    var cols = Math.min(maxLines, Math.max(1, Math.floor(panelW / emCm)));
-    return Math.max(4, Math.floor(rows * cols * 0.62)); // safety margin: ruby text takes extra vertical room
+    return Math.max(4, Math.floor(rows * lines * 0.62)); // safety margin: ruby text takes extra vertical room
   }
+
+  function estimatePanelCapacity(){
+    var panelW = parseFloat(panelWidthInput.value) || 6.8;
+    var fontSize = parseFloat(fontSizeInput.value) || 30;
+    var maxLines = Math.max(1, parseInt(maxLinesInput.value, 10) || 3);
+    var emCm = fontSize * 0.035278;
+    var cols = Math.min(maxLines, Math.max(1, Math.floor(panelW / emCm)));
+    return capacityForLines(cols);
+  }
+
+  // Natural break points, in priority order: sentence punctuation first, then
+  // particles/connectives a line can end on without splitting a phrase awkwardly.
+  var NATURAL_BREAK_RE = /(?<=[。、])|(?<=にわたり)|(?<=という)|(?<=が)|(?<=の)|(?<=に)|(?<=く)/;
 
   function tokenizeForAutoSplit(block){
     var tokens = [];
     var lines = block.split('\n');
     lines.forEach(function(line, li){
-      var pieces = line.split(/(?<=[。、])/).filter(function(s){ return s; });
+      var pieces = line.split(NATURAL_BREAK_RE).filter(function(s){ return s; });
       pieces.forEach(function(p){ tokens.push(p); });
       if(li < lines.length - 1) tokens.push('\n');
     });
@@ -627,21 +637,25 @@
   }
 
   function autoSplitScript(raw){
-    var capacity = estimatePanelCapacity();
+    var oneLineCap = capacityForLines(1);
+    var maxCap = estimatePanelCapacity();
     var blocks = raw.split(/\n\s*\n+/).map(function(s){ return s.replace(/^\n+|\n+$/g,''); }).filter(function(s){ return s.trim(); });
     var result = [];
     blocks.forEach(function(block){
       var totalChars = panelCharCount(block);
-      if(totalChars <= capacity){ result.push(block.trim()); return; }
+      if(totalChars <= oneLineCap){ result.push(block.trim()); return; }
       var tokens = tokenizeForAutoSplit(block);
-      var idealCount = Math.max(1, Math.ceil(totalChars / capacity));
-      var target = Math.min(capacity, Math.ceil(totalChars / idealCount));
       var cur = '';
       tokens.forEach(function(tok){
         var candidate = cur + tok;
-        var overTarget = panelCharCount(candidate) > target && cur.trim();
-        var overCapacity = panelCharCount(candidate) > capacity;
-        if((overTarget || overCapacity) && cur.trim()){
+        var candLen = panelCharCount(candidate);
+        // Prefer to close out the panel as soon as it no longer fits on one line,
+        // so a panel spans 2-3 lines only when a single natural phrase (with no
+        // earlier break point) genuinely needs the room.
+        if(cur.trim() && candLen > oneLineCap){
+          result.push(cur.replace(/^\n+|\n+$/g,''));
+          cur = tok;
+        } else if(cur.trim() && candLen > maxCap){
           result.push(cur.replace(/^\n+|\n+$/g,''));
           cur = tok;
         } else {
