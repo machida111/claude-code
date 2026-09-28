@@ -303,7 +303,12 @@
   function escapeHtml(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
   function renderRubyText(raw){
     raw = raw || '';
-    var re = /([^\[\]\n]+?)\[([^\[\]\n]+)\]/g;
+    // Base characters exclude hiragana, CJK/fullwidth punctuation and
+    // whitespace, so a bracket group only absorbs the kanji/katakana word
+    // immediately before it — not an unrelated run of plain prose earlier
+    // in the same line (which would otherwise get swallowed into the ruby
+    // base and visibly scatter the reading across it).
+    var re = /([^\[\]\nぁ-ゖ　-〿＀-￯\s]+)\[([^\[\]\n]+)\]/g;
     var result = '', lastIndex = 0, m;
     while((m = re.exec(raw))){
       result += escapeHtml(raw.slice(lastIndex, m.index));
@@ -347,6 +352,10 @@
       var selected = val.slice(start, end);
       if(selected.indexOf('[')>=0 || selected.indexOf(']')>=0){
         msg.textContent = '選択範囲に「[」「]」が含まれています。ふりがなの範囲だけを選び直してください。';
+        return;
+      }
+      if(/[ぁ-ゖ]/.test(selected)){
+        msg.textContent = '選択範囲にひらがなが含まれています。送り仮名を除き、漢字（・カタカナ）の部分だけを選び直してください。';
         return;
       }
       pending = {start:start, end:end, selected:selected};
