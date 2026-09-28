@@ -693,14 +693,60 @@
     return lines;
   }
 
-  function xmlMaxFontSizePt(container){
-    var szEls = container.getElementsByTagName('w:sz');
-    var max = 0;
-    for(var i=0; i<szEls.length; i++){
-      var val = parseInt(szEls[i].getAttribute('w:val'), 10);
-      if(!isNaN(val) && val > max) max = val;
+  function xmlRunHasText(runEl){
+    var ts = runEl.getElementsByTagName('w:t');
+    for(var j=0; j<ts.length; j++){ if(ts[j].textContent){ return true; } }
+    return false;
+  }
+
+  function xmlRunRPr(runEl){
+    for(var k=0; k<runEl.childNodes.length; k++){
+      var ch = runEl.childNodes[k];
+      if(ch.nodeType===1 && ch.tagName==='w:rPr'){ return ch; }
     }
-    return max > 0 ? max/2 : null; // w:sz is in half-points
+    return null;
+  }
+
+  function xmlParagraphSizePt(pEl){
+    // The size of the paragraph's first text-bearing run — not the
+    // paragraph mark's own w:pPr/w:rPr, which can carry an unrelated size
+    // left over from an empty trailing paragraph or blank spacer line.
+    var runs = pEl.getElementsByTagName('w:r');
+    for(var i=0; i<runs.length; i++){
+      if(!xmlRunHasText(runs[i])) continue;
+      var rPr = xmlRunRPr(runs[i]);
+      if(!rPr) continue;
+      var szEls = rPr.getElementsByTagName('w:sz');
+      if(!szEls.length) continue;
+      var val = parseInt(szEls[0].getAttribute('w:val'), 10);
+      if(!isNaN(val)) return val/2; // w:sz is in half-points
+    }
+    return null;
+  }
+
+  function splitTextboxIntoCandidates(container){
+    // A single text box can itself mix a title line and a smaller
+    // date/venue block (this is how real templates are often built,
+    // rather than one text box per line group) — so group its non-empty
+    // paragraphs by contiguous matching size instead of always treating
+    // the whole text box as one panel.
+    var pList = container.getElementsByTagName('w:p');
+    var paras = [];
+    for(var i=0; i<pList.length; i++){
+      var t = xmlParagraphText(pList[i]);
+      if(t) paras.push({text:t, sizePt: xmlParagraphSizePt(pList[i])});
+    }
+    if(!paras.length) return [];
+    var groups = [];
+    var cur = [paras[0]];
+    for(var i=1; i<paras.length; i++){
+      if(paras[i].sizePt === paras[i-1].sizePt){ cur.push(paras[i]); }
+      else { groups.push(cur); cur = [paras[i]]; }
+    }
+    groups.push(cur);
+    return groups.map(function(g){
+      return { text: g.map(function(p){ return p.text; }).join('\n'), sizePt: g[0].sizePt };
+    });
   }
 
   var COVER_CONTENT_PATTERN = /年.*月|開式|午前|午後|会館|ホール|センター|体育館|公民館/;
@@ -745,8 +791,8 @@
     var candidates = [];
     var txbxList = xmlDoc.getElementsByTagName('w:txbxContent');
     for(var i=0; i<txbxList.length; i++){
-      var lines = panelsFromParagraphs(txbxList[i]);
-      if(lines.length) candidates.push({text: lines.join('\n'), sizePt: xmlMaxFontSizePt(txbxList[i])});
+      var groups = splitTextboxIntoCandidates(txbxList[i]);
+      groups.forEach(function(g){ if(g.text) candidates.push(g); });
     }
     if(!candidates.length){
       var body = xmlDoc.getElementsByTagName('w:body')[0];
