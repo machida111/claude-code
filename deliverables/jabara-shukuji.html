@@ -250,7 +250,11 @@
     <h2>パネルごとの文言</h2>
     <div class="ruby-hint">文字を選択して「ふりがなを付ける」ボタンを押すと、そのパネルの読みが正しい位置に付きます。改行すると次の行（列）に送られます。</div>
     <div id="panelList"></div>
-    <button type="button" class="btn ghost" id="addPanelBtn">＋ パネルを追加</button>
+    <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <button type="button" class="btn ghost" id="addPanelBtn">＋ パネルを追加</button>
+      <button type="button" class="btn ghost" id="clearAllTextBtn">全パネルの文言を一括削除</button>
+      <span class="hint" id="clearAllConfirmMsg" style="margin:0;"></span>
+    </div>
   </div>
 
   <div class="toolbar-row">
@@ -555,6 +559,31 @@
 
   document.getElementById('addPanelBtn').addEventListener('click', function(){
     panels.push({text:''});
+    renderPanelEditor(); renderSheets();
+  });
+
+  var clearAllTextBtn = document.getElementById('clearAllTextBtn');
+  var clearAllConfirmMsg = document.getElementById('clearAllConfirmMsg');
+  var clearAllArmed = false;
+  var clearAllArmTimer = null;
+  clearAllTextBtn.addEventListener('click', function(){
+    if(!clearAllArmed){
+      clearAllArmed = true;
+      clearAllTextBtn.textContent = 'もう一度押すと全て空欄にします';
+      clearAllConfirmMsg.textContent = '全'+panels.length+'パネルの文言を空欄にします（パネル数はそのまま）。';
+      clearTimeout(clearAllArmTimer);
+      clearAllArmTimer = setTimeout(function(){
+        clearAllArmed = false;
+        clearAllTextBtn.textContent = '全パネルの文言を一括削除';
+        clearAllConfirmMsg.textContent = '';
+      }, 4000);
+      return;
+    }
+    clearTimeout(clearAllArmTimer);
+    clearAllArmed = false;
+    clearAllTextBtn.textContent = '全パネルの文言を一括削除';
+    panels.forEach(function(p){ p.text = ''; });
+    clearAllConfirmMsg.textContent = '全パネルの文言を空欄にしました。';
     renderPanelEditor(); renderSheets();
   });
 
