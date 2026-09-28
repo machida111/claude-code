@@ -81,7 +81,7 @@
   .sheets-row{display:flex; gap:20px; align-items:flex-start;}
   .sheet{
     background:var(--sheet-bg); color:var(--sheet-ink); flex:none;
-    width:21cm; height:29.7cm; position:relative; box-shadow:0 1px 4px rgba(0,0,0,.15);
+    width:29.7cm; height:21cm; position:relative; box-shadow:0 1px 4px rgba(0,0,0,.15);
     border:1px solid var(--line); overflow:hidden;
   }
   .sheet .sheet-label{position:absolute; top:2mm; left:2mm; font-size:9px; color:var(--ink-400); font-family:"Zen Kaku Gothic New",sans-serif;}
@@ -141,7 +141,7 @@
     .sheets-scroll{overflow:visible;}
     .sheets-row{display:block;}
     .sheet{box-shadow:none; border:none; page-break-after:always; margin:0;}
-    @page{size:A4 portrait; margin:0;}
+    @page{size:A4 landscape; margin:0;}
   }
 </style>
 
@@ -195,15 +195,11 @@
         <input type="number" id="panelWidth" value="6.8" step="0.05" min="2"> cm
       </div>
       <div>
-        <label class="field-label" for="marginCm">用紙の余白（上下左右）</label>
-        <input type="number" id="marginCm" value="0.15" step="0.05" min="0"> cm
-      </div>
-      <div>
         <label class="field-label" for="fontSize">文字サイズ</label>
         <input type="number" id="fontSize" value="30" step="1" min="10"> pt
       </div>
       <div>
-        <label class="field-label">A4横幅に入るパネル数</label>
+        <label class="field-label">A4横に入るパネル数</label>
         <div class="idx" style="justify-content:flex-start; height:38px;" id="panelsPerSheetDisplay">—</div>
       </div>
       <div>
@@ -211,7 +207,26 @@
         <input type="number" id="maxLines" value="3" step="1" min="1"> 行
       </div>
     </div>
-    <div class="hint">元のテンプレートと同じく、1枚目の紙の右端から折り幅ぶん測って山折り→谷折りを繰り返します。2枚目以降は前の紙の続きとして同じ折り幅で並びます。用紙幅が折り幅でちょうど割り切れない場合、余った分は次の用紙と貼り合わせる「のりしろ」として紙の左端に自動で確保されます。余白を小さくしすぎるとプリンターによっては端が印刷されないことがあります（多くの機種は3〜5mm程度が下限）。端が切れる場合は余白を広げてください。</div>
+    <div class="field-label" style="margin-top:14px;">用紙の余白（Word標準準拠・上下と左右を独立設定）</div>
+    <div class="settings-grid" style="margin-top:6px;">
+      <div>
+        <label class="field-label" for="marginTop">上</label>
+        <input type="number" id="marginTop" value="3.5" step="0.05" min="0"> cm
+      </div>
+      <div>
+        <label class="field-label" for="marginBottom">下</label>
+        <input type="number" id="marginBottom" value="3.0" step="0.05" min="0"> cm
+      </div>
+      <div>
+        <label class="field-label" for="marginLeft">左</label>
+        <input type="number" id="marginLeft" value="1.25" step="0.05" min="0"> cm
+      </div>
+      <div>
+        <label class="field-label" for="marginRight">右</label>
+        <input type="number" id="marginRight" value="1.25" step="0.05" min="0"> cm
+      </div>
+    </div>
+    <div class="hint">元のテンプレートと同じく、1枚目の紙の右端から折り幅ぶん測って山折り→谷折りを繰り返します。2枚目以降は前の紙の続きとして同じ折り幅で並びます。用紙幅が折り幅でちょうど割り切れない場合、余った分は次の用紙と貼り合わせる「のりしろ」として紙の左端に自動で確保されます。上下の余白はWordの標準（上35mm・下30mm）、左右は折り幅6.8cm×4パネルがちょうど収まる幅（各12.5mm）を初期値にしています。余白を小さくしすぎるとプリンターによっては端が印刷されないことがあります（多くの機種は3〜5mm程度が下限）。端が切れる場合は余白を広げてください。</div>
   </div>
 
   <div class="card">
@@ -261,7 +276,10 @@
   ];
 
   var panelWidthInput = document.getElementById('panelWidth');
-  var marginInput = document.getElementById('marginCm');
+  var marginTopInput = document.getElementById('marginTop');
+  var marginBottomInput = document.getElementById('marginBottom');
+  var marginLeftInput = document.getElementById('marginLeft');
+  var marginRightInput = document.getElementById('marginRight');
   var fontSizeInput = document.getElementById('fontSize');
   var maxLinesInput = document.getElementById('maxLines');
   var panelList = document.getElementById('panelList');
@@ -275,7 +293,7 @@
   var coverTitleSize = document.getElementById('coverTitleSize');
   var coverSubtitleSize = document.getElementById('coverSubtitleSize');
 
-  var PAGE_W = 21, PAGE_H = 29.7;
+  var PAGE_W = 29.7, PAGE_H = 21;
 
   function escapeHtml(s){ var d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
   function renderRubyText(raw){
@@ -397,11 +415,14 @@
   function foldLabel(globalFoldIdx){ return globalFoldIdx % 2 === 0 ? '山' : '谷'; }
 
   function renderSheets(){
-    var panelW = parseFloat(panelWidthInput.value) || 5.15;
-    var margin = parseFloat(marginInput.value) || 0;
+    var panelW = parseFloat(panelWidthInput.value) || 6.8;
+    var marginTop = parseFloat(marginTopInput.value) || 0;
+    var marginBottom = parseFloat(marginBottomInput.value) || 0;
+    var marginLeft = parseFloat(marginLeftInput.value) || 0;
+    var marginRight = parseFloat(marginRightInput.value) || 0;
     var fontSize = parseFloat(fontSizeInput.value) || 30;
-    var usableW = PAGE_W - margin*2;
-    var usableH = PAGE_H - margin*2;
+    var usableW = PAGE_W - marginLeft - marginRight;
+    var usableH = PAGE_H - marginTop - marginBottom;
     var perSheet = Math.max(1, Math.floor(usableW / panelW));
     panelsPerSheetDisplay.textContent = perSheet + ' パネル / 枚';
 
@@ -430,8 +451,8 @@
       sheet.appendChild(lbl);
 
       var strip = document.createElement('div'); strip.className='panel-strip';
-      strip.style.left = margin+'cm'; strip.style.right = margin+'cm';
-      strip.style.top = margin+'cm'; strip.style.bottom = margin+'cm';
+      strip.style.left = marginLeft+'cm'; strip.style.right = marginRight+'cm';
+      strip.style.top = marginTop+'cm'; strip.style.bottom = marginBottom+'cm';
 
       for(var localIdx = sheetPanels.length - 1; localIdx >= 0; localIdx--){
         var p = sheetPanels[localIdx];
@@ -543,11 +564,12 @@
   var bulkArmTimer = null;
 
   function estimatePanelCapacity(){
-    var panelW = parseFloat(panelWidthInput.value) || 5.15;
-    var margin = parseFloat(marginInput.value) || 0;
+    var panelW = parseFloat(panelWidthInput.value) || 6.8;
+    var marginTop = parseFloat(marginTopInput.value) || 0;
+    var marginBottom = parseFloat(marginBottomInput.value) || 0;
     var fontSize = parseFloat(fontSizeInput.value) || 30;
     var maxLines = Math.max(1, parseInt(maxLinesInput.value, 10) || 3);
-    var usableH = PAGE_H - margin*2;
+    var usableH = PAGE_H - marginTop - marginBottom;
     var emCm = fontSize * 0.035278; // 1pt ≈ 0.035278cm; vertical text advances ~1em per character
     var rows = Math.max(1, Math.floor(usableH / emCm));
     var cols = Math.min(maxLines, Math.max(1, Math.floor(panelW / emCm)));
@@ -623,7 +645,7 @@
     bulkApplyBtn.textContent = 'パネルに反映';
     applyBulkInput();
   });
-  [panelWidthInput, marginInput].forEach(function(el){
+  [panelWidthInput, marginTopInput, marginBottomInput, marginLeftInput, marginRightInput].forEach(function(el){
     el.addEventListener('input', renderSheets);
   });
   fontSizeInput.addEventListener('input', function(){ renderPanelEditor(); renderSheets(); });
