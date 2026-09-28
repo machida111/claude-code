@@ -234,7 +234,7 @@
 
   <div class="card">
     <h2>Wordファイルを読み込む</h2>
-    <div class="ruby-hint">.docx形式のWordファイルを選択すると、ファイル内のテキストボックスを1つずつパネルとして読み込みます（テキストボックスが無い場合は本文の段落を読み込みます）。ふりがな（Wordのルビ機能）が設定されている場合はそのまま「文字[よみ]」の形式に変換されます。古い.doc形式は読み込めないため、Wordで「名前を付けて保存」→ファイルの種類を「Word文書（.docx）」にしてから読み込んでください。テキストボックスの並び順はファイル内部の順序になるため、実際の読み順と異なる場合はパネルごとの「▲」「▼」ボタンで並び替えてください。</div>
+    <div class="ruby-hint">.docx形式のWordファイルを選択すると、ファイル内のテキストボックスを1つずつパネルとして読み込みます（テキストボックスが無い場合は本文の段落を読み込みます）。文字サイズが明らかに大きいテキストボックスは表紙タイトルとして、日付や会場らしい文言（「○年○月」「開式」「会館」など）を含むものは表紙サブタイトルとして自動判定し、本文パネルとは重複させずに表紙欄へ振り分けます（判定できない場合は通常のパネルとして読み込みます）。ふりがな（Wordのルビ機能）が設定されている場合はそのまま「文字[よみ]」の形式に変換されます。古い.doc形式は読み込めないため、Wordで「名前を付けて保存」→ファイルの種類を「Word文書（.docx）」にしてから読み込んでください。テキストボックスの並び順はファイル内部の順序になるため、実際の読み順と異なる場合はパネルごとの「▲」「▼」ボタンで並び替えてください。</div>
     <input type="file" id="docxFileInput" accept=".docx">
     <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
       <button type="button" class="btn" id="docxApplyBtn" disabled>パネルに反映</button>
@@ -506,7 +506,6 @@
     var globalStart = 0;
     sheets.forEach(function(sheetPanels, sIdx){
       var isFirstSheet = sIdx===0;
-      var isLastSheet = sIdx === sheets.length - 1;
       var sheet = document.createElement('div'); sheet.className='sheet';
       var lbl = document.createElement('div'); lbl.className='sheet-label'; lbl.textContent = (sIdx+1)+'枚目 / 全'+sheets.length+'枚';
       sheet.appendChild(lbl);
@@ -514,11 +513,6 @@
       var strip = document.createElement('div'); strip.className='panel-strip';
       strip.style.left = marginLeft+'cm'; strip.style.right = marginRight+'cm';
       strip.style.top = marginTop+'cm'; strip.style.bottom = marginBottom+'cm';
-      // On the last sheet there's no glue tab to fill the leftover width, so
-      // pack panels against the right (reading-start) edge instead of the
-      // left — otherwise unfolding the accordion hits blank paper before any
-      // text, and the final panel ends up stranded away from the previous one.
-      if(isLastSheet) strip.style.justifyContent = 'flex-end';
 
       for(var localIdx = sheetPanels.length - 1; localIdx >= 0; localIdx--){
         var p = sheetPanels[localIdx];
@@ -563,7 +557,7 @@
 
       var contentWidth = sheetPanels.length * panelW + (isFirstSheet && useCover ? cWidth : 0);
       var remainder = usableW - contentWidth;
-      if(!isLastSheet && remainder > 0.05){
+      if(remainder > 0.05){
         var glueTab = document.createElement('div'); glueTab.className = 'glue-tab';
         glueTab.style.width = remainder + 'cm';
         var glueLabel = document.createElement('div'); glueLabel.className = 'glue-label'; glueLabel.textContent = 'のりしろ';
@@ -699,25 +693,75 @@
     return lines;
   }
 
+  function xmlMaxFontSizePt(container){
+    var szEls = container.getElementsByTagName('w:sz');
+    var max = 0;
+    for(var i=0; i<szEls.length; i++){
+      var val = parseInt(szEls[i].getAttribute('w:val'), 10);
+      if(!isNaN(val) && val > max) max = val;
+    }
+    return max > 0 ? max/2 : null; // w:sz is in half-points
+  }
+
+  var COVER_CONTENT_PATTERN = /年.*月|開式|午前|午後|会館|ホール|センター|体育館|公民館/;
+
+  function detectCoverParts(candidates){
+    // Most panels share one common "body text" size by convention — the
+    // title and subtitle don't have to be the biggest numbers (this tool's
+    // own default is body 30pt > title 24pt > subtitle 18pt), they just have
+    // to differ from whatever the majority of panels use. Among those size
+    // outliers, the one reading like a date/venue is the subtitle; the
+    // other is the title. If there's no clear majority size to compare
+    // against, leave everything as regular panels rather than guessing.
+    var sized = candidates.filter(function(c){ return c.sizePt; });
+    if(sized.length < 3) return {title:null, subtitle:null, rest:candidates};
+    var counts = {};
+    sized.forEach(function(c){ counts[c.sizePt] = (counts[c.sizePt]||0) + 1; });
+    var modeSize = null, modeCount = 0;
+    Object.keys(counts).forEach(function(k){
+      if(counts[k] > modeCount){ modeCount = counts[k]; modeSize = parseFloat(k); }
+    });
+    if(modeCount < sized.length * 0.5) return {title:null, subtitle:null, rest:candidates};
+
+    var outliers = candidates.filter(function(c){ return c.sizePt && c.sizePt !== modeSize; });
+    if(!outliers.length) return {title:null, subtitle:null, rest:candidates};
+
+    var subtitle = null;
+    for(var i=0; i<outliers.length; i++){
+      if(COVER_CONTENT_PATTERN.test(outliers[i].text)){ subtitle = outliers[i]; break; }
+    }
+    var titleCandidates = outliers.filter(function(c){ return c !== subtitle; });
+    var title = titleCandidates.length ? titleCandidates[0] : null;
+
+    var rest = candidates.filter(function(c){ return c !== title && c !== subtitle; });
+    return {title:title, subtitle:subtitle, rest:rest};
+  }
+
   function parseDocxXml(xmlText){
     var xmlDoc = new DOMParser().parseFromString(xmlText, 'text/xml');
     if(xmlDoc.getElementsByTagName('parsererror').length){
       throw new Error('XML解析に失敗しました');
     }
-    var result = [];
+    var candidates = [];
     var txbxList = xmlDoc.getElementsByTagName('w:txbxContent');
     for(var i=0; i<txbxList.length; i++){
       var lines = panelsFromParagraphs(txbxList[i]);
-      if(lines.length) result.push({text: lines.join('\n')});
+      if(lines.length) candidates.push({text: lines.join('\n'), sizePt: xmlMaxFontSizePt(txbxList[i])});
     }
-    if(!result.length){
+    if(!candidates.length){
       var body = xmlDoc.getElementsByTagName('w:body')[0];
       if(body){
         var lines2 = panelsFromParagraphs(body);
-        lines2.forEach(function(l){ result.push({text: l}); });
+        lines2.forEach(function(l){ candidates.push({text: l, sizePt: null}); });
       }
+      return {panels: candidates.map(function(c){ return {text:c.text}; }), coverTitle:null, coverSubtitle:null};
     }
-    return result;
+    var parts = detectCoverParts(candidates);
+    return {
+      panels: parts.rest.map(function(c){ return {text:c.text}; }),
+      coverTitle: parts.title,
+      coverSubtitle: parts.subtitle
+    };
   }
 
   docxFileInput.addEventListener('change', function(){
@@ -745,25 +789,26 @@
       return doc.async('string');
     }).then(function(xmlText){
       var parsed = parseDocxXml(xmlText);
-      if(!parsed.length){
+      if(!parsed.panels.length && !parsed.coverTitle){
         docxConfirmMsg.textContent = 'テキストを検出できませんでした。ファイルの内容をご確認ください。';
         return;
       }
       pendingPanels = parsed;
       docxApplyBtn.disabled = false;
-      docxConfirmMsg.textContent = parsed.length+'個のテキストボックス（または段落）を検出しました。「パネルに反映」を押すと取り込みます。';
+      var detectMsg = parsed.coverTitle ? '（うち表紙タイトル'+(parsed.coverSubtitle?'・サブタイトルを自動判定）':'を自動判定）') : '';
+      docxConfirmMsg.textContent = parsed.panels.length+'個のパネル'+detectMsg+'を検出しました。「パネルに反映」を押すと取り込みます。';
     }).catch(function(err){
       docxConfirmMsg.textContent = '読み込みに失敗しました：'+err.message;
     });
   });
 
   docxApplyBtn.addEventListener('click', function(){
-    if(!pendingPanels || !pendingPanels.length) return;
+    if(!pendingPanels) return;
     var hasExisting = panels.some(function(p){ return p.text && p.text.trim(); });
     if(hasExisting && !docxArmed){
       docxArmed = true;
       docxApplyBtn.textContent = 'もう一度押すと置き換えます';
-      docxConfirmMsg.textContent = '今のパネル一覧（'+panels.length+'件）を、読み込んだ内容（'+pendingPanels.length+'パネル）で置き換えます。';
+      docxConfirmMsg.textContent = '今のパネル一覧（'+panels.length+'件）と表紙欄を、読み込んだ内容で置き換えます。';
       clearTimeout(docxArmTimer);
       docxArmTimer = setTimeout(function(){
         docxArmed = false;
@@ -774,9 +819,17 @@
     clearTimeout(docxArmTimer);
     docxArmed = false;
     docxApplyBtn.textContent = 'パネルに反映';
-    panels = pendingPanels.map(function(p){ return {text: p.text}; });
+    panels = pendingPanels.panels.map(function(p){ return {text: p.text}; });
+    if(pendingPanels.coverTitle){
+      coverTitle.value = pendingPanels.coverTitle.text;
+      if(pendingPanels.coverTitle.sizePt) coverTitleSize.value = Math.round(pendingPanels.coverTitle.sizePt);
+    }
+    if(pendingPanels.coverSubtitle){
+      coverSubtitle.value = pendingPanels.coverSubtitle.text;
+      if(pendingPanels.coverSubtitle.sizePt) coverSubtitleSize.value = Math.round(pendingPanels.coverSubtitle.sizePt);
+    }
     renderPanelEditor(); renderSheets();
-    docxConfirmMsg.textContent = '反映しました（パネル '+panels.length+' 件）。順序が読み順と違う場合は各パネルの「▲」「▼」で並び替えてください。';
+    docxConfirmMsg.textContent = '反映しました（パネル '+panels.length+' 件'+(pendingPanels.coverTitle?'、表紙タイトルあり':'')+'）。順序が読み順と違う場合は各パネルの「▲」「▼」で並び替えてください。';
   });
 
   [panelWidthInput, marginTopInput, marginBottomInput, marginLeftInput, marginRightInput].forEach(function(el){

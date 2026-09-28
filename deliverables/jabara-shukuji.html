@@ -494,7 +494,6 @@
     var globalStart = 0;
     sheets.forEach(function(sheetPanels, sIdx){
       var isFirstSheet = sIdx===0;
-      var isLastSheet = sIdx === sheets.length - 1;
       var sheet = document.createElement('div'); sheet.className='sheet';
       var lbl = document.createElement('div'); lbl.className='sheet-label'; lbl.textContent = (sIdx+1)+'枚目 / 全'+sheets.length+'枚';
       sheet.appendChild(lbl);
@@ -502,11 +501,6 @@
       var strip = document.createElement('div'); strip.className='panel-strip';
       strip.style.left = marginLeft+'cm'; strip.style.right = marginRight+'cm';
       strip.style.top = marginTop+'cm'; strip.style.bottom = marginBottom+'cm';
-      // On the last sheet there's no glue tab to fill the leftover width, so
-      // pack panels against the right (reading-start) edge instead of the
-      // left — otherwise unfolding the accordion hits blank paper before any
-      // text, and the signature ends up stranded away from the final panel.
-      if(isLastSheet) strip.style.justifyContent = 'flex-end';
 
       for(var localIdx = sheetPanels.length - 1; localIdx >= 0; localIdx--){
         var p = sheetPanels[localIdx];
@@ -551,7 +545,7 @@
 
       var contentWidth = sheetPanels.length * panelW + (isFirstSheet && useCover ? cWidth : 0);
       var remainder = usableW - contentWidth;
-      if(!isLastSheet && remainder > 0.05){
+      if(remainder > 0.05){
         var glueTab = document.createElement('div'); glueTab.className = 'glue-tab';
         glueTab.style.width = remainder + 'cm';
         var glueLabel = document.createElement('div'); glueLabel.className = 'glue-label'; glueLabel.textContent = 'のりしろ';
