@@ -132,6 +132,10 @@
     writing-mode:vertical-rl; text-orientation:mixed; font-size:8.5px; letter-spacing:.15em;
     color:var(--fold-line); font-family:"Zen Kaku Gothic New",sans-serif; white-space:nowrap;
   }
+  .sheets-row.hide-guides .fold-guide,
+  .sheets-row.hide-guides .fold-label,
+  .sheets-row.hide-guides .glue-label{ display:none; }
+  .sheets-row.hide-guides .glue-tab{ border-right:none; background:none; }
   .cover-fields{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
   @media (max-width:640px){.cover-fields{grid-template-columns:1fr;}}
   .cover-enable-row{display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:13px; color:var(--ink-600);}
@@ -256,6 +260,10 @@
 
   <div class="toolbar-row">
     <span class="status-msg" id="statusMsg">右から順にパネルが並びます。折り線（赤の点線）に沿って山折り・谷折りしてください。</span>
+    <label style="display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-600); cursor:pointer;">
+      <input type="checkbox" id="hideGuidesInput">
+      ガイド線・山谷ラベル・のりしろ表示を消す（清書印刷用）
+    </label>
     <button type="button" class="btn" id="printBtn">印刷</button>
   </div>
 
@@ -708,11 +716,43 @@
     return out.join('').trim();
   }
 
+  function xmlParagraphPPr(pEl){
+    for(var i=0; i<pEl.childNodes.length; i++){
+      var ch = pEl.childNodes[i];
+      if(ch.nodeType===1 && ch.tagName==='w:pPr'){ return ch; }
+    }
+    return null;
+  }
+
+  function xmlParagraphIndentChars(pEl){
+    // Word often indents a line (e.g. a date/venue line under a title) via
+    // paragraph-level w:ind firstLineChars rather than literal leading
+    // spaces in the text, so a plain w:t scan misses it entirely. Convert
+    // that indent into the same leading full-width spaces the "スペース自
+    // 動調整" feature already uses, so the imported line keeps its
+    // original visual indent instead of coming out flush.
+    var pPr = xmlParagraphPPr(pEl);
+    if(!pPr) return 0;
+    var indEls = pPr.getElementsByTagName('w:ind');
+    if(!indEls.length) return 0;
+    var val = indEls[0].getAttribute('w:firstLineChars');
+    if(!val) return 0;
+    var n = parseInt(val, 10);
+    return isNaN(n) ? 0 : Math.round(n/100);
+  }
+
+  function xmlParagraphLine(pEl){
+    var text = xmlParagraphText(pEl);
+    if(!text) return '';
+    var indent = xmlParagraphIndentChars(pEl);
+    return indent > 0 ? (new Array(indent+1).join('　') + text) : text;
+  }
+
   function panelsFromParagraphs(container){
     var lines = [];
     var pList = container.getElementsByTagName('w:p');
     for(var i=0; i<pList.length; i++){
-      var t = xmlParagraphText(pList[i]);
+      var t = xmlParagraphLine(pList[i]);
       if(t) lines.push(t);
     }
     return lines;
@@ -758,7 +798,7 @@
     var pList = container.getElementsByTagName('w:p');
     var paras = [];
     for(var i=0; i<pList.length; i++){
-      var t = xmlParagraphText(pList[i]);
+      var t = xmlParagraphLine(pList[i]);
       if(t) paras.push({text:t, sizePt: xmlParagraphSizePt(pList[i])});
     }
     if(!paras.length) return [];
@@ -912,6 +952,9 @@
     el.addEventListener('change', renderSheets);
   });
   document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
+  document.getElementById('hideGuidesInput').addEventListener('change', function(e){
+    sheetsRow.classList.toggle('hide-guides', e.target.checked);
+  });
 
   function makeClearBtn(targetEl){
     var btn = document.createElement('button'); btn.type='button'; btn.className='ruby-btn'; btn.textContent='文言を消す';
