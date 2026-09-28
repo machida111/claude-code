@@ -392,7 +392,13 @@
       function updateCount(){ countEl.textContent = panelCharCount(ta.value)+'文字'; }
       updateCount();
       ta.addEventListener('input', function(){ p.text = ta.value; updateCount(); renderSheets(); });
-      toolbar.appendChild(countEl); toolbar.appendChild(makeRubyBtn(ta));
+      var taBtns = document.createElement('div'); taBtns.style.display='flex'; taBtns.style.alignItems='center'; taBtns.style.gap='6px';
+      var clearTextBtn = document.createElement('button'); clearTextBtn.type='button'; clearTextBtn.className='ruby-btn'; clearTextBtn.textContent='文言を消す';
+      clearTextBtn.addEventListener('click', function(){
+        ta.value = ''; p.text = ''; updateCount(); renderSheets();
+      });
+      taBtns.appendChild(clearTextBtn); taBtns.appendChild(makeRubyBtn(ta));
+      toolbar.appendChild(countEl); toolbar.appendChild(taBtns);
       taWrap.appendChild(ta); taWrap.appendChild(toolbar);
 
       var fsWrap = document.createElement('div'); fsWrap.className='fontsize-wrap';
@@ -684,8 +690,23 @@
   });
   document.getElementById('printBtn').addEventListener('click', function(){ window.print(); });
 
-  document.getElementById('coverTitleRuby').appendChild(makeRubyBtn(coverTitle));
-  document.getElementById('coverSubtitleRuby').appendChild(makeRubyBtn(coverSubtitle));
+  function makeClearBtn(targetEl){
+    var btn = document.createElement('button'); btn.type='button'; btn.className='ruby-btn'; btn.textContent='文言を消す';
+    btn.addEventListener('click', function(){
+      targetEl.value = ''; renderSheets();
+    });
+    return btn;
+  }
+
+  var coverTitleBtns = document.createElement('div'); coverTitleBtns.style.display='flex'; coverTitleBtns.style.alignItems='center'; coverTitleBtns.style.gap='6px';
+  coverTitleBtns.appendChild(makeClearBtn(coverTitle));
+  coverTitleBtns.appendChild(makeRubyBtn(coverTitle));
+  document.getElementById('coverTitleRuby').appendChild(coverTitleBtns);
+
+  var coverSubtitleBtns = document.createElement('div'); coverSubtitleBtns.style.display='flex'; coverSubtitleBtns.style.alignItems='center'; coverSubtitleBtns.style.gap='6px';
+  coverSubtitleBtns.appendChild(makeClearBtn(coverSubtitle));
+  coverSubtitleBtns.appendChild(makeRubyBtn(coverSubtitle));
+  document.getElementById('coverSubtitleRuby').appendChild(coverSubtitleBtns);
 
   renderPanelEditor();
   renderSheets();
