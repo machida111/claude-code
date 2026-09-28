@@ -100,6 +100,7 @@
     writing-mode:horizontal-tb; background:var(--sheet-bg); padding:0 2px;
   }
   .panel rt{font-size:.5em;}
+  .panel ruby, .cover-panel ruby{ruby-align:space-between;}
   .panel.overflow-warn{outline:2px solid var(--vermilion-600); outline-offset:-2px;}
   .overflow-badge{
     position:absolute; bottom:3mm; left:50%; transform:translateX(-50%); writing-mode:horizontal-tb;
@@ -505,6 +506,7 @@
     var globalStart = 0;
     sheets.forEach(function(sheetPanels, sIdx){
       var isFirstSheet = sIdx===0;
+      var isLastSheet = sIdx === sheets.length - 1;
       var sheet = document.createElement('div'); sheet.className='sheet';
       var lbl = document.createElement('div'); lbl.className='sheet-label'; lbl.textContent = (sIdx+1)+'枚目 / 全'+sheets.length+'枚';
       sheet.appendChild(lbl);
@@ -512,6 +514,11 @@
       var strip = document.createElement('div'); strip.className='panel-strip';
       strip.style.left = marginLeft+'cm'; strip.style.right = marginRight+'cm';
       strip.style.top = marginTop+'cm'; strip.style.bottom = marginBottom+'cm';
+      // On the last sheet there's no glue tab to fill the leftover width, so
+      // pack panels against the right (reading-start) edge instead of the
+      // left — otherwise unfolding the accordion hits blank paper before any
+      // text, and the final panel ends up stranded away from the previous one.
+      if(isLastSheet) strip.style.justifyContent = 'flex-end';
 
       for(var localIdx = sheetPanels.length - 1; localIdx >= 0; localIdx--){
         var p = sheetPanels[localIdx];
@@ -556,7 +563,6 @@
 
       var contentWidth = sheetPanels.length * panelW + (isFirstSheet && useCover ? cWidth : 0);
       var remainder = usableW - contentWidth;
-      var isLastSheet = sIdx === sheets.length - 1;
       if(!isLastSheet && remainder > 0.05){
         var glueTab = document.createElement('div'); glueTab.className = 'glue-tab';
         glueTab.style.width = remainder + 'cm';
