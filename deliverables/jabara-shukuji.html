@@ -169,7 +169,7 @@
         <textarea id="coverSubtitle" rows="3">令和[れいわ]○[まる]年[ねん]○月[まるがつ]○日[まるにち]（○[まる]）午前[ごぜん]○[まる]時[じ]　開式[かいしき]
 ○○市[まるまるし]　○○会館[まるまるかいかん]</textarea>
         <div id="coverSubtitleRuby"></div>
-        <div class="hint">「スペース自動調整」を押すと、1行目（日付）の先頭に半角5文字分、2行目（会場）の先頭に半角10文字分の空白を自動で入れます（既存の先頭空白は置き換えます）。</div>
+        <div class="hint">「スペース自動調整」を押すと、1行目（日付）の先頭に全角5文字分、2行目（会場）の先頭に全角10文字分の空白を自動で入れます（既存の先頭空白は置き換えます）。</div>
       </div>
       <div>
         <label class="field-label" for="coverSpan">表紙パネルの幅（折り幅の何個分か）</label>
@@ -707,8 +707,8 @@
     btn.addEventListener('click', function(){
       var lines = targetEl.value.split('\n');
       for(var li=0; li<indents.length && li<lines.length; li++){
-        lines[li] = lines[li].replace(/^ +/, '');
-        lines[li] = new Array(indents[li]+1).join(' ') + lines[li];
+        lines[li] = lines[li].replace(/^[ 　]+/, '');
+        lines[li] = new Array(indents[li]+1).join('　') + lines[li];
       }
       targetEl.value = lines.join('\n');
       renderSheets();
