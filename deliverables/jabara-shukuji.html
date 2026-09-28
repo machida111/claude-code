@@ -637,25 +637,21 @@
   }
 
   function autoSplitScript(raw){
-    var oneLineCap = capacityForLines(1);
     var maxCap = estimatePanelCapacity();
     var blocks = raw.split(/\n\s*\n+/).map(function(s){ return s.replace(/^\n+|\n+$/g,''); }).filter(function(s){ return s.trim(); });
     var result = [];
     blocks.forEach(function(block){
       var totalChars = panelCharCount(block);
-      if(totalChars <= oneLineCap){ result.push(block.trim()); return; }
+      if(totalChars <= maxCap){ result.push(block.trim()); return; }
       var tokens = tokenizeForAutoSplit(block);
       var cur = '';
       tokens.forEach(function(tok){
         var candidate = cur + tok;
         var candLen = panelCharCount(candidate);
-        // Prefer to close out the panel as soon as it no longer fits on one line,
-        // so a panel spans 2-3 lines only when a single natural phrase (with no
-        // earlier break point) genuinely needs the room.
-        if(cur.trim() && candLen > oneLineCap){
-          result.push(cur.replace(/^\n+|\n+$/g,''));
-          cur = tok;
-        } else if(cur.trim() && candLen > maxCap){
+        // Fill each panel up to the full (default 3-line) capacity, only closing
+        // it out early at a natural word/particle boundary once that capacity
+        // would otherwise be exceeded.
+        if(cur.trim() && candLen > maxCap){
           result.push(cur.replace(/^\n+|\n+$/g,''));
           cur = tok;
         } else {
