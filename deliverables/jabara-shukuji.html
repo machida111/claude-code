@@ -249,7 +249,7 @@
 
   <div class="card">
     <h2>パネルごとの文言</h2>
-    <div class="ruby-hint">文字を選択して「ふりがなを付ける」ボタンを押すと、そのパネルの読みが正しい位置に付きます。改行すると次の行（列）に送られます。</div>
+    <div class="ruby-hint">文字を選択して「ふりがなを付ける」ボタンを押すと、そのパネルの読みが正しい位置に付きます。改行すると次の行（列）に送られます。移動したい文字や文を選択して「前のパネルへ移動」「次のパネルへ移動」を押すと、隣のパネルとの境目を微調整できます。</div>
     <div id="panelList"></div>
     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
       <button type="button" class="btn ghost" id="addPanelBtn">＋ パネルを追加</button>
@@ -402,6 +402,43 @@
       taBtns.appendChild(clearTextBtn); taBtns.appendChild(makeRubyBtn(ta));
       toolbar.appendChild(countEl); toolbar.appendChild(taBtns);
       taWrap.appendChild(ta); taWrap.appendChild(toolbar);
+
+      var moveRow = document.createElement('div'); moveRow.className='ta-toolbar'; moveRow.style.marginTop='2px';
+      var moveMsg = document.createElement('div'); moveMsg.className='ruby-msg';
+      var moveBtns = document.createElement('div'); moveBtns.style.display='flex'; moveBtns.style.alignItems='center'; moveBtns.style.gap='6px';
+      function showMoveMsg(text){
+        moveMsg.textContent = text;
+        clearTimeout(moveMsg._t);
+        moveMsg._t = setTimeout(function(){ moveMsg.textContent = ''; }, 2500);
+      }
+      function makeMoveBtn(label, dir){
+        var btn = document.createElement('button'); btn.type='button'; btn.className='ruby-btn'; btn.textContent=label;
+        btn.addEventListener('click', function(){
+          var start = ta.selectionStart, end = ta.selectionEnd;
+          var moving = start !== end ? ta.value.slice(start, end) : '';
+          if(!moving){
+            showMoveMsg('移動したい文字をテキスト内で選択してから押してください。');
+            return;
+          }
+          var openCount = (moving.match(/\[/g)||[]).length;
+          var closeCount = (moving.match(/\]/g)||[]).length;
+          if(openCount !== closeCount){
+            showMoveMsg('ふりがなの［　］の途中では移動できません。選択範囲を調整してください。');
+            return;
+          }
+          var targetIdx = idx + dir;
+          if(targetIdx < 0 || targetIdx >= panels.length){ return; }
+          p.text = ta.value.slice(0, start) + ta.value.slice(end);
+          var target = panels[targetIdx];
+          target.text = dir < 0 ? (target.text + moving) : (moving + target.text);
+          renderPanelEditor(); renderSheets();
+        });
+        return btn;
+      }
+      if(idx > 0) moveBtns.appendChild(makeMoveBtn('◀ 前のパネルへ移動', -1));
+      if(idx < panels.length - 1) moveBtns.appendChild(makeMoveBtn('次のパネルへ移動 ▶', 1));
+      moveRow.appendChild(moveBtns); moveRow.appendChild(moveMsg);
+      taWrap.appendChild(moveRow);
 
       var fsWrap = document.createElement('div'); fsWrap.className='fontsize-wrap';
       var fsLabel = document.createElement('label'); fsLabel.textContent='文字サイズ'; fsLabel.setAttribute('for','panel-fs-'+idx);
