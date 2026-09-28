@@ -621,15 +621,54 @@
     return capacityForLines(cols);
   }
 
-  // Natural break points, in priority order: sentence punctuation first, then
-  // particles/connectives a line can end on without splitting a phrase awkwardly.
-  var NATURAL_BREAK_RE = /(?<=[。、])|(?<=にわたり)|(?<=という)|(?<=が)|(?<=の)|(?<=に)|(?<=く)/;
+  // Standard Japanese kinsoku shori (line-breaking) rules: characters that may
+  // not start a new line/panel, and characters that may not end one.
+  var KINSOKU_NO_START = '。、）」』】,.)]｝！？!?ー〜ゝゞゃゅょっぁぃぅぇぉァィゥェォヵヶ';
+  var KINSOKU_NO_END = '（「『【([｛';
+
+  function charKind(ch){
+    if(/[。、！？]/.test(ch)) return 'punct';
+    if(/[ぁ-ゖ]/.test(ch)) return 'hira';
+    if(/[ァ-ヺ]/.test(ch)) return 'kata';
+    if(/[一-鿿]/.test(ch)) return 'kanji';
+    return 'other';
+  }
 
   function tokenizeForAutoSplit(block){
+    // Break candidates at likely bunsetsu (phrase) boundaries: after
+    // punctuation, and wherever a run of hiragana (typically trailing
+    // particles/okurigana) is followed by the next kanji/katakana content
+    // word — a cheap approximation of Japanese phrase segmentation without
+    // a full morphological analyzer. A ruby group "漢字[かんじ]" is kept as
+    // a single atomic unit so it never splits away from its reading.
     var tokens = [];
     var lines = block.split('\n');
     lines.forEach(function(line, li){
-      var pieces = line.split(NATURAL_BREAK_RE).filter(function(s){ return s; });
+      var re = /[^\[\]\n]\[[^\[\]\n]+\]|[^\n]/g;
+      var chars = [];
+      var m;
+      while((m = re.exec(line))){ chars.push(m[0]); }
+      var pieces = [];
+      var cur = '';
+      var prevKind = null;
+      chars.forEach(function(ch){
+        var base = ch.length > 1 ? ch.replace(/\[[^\]]*\]$/,'') : ch;
+        var lastBase = base.charAt(base.length - 1);
+        var kind = charKind(lastBase);
+        if(cur && prevKind === 'hira' && (kind === 'kanji' || kind === 'kata')){
+          pieces.push(cur);
+          cur = '';
+        }
+        cur += ch;
+        if(kind === 'punct'){
+          pieces.push(cur);
+          cur = '';
+          prevKind = null;
+          return;
+        }
+        prevKind = kind;
+      });
+      if(cur) pieces.push(cur);
       pieces.forEach(function(p){ tokens.push(p); });
       if(li < lines.length - 1) tokens.push('\n');
     });
@@ -648,12 +687,19 @@
       tokens.forEach(function(tok){
         var candidate = cur + tok;
         var candLen = panelCharCount(candidate);
-        // Fill each panel up to the full (default 3-line) capacity, only closing
-        // it out early at a natural word/particle boundary once that capacity
-        // would otherwise be exceeded.
+        // Fill each panel up to the full (default 3-line) capacity, only
+        // closing it out once that capacity would otherwise be exceeded —
+        // unless kinsoku rules forbid breaking right there, in which case
+        // the token is absorbed anyway.
         if(cur.trim() && candLen > maxCap){
-          result.push(cur.replace(/^\n+|\n+$/g,''));
-          cur = tok;
+          var firstCh = tok.charAt(0);
+          var lastCh = cur.charAt(cur.length - 1);
+          if(KINSOKU_NO_START.indexOf(firstCh) !== -1 || KINSOKU_NO_END.indexOf(lastCh) !== -1){
+            cur = candidate;
+          } else {
+            result.push(cur.replace(/^\n+|\n+$/g,''));
+            cur = tok;
+          }
         } else {
           cur = candidate;
         }
