@@ -462,7 +462,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
       </div>
     </div>
     <div id="navItems"></div>
-    <div class="nav-foot">統計値：e-Stat等 公表データ<br>ベータ版のため、指標や算出方法は今後変更することがあります。</div>
+    <div class="nav-foot">統計値：e-Stat等 公表データ<br><span id="dataUpdated"></span>ベータ版のため、指標や算出方法は今後変更することがあります。</div>
   </nav>
 
   <div class="main-col">
@@ -1006,6 +1006,65 @@ var REGIONS={
   'sen-nan':{label:'泉南地域'}
 };
 
+/* ===================== 統計データ（ここにすべての市町村の統計値がある） =====================
+   年次の更新は、同じフォルダの「データ更新ツール」で行う（CSVで書き出し→Excelで修正→取り込み→新しいHTMLを保存）。
+   このブロックを手で書き換える場合は、DATA-BEGIN と DATA-END の目印（すぐ下の var DATA の行と、データの最後）を消さないこと。
+   ・years：画面に出る年次の表示（例「2020年」）
+   ・munis：43市町村の統計値（null＝データなし。推定値で埋めない）
+   各項目の意味・単位・出典は保守マニュアルの「データ項目一覧」を参照 */
+function dataMap(f){ var o={}; DATA.munis.forEach(function(r){ o[r.id]=f(r); }); return o; }
+var DATA = /*DATA-BEGIN*/{
+"schema":1,
+"updated":"2026-09-29",
+"history":[{"date":"2026-09-29","note":"統計値を1か所（このデータ）にまとめた。値は変更なし"}],
+"years":{"population":"2015→2020年","aging":"2020年","vacant":"2023年（令和5年）","transit":"2020年","community":"2020年","successor":"2015→2020年","dx":"令和7年度（手続は令和7年4月1日現在）","food":"2020年","clinic":"2023年度公表値","school":"2024年度公表値","leakage":"2022年（RESAS掲載値）","landslide":"大阪府の指定状況（掲載時点）","flood":"洪水2024年度・高潮2021年度・津波2016年度、人口2020年","quake":"2024年版（人口2020年）","liquefy":"微地形区分V4、人口2020年","railCover1km":"鉄道 国土数値情報N02-23、人口2020年","census":"2020","censusPrev":"2015","est":"2021","estPrev":"2016","popFuture":"2050","popFutureBase":"2020"},
+"munis":[
+{"id":"osaka","name":"大阪市","region":"osaka-city","lat":34.6937,"lng":135.5023,"population":2752412,"popChangeRate":0.45,"agingRate":24.6,"areaKm2":225.34,"households":1469718,"fiscalIndex":0.92,"vacantRate":16.12,"aloneElderlyRate":14.56,"cardRate":81.69,"hazardCount":0,"carCommuteRate":10.5,"railCover1km":96.9,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":33,"onlineApplicable":47,"workAgeChange":0.24,"est2016":179252,"est2021":177184,"agingRise":-0.26,"elderlyAloneShare":31.5,"elderlyOnlyHH":22.2,"floodExposure":81.4,"floodRiver":62.8,"floodSurge":51.2,"floodTsunami":27.9,"quakeProb":52.2,"quakeProb6s":13.6,"liquefyRate":37.6,"foodAccessRate":13.56,"clinicDensity":1657.1,"schoolDensity":130.5,"habitableKm2":225.34,"nursingPer1k":20.2,"pop2050":2430185,"popRate2050":-11.7,"leakageRate":42.3,"industry":[[67,66],[5801,4499],[7543,6447],[9456,8302],[24426,20549],[1482,1466],[7662,7075],[1962,1842],[1536,1491],[3164,3451],[8427,8544],[4247,5886]]},
+{"id":"sakai","name":"堺市","region":"sen-hoku","lat":34.5732,"lng":135.483,"population":826161,"popChangeRate":-0.32,"agingRate":28.2,"areaKm2":149.83,"households":366079,"fiscalIndex":0.78,"vacantRate":12.9,"aloneElderlyRate":14.12,"cardRate":82.69,"hazardCount":142,"carCommuteRate":28.5,"railCover1km":67.6,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":47,"onlineApplicable":48,"workAgeChange":-4.9,"est2016":28733,"est2021":27315,"agingRise":1.52,"elderlyAloneShare":22.1,"elderlyOnlyHH":26.7,"floodExposure":17.6,"floodRiver":12.4,"floodSurge":13.4,"floodTsunami":6,"quakeProb":36.2,"quakeProb6s":6.6,"liquefyRate":10.7,"foodAccessRate":26.44,"clinicDensity":510,"schoolDensity":64.4,"habitableKm2":145.93,"nursingPer1k":13.1,"pop2050":653087,"popRate2050":-20.9,"leakageRate":-1.7,"industry":[[15,14],[697,525],[1419,1141],[1788,1552],[3265,2626],[387,350],[1810,1611],[303,300],[303,245],[853,838],[1919,1899],[1126,1443]]},
+{"id":"ikeda","name":"池田市","region":"toyono-area","lat":34.8167,"lng":135.4308,"population":104993,"popChangeRate":0.37,"agingRate":26.5,"areaKm2":22.14,"households":48611,"fiscalIndex":0.82,"vacantRate":12.95,"aloneElderlyRate":12.03,"cardRate":85.19,"hazardCount":163,"carCommuteRate":18.1,"railCover1km":59.5,"dxAi":2,"dxRpa":0,"dxGenai":1,"onlineDone":32,"onlineApplicable":46,"workAgeChange":-0.97,"est2016":3647,"est2021":3629,"agingRise":0.91,"elderlyAloneShare":21,"elderlyOnlyHH":24,"floodExposure":18.4,"floodRiver":18.4,"floodSurge":0,"floodTsunami":0,"quakeProb":14.1,"quakeProb6s":3.1,"liquefyRate":4.7,"foodAccessRate":25.32,"clinicDensity":619.7,"schoolDensity":66.2,"habitableKm2":16.63,"nursingPer1k":14.2,"pop2050":94005,"popRate2050":-10.5,"leakageRate":-17.2,"industry":[[4,2],[91,68],[215,176],[241,206],[558,474],[59,63],[249,230],[50,51],[46,36],[147,156],[286,272],[145,167]]},
+{"id":"toyonaka","name":"豊中市","region":"toyono-area","lat":34.7815,"lng":135.4695,"population":401558,"popChangeRate":0.31,"agingRate":26.2,"areaKm2":36.39,"households":176967,"fiscalIndex":0.87,"vacantRate":13.7,"aloneElderlyRate":14.51,"cardRate":84.48,"hazardCount":49,"carCommuteRate":16,"railCover1km":79.6,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":46,"onlineApplicable":48,"workAgeChange":0.43,"est2016":13044,"est2021":13180,"agingRise":0.96,"elderlyAloneShare":24.3,"elderlyOnlyHH":26.4,"floodExposure":22.1,"floodRiver":21.5,"floodSurge":18.6,"floodTsunami":0,"quakeProb":22.2,"quakeProb6s":5.4,"liquefyRate":9.7,"foodAccessRate":16.91,"clinicDensity":1182.3,"schoolDensity":110,"habitableKm2":36.35,"nursingPer1k":11.2,"pop2050":367696,"popRate2050":-8.4,"leakageRate":-10.7,"industry":[[8,5],[318,246],[704,578],[763,694],[1498,1305],[148,148],[927,845],[177,160],[121,119],[556,548],[1036,1014],[588,699]]},
+{"id":"suita","name":"吹田市","region":"toyono-area","lat":34.7617,"lng":135.5158,"population":385567,"popChangeRate":0.59,"agingRate":23,"areaKm2":36.09,"households":180099,"fiscalIndex":0.96,"vacantRate":12.03,"aloneElderlyRate":10.99,"cardRate":85.25,"hazardCount":75,"carCommuteRate":13.5,"railCover1km":80.4,"dxAi":2,"dxRpa":2,"dxGenai":1,"onlineDone":41,"onlineApplicable":48,"workAgeChange":-0.43,"est2016":11526,"est2021":11703,"agingRise":0.42,"elderlyAloneShare":22.3,"elderlyOnlyHH":21.6,"floodExposure":23.4,"floodRiver":22.7,"floodSurge":15.3,"floodTsunami":0,"quakeProb":25.2,"quakeProb6s":5.9,"liquefyRate":0.6,"foodAccessRate":22.26,"clinicDensity":1044.5,"schoolDensity":100.9,"habitableKm2":35.69,"nursingPer1k":16.9,"pop2050":366647,"popRate2050":-4.9,"leakageRate":-4.6,"industry":[[9,10],[289,269],[553,488],[646,590],[1170,1018],[130,129],[703,634],[130,122],[145,150],[435,456],[789,842],[469,559]]},
+{"id":"takatsuki","name":"高槻市","region":"mishima","lat":34.8467,"lng":135.6178,"population":352698,"popChangeRate":0.05,"agingRate":29,"areaKm2":105.29,"households":152869,"fiscalIndex":0.78,"vacantRate":9.63,"aloneElderlyRate":12.92,"cardRate":83.32,"hazardCount":468,"carCommuteRate":18.6,"railCover1km":29.6,"dxAi":2,"dxRpa":2,"dxGenai":0,"onlineDone":36,"onlineApplicable":47,"workAgeChange":-2.92,"est2016":9320,"est2021":9224,"agingRise":1.51,"elderlyAloneShare":19.3,"elderlyOnlyHH":27.2,"floodExposure":54,"floodRiver":54,"floodSurge":0,"floodTsunami":0,"quakeProb":36,"quakeProb6s":8.9,"liquefyRate":3.1,"foodAccessRate":26.24,"clinicDensity":532.3,"schoolDensity":75.3,"habitableKm2":55.8,"nursingPer1k":12.4,"pop2050":300685,"popRate2050":-14.7,"leakageRate":-4,"industry":[[8,11],[250,194],[542,490],[666,580],[1117,963],[114,111],[762,701],[147,143],[99,102],[364,367],[755,754],[402,489]]},
+{"id":"ibaraki","name":"茨木市","region":"mishima","lat":34.8156,"lng":135.5686,"population":287730,"popChangeRate":0.54,"agingRate":23.9,"areaKm2":76.49,"households":125089,"fiscalIndex":0.97,"vacantRate":9.12,"aloneElderlyRate":10.59,"cardRate":84.16,"hazardCount":382,"carCommuteRate":18.1,"railCover1km":62.5,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":37,"onlineApplicable":47,"workAgeChange":0.3,"est2016":9279,"est2021":8945,"agingRise":0.68,"elderlyAloneShare":19.3,"elderlyOnlyHH":22.1,"floodExposure":44.4,"floodRiver":44.4,"floodSurge":0,"floodTsunami":0,"quakeProb":31.9,"quakeProb6s":7.6,"liquefyRate":3.2,"foodAccessRate":28.51,"clinicDensity":500,"schoolDensity":65.1,"habitableKm2":49.18,"nursingPer1k":10,"pop2050":266518,"popRate2050":-7.4,"leakageRate":-9.1,"industry":[[9,4],[215,164],[475,402],[505,473],[1031,830],[134,110],[574,527],[84,87],[90,85],[354,326],[608,615],[335,406]]},
+{"id":"minoh","name":"箕面市","region":"toyono-area","lat":34.8256,"lng":135.47,"population":136868,"popChangeRate":0.51,"agingRate":25.8,"areaKm2":47.9,"households":58088,"fiscalIndex":0.9,"vacantRate":11.69,"aloneElderlyRate":11.12,"cardRate":84.47,"hazardCount":340,"carCommuteRate":24.9,"railCover1km":50,"dxAi":1,"dxRpa":2,"dxGenai":2,"onlineDone":37,"onlineApplicable":45,"workAgeChange":5.62,"est2016":4215,"est2021":4159,"agingRise":1.19,"elderlyAloneShare":18.3,"elderlyOnlyHH":24.7,"floodExposure":1.2,"floodRiver":1.2,"floodSurge":0,"floodTsunami":0,"quakeProb":9,"quakeProb6s":2.6,"liquefyRate":0,"foodAccessRate":22.78,"clinicDensity":593.7,"schoolDensity":65.9,"habitableKm2":22.75,"nursingPer1k":10.8,"pop2050":128501,"popRate2050":-6.1,"leakageRate":-5.3,"industry":[[2,2],[120,86],[256,219],[298,261],[457,361],[56,55],[249,223],[46,49],[27,29],[141,129],[296,305],[158,205]]},
+{"id":"settsu","name":"摂津市","region":"mishima","lat":34.7736,"lng":135.5661,"population":87456,"popChangeRate":0.57,"agingRate":25.3,"areaKm2":14.87,"households":40243,"fiscalIndex":0.95,"vacantRate":11.39,"aloneElderlyRate":12.05,"cardRate":82.74,"hazardCount":0,"carCommuteRate":19.1,"railCover1km":73.6,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":12,"onlineApplicable":47,"workAgeChange":-0.52,"est2016":4082,"est2021":3935,"agingRise":1.01,"elderlyAloneShare":21.9,"elderlyOnlyHH":22.9,"floodExposure":75.9,"floodRiver":75.9,"floodSurge":0,"floodTsunami":0,"quakeProb":50.5,"quakeProb6s":12.9,"liquefyRate":17.3,"foodAccessRate":29.29,"clinicDensity":390,"schoolDensity":67.2,"habitableKm2":14.87,"nursingPer1k":12.4,"pop2050":77289,"popRate2050":-11.6,"leakageRate":3.8,"industry":[[null,null],[26,24],[142,106],[170,141],[316,265],[43,41],[182,158],[36,40],[35,27],[82,83],[146,153],[96,109]]},
+{"id":"shimamoto","name":"島本町","region":"mishima","lat":34.8867,"lng":135.6767,"population":30927,"popChangeRate":0.62,"agingRate":27.5,"areaKm2":16.81,"households":12747,"fiscalIndex":0.71,"vacantRate":6.29,"aloneElderlyRate":13.31,"cardRate":86.87,"hazardCount":67,"carCommuteRate":15.4,"railCover1km":90.1,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":31,"onlineApplicable":46,"workAgeChange":-0.43,"est2016":610,"est2021":583,"agingRise":1.92,"elderlyAloneShare":20,"elderlyOnlyHH":29.1,"floodExposure":54.4,"floodRiver":54.4,"floodSurge":0,"floodTsunami":0,"quakeProb":37.6,"quakeProb6s":9.4,"liquefyRate":1.1,"foodAccessRate":26.95,"clinicDensity":355,"schoolDensity":59.2,"habitableKm2":6.76,"nursingPer1k":5.9,"pop2050":28158,"popRate2050":-9,"leakageRate":-45.4,"industry":[[null,null],[12,6],[49,41],[43,38],[48,41],[15,12],[49,46],[11,8],[5,8],[35,33],[50,53],[35,39]]},
+{"id":"toyono","name":"豊能町","region":"toyono-area","lat":34.9264,"lng":135.4581,"population":18279,"popChangeRate":-1.72,"agingRate":47.4,"areaKm2":34.34,"households":7580,"fiscalIndex":0.41,"vacantRate":8.92,"aloneElderlyRate":13.15,"cardRate":84.25,"hazardCount":415,"carCommuteRate":44.3,"railCover1km":61.8,"dxAi":0,"dxRpa":0,"dxGenai":0,"onlineDone":4,"onlineApplicable":46,"workAgeChange":-20.93,"est2016":311,"est2021":379,"agingRise":8.52,"elderlyAloneShare":11.5,"elderlyOnlyHH":44.7,"floodExposure":0.4,"floodRiver":0.4,"floodSurge":0,"floodTsunami":0,"quakeProb":5.9,"quakeProb6s":1,"liquefyRate":0,"foodAccessRate":29.68,"clinicDensity":115.4,"schoolDensity":33,"habitableKm2":12.12,"nursingPer1k":15,"pop2050":7516,"popRate2050":-58.9,"leakageRate":-41.7,"industry":[[null,null],[4,7],[20,18],[17,19],[14,15],[3,5],[14,21],[6,8],[2,5],[5,13],[25,30],[15,15]]},
+{"id":"nose","name":"能勢町","region":"toyono-area","lat":34.9694,"lng":135.4231,"population":9079,"popChangeRate":-2.41,"agingRate":41.5,"areaKm2":98.75,"households":3645,"fiscalIndex":0.36,"vacantRate":null,"aloneElderlyRate":14.01,"cardRate":75.88,"hazardCount":1072,"carCommuteRate":75.7,"railCover1km":0,"dxAi":0,"dxRpa":0,"dxGenai":0,"onlineDone":34,"onlineApplicable":48,"workAgeChange":-21.91,"est2016":365,"est2021":383,"agingRise":6.69,"elderlyAloneShare":13.5,"elderlyOnlyHH":36,"floodExposure":7.9,"floodRiver":7.9,"floodSurge":0,"floodTsunami":0,"quakeProb":3.9,"quakeProb6s":0.4,"liquefyRate":0,"foodAccessRate":33.95,"clinicDensity":32.8,"schoolDensity":4.7,"habitableKm2":21.33,"nursingPer1k":13.3,"pop2050":3838,"popRate2050":-57.7,"leakageRate":6.1,"industry":[[1,1],[null,null],[23,18],[21,26],[21,18],[2,2],[14,13],[1,1],[3,5],[3,2],[9,9],[16,23]]},
+{"id":"moriguchi","name":"守口市","region":"kita-kawachi","lat":34.7377,"lng":135.5697,"population":143096,"popChangeRate":0.01,"agingRate":28.6,"areaKm2":12.71,"households":67860,"fiscalIndex":0.7,"vacantRate":17.07,"aloneElderlyRate":15.66,"cardRate":83.75,"hazardCount":0,"carCommuteRate":15.7,"railCover1km":68.7,"dxAi":2,"dxRpa":2,"dxGenai":1,"onlineDone":39,"onlineApplicable":47,"workAgeChange":3.94,"est2016":6127,"est2021":5881,"agingRise":1.19,"elderlyAloneShare":25.9,"elderlyOnlyHH":26.6,"floodExposure":90.7,"floodRiver":90.7,"floodSurge":0,"floodTsunami":0,"quakeProb":62.3,"quakeProb6s":18.2,"liquefyRate":12.3,"foodAccessRate":16.36,"clinicDensity":1093.6,"schoolDensity":102.3,"habitableKm2":12.71,"nursingPer1k":9.5,"pop2050":116069,"popRate2050":-18.9,"leakageRate":-5.6,"industry":[[4,4],[162,139],[293,246],[391,338],[763,594],[89,83],[440,367],[67,71],[56,42],[140,134],[352,342],[189,276]]},
+{"id":"hirakata","name":"枚方市","region":"kita-kawachi","lat":34.8153,"lng":135.6567,"population":397289,"popChangeRate":-0.34,"agingRate":27.8,"areaKm2":65.12,"households":172253,"fiscalIndex":0.77,"vacantRate":11.43,"aloneElderlyRate":11.53,"cardRate":83.78,"hazardCount":165,"carCommuteRate":23.2,"railCover1km":57.8,"dxAi":2,"dxRpa":2,"dxGenai":1,"onlineDone":37,"onlineApplicable":45,"workAgeChange":-8.9,"est2016":10074,"est2021":9839,"agingRise":1.68,"elderlyAloneShare":18,"elderlyOnlyHH":25.5,"floodExposure":29.5,"floodRiver":29.5,"floodSurge":0,"floodTsunami":0,"quakeProb":24,"quakeProb6s":4.6,"liquefyRate":2.5,"foodAccessRate":28.09,"clinicDensity":489.8,"schoolDensity":77.6,"habitableKm2":57.96,"nursingPer1k":10.9,"pop2050":307802,"popRate2050":-22.5,"leakageRate":-2.7,"industry":[[8,9],[308,256],[586,470],[757,669],[1237,966],[154,139],[823,760],[139,135],[127,111],[440,453],[776,784],[544,641]]},
+{"id":"neyagawa","name":"寝屋川市","region":"kita-kawachi","lat":34.7642,"lng":135.6283,"population":229733,"popChangeRate":-0.66,"agingRate":29.6,"areaKm2":24.7,"households":101538,"fiscalIndex":0.64,"vacantRate":13.31,"aloneElderlyRate":14.68,"cardRate":79.84,"hazardCount":43,"carCommuteRate":20.3,"railCover1km":50.6,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":38,"onlineApplicable":48,"workAgeChange":-9.53,"est2016":7096,"est2021":6742,"agingRise":0.97,"elderlyAloneShare":21.9,"elderlyOnlyHH":28,"floodExposure":54.5,"floodRiver":54.5,"floodSurge":0,"floodTsunami":0,"quakeProb":46.2,"quakeProb6s":11.8,"liquefyRate":10.4,"foodAccessRate":22.23,"clinicDensity":761.5,"schoolDensity":100.4,"habitableKm2":23.91,"nursingPer1k":13.4,"pop2050":172808,"popRate2050":-24.8,"leakageRate":-2.1,"industry":[[3,5],[198,127],[425,359],[486,422],[992,783],[86,76],[580,502],[104,101],[77,68],[219,198],[482,458],[303,404]]},
+{"id":"daito","name":"大東市","region":"kita-kawachi","lat":34.7136,"lng":135.6197,"population":119367,"popChangeRate":-0.63,"agingRate":26.3,"areaKm2":18.27,"households":52686,"fiscalIndex":0.72,"vacantRate":14.92,"aloneElderlyRate":13.01,"cardRate":81.34,"hazardCount":120,"carCommuteRate":18.9,"railCover1km":69.6,"dxAi":2,"dxRpa":2,"dxGenai":1,"onlineDone":36,"onlineApplicable":47,"workAgeChange":-5,"est2016":4606,"est2021":4208,"agingRise":1.13,"elderlyAloneShare":21.8,"elderlyOnlyHH":25,"floodExposure":63,"floodRiver":63,"floodSurge":0,"floodTsunami":0,"quakeProb":53.5,"quakeProb6s":15.1,"liquefyRate":9.9,"foodAccessRate":19.48,"clinicDensity":517.8,"schoolDensity":84.1,"habitableKm2":15.46,"nursingPer1k":11.5,"pop2050":87420,"popRate2050":-26.8,"leakageRate":-3.8,"industry":[[3,1],[89,68],[206,165],[244,223],[453,343],[55,44],[257,211],[43,48],[29,29],[110,88],[222,216],[143,166]]},
+{"id":"kadoma","name":"門真市","region":"kita-kawachi","lat":34.7369,"lng":135.5789,"population":119764,"popChangeRate":-0.62,"agingRate":29.7,"areaKm2":12.3,"households":57379,"fiscalIndex":0.68,"vacantRate":16.99,"aloneElderlyRate":16.98,"cardRate":80.38,"hazardCount":0,"carCommuteRate":18.3,"railCover1km":67.4,"dxAi":2,"dxRpa":2,"dxGenai":0,"onlineDone":45,"onlineApplicable":47,"workAgeChange":-4.91,"est2016":5462,"est2021":5128,"agingRise":1.96,"elderlyAloneShare":27.4,"elderlyOnlyHH":28,"floodExposure":96.5,"floodRiver":96.5,"floodSurge":0,"floodTsunami":0,"quakeProb":63.7,"quakeProb6s":19.2,"liquefyRate":7.4,"foodAccessRate":20.99,"clinicDensity":935,"schoolDensity":105.7,"habitableKm2":12.3,"nursingPer1k":12.7,"pop2050":79332,"popRate2050":-33.8,"leakageRate":9.5,"industry":[[2,2],[99,75],[258,217],[313,267],[786,621],[100,74],[343,300],[73,64],[59,51],[95,91],[308,294],[191,237]]},
+{"id":"shijonawate","name":"四條畷市","region":"kita-kawachi","lat":34.7378,"lng":135.6478,"population":55177,"popChangeRate":-0.32,"agingRate":27.5,"areaKm2":18.69,"households":22415,"fiscalIndex":0.59,"vacantRate":15.54,"aloneElderlyRate":12.88,"cardRate":83.81,"hazardCount":70,"carCommuteRate":26.4,"railCover1km":66.7,"dxAi":2,"dxRpa":2,"dxGenai":1,"onlineDone":24,"onlineApplicable":48,"workAgeChange":-1.94,"est2016":1862,"est2021":1848,"agingRise":2.02,"elderlyAloneShare":19,"elderlyOnlyHH":26.3,"floodExposure":5.3,"floodRiver":5.3,"floodSurge":0,"floodTsunami":0,"quakeProb":21.9,"quakeProb6s":3.5,"liquefyRate":0,"foodAccessRate":31.77,"clinicDensity":317.2,"schoolDensity":52.9,"habitableKm2":11.34,"nursingPer1k":17.8,"pop2050":41138,"popRate2050":-25.4,"leakageRate":-13.6,"industry":[[null,1],[100,88],[107,92],[149,126],[211,190],[22,21],[134,127],[28,24],[20,23],[71,68],[91,98],[67,94]]},
+{"id":"katano","name":"交野市","region":"kita-kawachi","lat":34.7692,"lng":135.6667,"population":75033,"popChangeRate":-0.37,"agingRate":28.8,"areaKm2":25.55,"households":29569,"fiscalIndex":0.69,"vacantRate":11.03,"aloneElderlyRate":12.05,"cardRate":84.48,"hazardCount":135,"carCommuteRate":26,"railCover1km":78.7,"dxAi":2,"dxRpa":2,"dxGenai":1,"onlineDone":17,"onlineApplicable":46,"workAgeChange":-4.51,"est2016":1934,"est2021":1930,"agingRise":2.53,"elderlyAloneShare":16.5,"elderlyOnlyHH":28.8,"floodExposure":7.2,"floodRiver":7.2,"floodSurge":0,"floodTsunami":0,"quakeProb":16.8,"quakeProb6s":2.2,"liquefyRate":2.8,"foodAccessRate":29.34,"clinicDensity":345,"schoolDensity":56.5,"habitableKm2":15.94,"nursingPer1k":10.9,"pop2050":55115,"popRate2050":-26.5,"leakageRate":-22.1,"industry":[null,null,null,null,null,null,null,null,null,null,null,null]},
+{"id":"yao","name":"八尾市","region":"naka-kawachi","lat":34.6247,"lng":135.6003,"population":264642,"popChangeRate":-0.31,"agingRate":28.3,"areaKm2":41.72,"households":114265,"fiscalIndex":0.71,"vacantRate":13.91,"aloneElderlyRate":14.96,"cardRate":82.82,"hazardCount":71,"carCommuteRate":21.1,"railCover1km":76.7,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":36,"onlineApplicable":47,"workAgeChange":-3.34,"est2016":11940,"est2021":10930,"agingRise":1.26,"elderlyAloneShare":22.8,"elderlyOnlyHH":27.7,"floodExposure":38,"floodRiver":38,"floodSurge":0,"floodTsunami":0,"quakeProb":60.7,"quakeProb6s":18.3,"liquefyRate":23.1,"foodAccessRate":24.91,"clinicDensity":574.5,"schoolDensity":75.9,"habitableKm2":36.88,"nursingPer1k":12.3,"pop2050":207696,"popRate2050":-21.5,"leakageRate":2.5,"industry":[[6,10],[263,186],[534,437],[681,537],[1149,908],[125,115],[629,543],[106,101],[91,73],[314,282],[606,589],[356,443]]},
+{"id":"kashiwara","name":"柏原市","region":"naka-kawachi","lat":34.5789,"lng":135.6444,"population":68775,"popChangeRate":-0.67,"agingRate":29,"areaKm2":25.33,"households":30009,"fiscalIndex":0.6,"vacantRate":20.79,"aloneElderlyRate":13.21,"cardRate":82.81,"hazardCount":239,"carCommuteRate":23.6,"railCover1km":95.4,"dxAi":2,"dxRpa":0,"dxGenai":2,"onlineDone":35,"onlineApplicable":46,"workAgeChange":-7.7,"est2016":2268,"est2021":2200,"agingRise":2.7,"elderlyAloneShare":19.8,"elderlyOnlyHH":27.1,"floodExposure":47.3,"floodRiver":47.3,"floodSurge":0,"floodTsunami":0,"quakeProb":38.9,"quakeProb6s":8.9,"liquefyRate":13.8,"foodAccessRate":33.69,"clinicDensity":266.8,"schoolDensity":55.6,"habitableKm2":17.98,"nursingPer1k":11,"pop2050":44402,"popRate2050":-35.4,"leakageRate":-12.9,"industry":[[null,null],[48,38],[124,108],[165,143],[191,170],[25,20],[144,135],[37,48],[29,21],[76,64],[141,137],[92,127]]},
+{"id":"higashiosaka","name":"東大阪市","region":"naka-kawachi","lat":34.6797,"lng":135.6008,"population":493940,"popChangeRate":-0.35,"agingRate":27.5,"areaKm2":61.78,"households":232303,"fiscalIndex":0.74,"vacantRate":16.25,"aloneElderlyRate":13.97,"cardRate":80.05,"hazardCount":167,"carCommuteRate":18,"railCover1km":84.8,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":37,"onlineApplicable":48,"workAgeChange":-3.99,"est2016":24644,"est2021":24408,"agingRise":0.7,"elderlyAloneShare":23.9,"elderlyOnlyHH":24.7,"floodExposure":27.6,"floodRiver":27.6,"floodSurge":0,"floodTsunami":0,"quakeProb":55.6,"quakeProb6s":16.3,"liquefyRate":20.4,"foodAccessRate":22.05,"clinicDensity":767.9,"schoolDensity":98.6,"habitableKm2":51.71,"nursingPer1k":13.7,"pop2050":377297,"popRate2050":-23.6,"leakageRate":null,"industry":[[7,5],[480,352],[1071,912],[1209,1040],[2369,1910],[215,202],[1218,1089],[218,223],[187,181],[522,513],[1168,1176],[756,996]]},
+{"id":"tondabayashi","name":"富田林市","region":"minami-kawachi","lat":34.5,"lng":135.5983,"population":108699,"popChangeRate":-0.95,"agingRate":30.2,"areaKm2":39.72,"households":45699,"fiscalIndex":0.62,"vacantRate":13.02,"aloneElderlyRate":14.06,"cardRate":81.53,"hazardCount":199,"carCommuteRate":39.5,"railCover1km":60.5,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":16,"onlineApplicable":45,"workAgeChange":-9.23,"est2016":3304,"est2021":3388,"agingRise":3.12,"elderlyAloneShare":19.6,"elderlyOnlyHH":29.4,"floodExposure":8.2,"floodRiver":8.2,"floodSurge":0,"floodTsunami":0,"quakeProb":24.5,"quakeProb6s":2.6,"liquefyRate":0,"foodAccessRate":35.67,"clinicDensity":236.9,"schoolDensity":46.3,"habitableKm2":36.74,"nursingPer1k":13.3,"pop2050":67795,"popRate2050":-37.6,"leakageRate":-9,"industry":[[3,2],[89,69],[176,146],[230,215],[259,239],[46,52],[196,184],[41,38],[27,28],[117,126],[220,227],[132,181]]},
+{"id":"kawachinagano","name":"河内長野市","region":"minami-kawachi","lat":34.4581,"lng":135.5686,"population":101692,"popChangeRate":-1.01,"agingRate":35.4,"areaKm2":109.63,"households":42367,"fiscalIndex":0.59,"vacantRate":12.11,"aloneElderlyRate":14.33,"cardRate":83.71,"hazardCount":1671,"carCommuteRate":40.8,"railCover1km":57.2,"dxAi":2,"dxRpa":0,"dxGenai":2,"onlineDone":35,"onlineApplicable":47,"workAgeChange":-11.37,"est2016":2701,"est2021":2688,"agingRise":4.3,"elderlyAloneShare":16.8,"elderlyOnlyHH":34.3,"floodExposure":7.2,"floodRiver":7.2,"floodSurge":0,"floodTsunami":0,"quakeProb":16.7,"quakeProb6s":1.4,"liquefyRate":0,"foodAccessRate":38.1,"clinicDensity":220.8,"schoolDensity":37.8,"habitableKm2":34.42,"nursingPer1k":12.3,"pop2050":58342,"popRate2050":-42.6,"leakageRate":null,"industry":[[2,1],[67,57],[169,152],[216,204],[266,205],[28,24],[198,194],[41,41],[29,23],[122,125],[225,223],[119,152]]},
+{"id":"matsubara","name":"松原市","region":"minami-kawachi","lat":34.5772,"lng":135.5442,"population":117641,"popChangeRate":-0.52,"agingRate":30,"areaKm2":16.66,"households":51902,"fiscalIndex":0.59,"vacantRate":13.42,"aloneElderlyRate":15.07,"cardRate":81.45,"hazardCount":0,"carCommuteRate":24.3,"railCover1km":73.6,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":11,"onlineApplicable":46,"workAgeChange":-5.64,"est2016":4607,"est2021":4362,"agingRise":1.54,"elderlyAloneShare":22.2,"elderlyOnlyHH":28.3,"floodExposure":24.8,"floodRiver":24.8,"floodSurge":0,"floodTsunami":0,"quakeProb":42.4,"quakeProb6s":9.8,"liquefyRate":6.3,"foodAccessRate":28.91,"clinicDensity":576.2,"schoolDensity":90,"habitableKm2":16.66,"nursingPer1k":9.2,"pop2050":80074,"popRate2050":-31.9,"leakageRate":-0.9,"industry":[[2,2],[90,63],[248,183],[273,252],[509,389],[54,42],[287,248],[53,47],[32,33],[134,121],[273,258],[131,172]]},
+{"id":"habikino","name":"羽曳野市","region":"minami-kawachi","lat":34.5561,"lng":135.61,"population":108736,"popChangeRate":-0.71,"agingRate":30.6,"areaKm2":26.45,"households":45008,"fiscalIndex":0.56,"vacantRate":14.5,"aloneElderlyRate":13.91,"cardRate":82.4,"hazardCount":37,"carCommuteRate":32.8,"railCover1km":51.3,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":43,"onlineApplicable":47,"workAgeChange":-6.21,"est2016":3638,"est2021":3394,"agingRise":2.38,"elderlyAloneShare":18.8,"elderlyOnlyHH":28.9,"floodExposure":22.1,"floodRiver":22.1,"floodSurge":0,"floodTsunami":0,"quakeProb":25.9,"quakeProb6s":3,"liquefyRate":0,"foodAccessRate":24.75,"clinicDensity":287.7,"schoolDensity":58.4,"habitableKm2":23.99,"nursingPer1k":13.8,"pop2050":73479,"popRate2050":-32.4,"leakageRate":-9,"industry":[[3,2],[48,38],[199,182],[226,200],[304,250],[38,33],[217,188],[43,42],[28,29],[136,113],[219,205],[162,174]]},
+{"id":"fujiidera","name":"藤井寺市","region":"minami-kawachi","lat":34.5697,"lng":135.5983,"population":63688,"popChangeRate":-0.54,"agingRate":28.4,"areaKm2":8.89,"households":27814,"fiscalIndex":0.61,"vacantRate":14.4,"aloneElderlyRate":14.62,"cardRate":82.64,"hazardCount":0,"carCommuteRate":26.3,"railCover1km":77.2,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":19,"onlineApplicable":43,"workAgeChange":-5.11,"est2016":2665,"est2021":2581,"agingRise":1.77,"elderlyAloneShare":22.5,"elderlyOnlyHH":27.7,"floodExposure":51.7,"floodRiver":51.7,"floodSurge":0,"floodTsunami":0,"quakeProb":36.4,"quakeProb6s":8.2,"liquefyRate":0,"foodAccessRate":22.82,"clinicDensity":787.4,"schoolDensity":90,"habitableKm2":8.89,"nursingPer1k":12.2,"pop2050":47772,"popRate2050":-25,"leakageRate":-10.3,"industry":[[null,null],[70,62],[134,127],[184,148],[389,324],[27,34],[178,164],[32,34],[21,19],[101,96],[192,189],[93,128]]},
+{"id":"osakasayama","name":"大阪狭山市","region":"minami-kawachi","lat":34.5133,"lng":135.5683,"population":58435,"popChangeRate":0.22,"agingRate":28.1,"areaKm2":11.92,"households":24216,"fiscalIndex":0.66,"vacantRate":11.96,"aloneElderlyRate":13.11,"cardRate":83.7,"hazardCount":24,"carCommuteRate":36.2,"railCover1km":52.1,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":19,"onlineApplicable":46,"workAgeChange":-2.97,"est2016":1835,"est2021":1761,"agingRise":1.43,"elderlyAloneShare":19.3,"elderlyOnlyHH":28,"floodExposure":1.5,"floodRiver":1.5,"floodSurge":0,"floodTsunami":0,"quakeProb":25.6,"quakeProb6s":2.9,"liquefyRate":0,"foodAccessRate":39.48,"clinicDensity":481.5,"schoolDensity":60.2,"habitableKm2":11.63,"nursingPer1k":11,"pop2050":47801,"popRate2050":-18.2,"leakageRate":12.7,"industry":[[3,1],[38,29],[82,74],[127,114],[215,168],[19,20],[147,146],[25,23],[17,14],[95,90],[154,152],[55,110]]},
+{"id":"taishi","name":"太子町","region":"minami-kawachi","lat":34.5061,"lng":135.6394,"population":13009,"popChangeRate":-1.1,"agingRate":29.5,"areaKm2":14.17,"households":5048,"fiscalIndex":0.47,"vacantRate":null,"aloneElderlyRate":11.32,"cardRate":84.09,"hazardCount":131,"carCommuteRate":50.4,"railCover1km":22,"dxAi":0,"dxRpa":0,"dxGenai":1,"onlineDone":34,"onlineApplicable":45,"workAgeChange":-9.56,"est2016":402,"est2021":355,"agingRise":3.71,"elderlyAloneShare":14.8,"elderlyOnlyHH":28.9,"floodExposure":6.2,"floodRiver":6.2,"floodSurge":0,"floodTsunami":0,"quakeProb":19.7,"quakeProb6s":1.8,"liquefyRate":0,"foodAccessRate":37.92,"clinicDensity":77.9,"schoolDensity":22.3,"habitableKm2":8.98,"nursingPer1k":13,"pop2050":8141,"popRate2050":-37.4,"leakageRate":-11.7,"industry":[[null,null],[7,4],[21,16],[20,19],[16,13],[8,6],[17,14],[3,2],[3,1],[19,11],[19,17],[17,21]]},
+{"id":"kanan","name":"河南町","region":"minami-kawachi","lat":34.4881,"lng":135.6486,"population":15697,"popChangeRate":-0.54,"agingRate":31.2,"areaKm2":25.26,"households":6392,"fiscalIndex":0.43,"vacantRate":15.07,"aloneElderlyRate":9.87,"cardRate":83.92,"hazardCount":251,"carCommuteRate":57.5,"railCover1km":0,"dxAi":0,"dxRpa":2,"dxGenai":0,"onlineDone":7,"onlineApplicable":49,"workAgeChange":-8.75,"est2016":491,"est2021":490,"agingRise":2.25,"elderlyAloneShare":12.9,"elderlyOnlyHH":26,"floodExposure":8.8,"floodRiver":8.8,"floodSurge":0,"floodTsunami":0,"quakeProb":14.5,"quakeProb6s":1.2,"liquefyRate":0,"foodAccessRate":45.66,"clinicDensity":68.1,"schoolDensity":15.1,"habitableKm2":13.21,"nursingPer1k":32.7,"pop2050":9989,"popRate2050":-36.4,"leakageRate":-9.1,"industry":[[null,null],[2,2],[28,23],[24,23],[33,23],[2,1],[20,22],[2,3],[5,4],[14,16],[15,14],[15,16]]},
+{"id":"chihayaakasaka","name":"千早赤阪村","region":"minami-kawachi","lat":34.4494,"lng":135.6394,"population":4909,"popChangeRate":-1.81,"agingRate":45.5,"areaKm2":37.3,"households":1944,"fiscalIndex":0.26,"vacantRate":null,"aloneElderlyRate":15.15,"cardRate":83.11,"hazardCount":306,"carCommuteRate":67.5,"railCover1km":0,"dxAi":0,"dxRpa":0,"dxGenai":0,"onlineDone":11,"onlineApplicable":43,"workAgeChange":-16.09,"est2016":198,"est2021":194,"agingRise":4.82,"elderlyAloneShare":13.2,"elderlyOnlyHH":41.3,"floodExposure":3.5,"floodRiver":3.5,"floodSurge":0,"floodTsunami":0,"quakeProb":17.8,"quakeProb6s":1.4,"liquefyRate":0,"foodAccessRate":41.3,"clinicDensity":69.3,"schoolDensity":27.8,"habitableKm2":7.2,"nursingPer1k":30.4,"pop2050":2045,"popRate2050":-58.3,"leakageRate":-29,"industry":[[null,null],[1,1],[8,8],[8,8],[9,10],[3,3],[3,3],[3,1],[1,4],[7,5],[5,4],[7,8]]},
+{"id":"izumiotsu","name":"泉大津市","region":"sen-hoku","lat":34.5033,"lng":135.4106,"population":74412,"popChangeRate":-0.39,"agingRate":25.5,"areaKm2":14.33,"households":32516,"fiscalIndex":0.71,"vacantRate":13.98,"aloneElderlyRate":13.46,"cardRate":82.94,"hazardCount":0,"carCommuteRate":30.3,"railCover1km":86.8,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":25,"onlineApplicable":47,"workAgeChange":-3.88,"est2016":3269,"est2021":3033,"agingRise":1.73,"elderlyAloneShare":23.1,"elderlyOnlyHH":24.6,"floodExposure":72.6,"floodRiver":51.4,"floodSurge":48.7,"floodTsunami":16.2,"quakeProb":51.1,"quakeProb6s":13.4,"liquefyRate":51.1,"foodAccessRate":21.65,"clinicDensity":488.5,"schoolDensity":55.8,"habitableKm2":14.33,"nursingPer1k":15.2,"pop2050":54837,"popRate2050":-26.3,"leakageRate":-3.8,"industry":[[2,2],[71,61],[155,122],[193,164],[408,326],[35,37],[174,167],[26,21],[38,30],[120,105],[196,179],[79,96]]},
+{"id":"izumi","name":"和泉市","region":"sen-hoku","lat":34.4839,"lng":135.4181,"population":184495,"popChangeRate":-0.17,"agingRate":25.5,"areaKm2":84.98,"households":73701,"fiscalIndex":0.72,"vacantRate":11.42,"aloneElderlyRate":11.16,"cardRate":83.43,"hazardCount":458,"carCommuteRate":41.2,"railCover1km":44.1,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":37,"onlineApplicable":47,"workAgeChange":-4.13,"est2016":5887,"est2021":5742,"agingRise":2.83,"elderlyAloneShare":17.5,"elderlyOnlyHH":24.3,"floodExposure":14.2,"floodRiver":13.8,"floodSurge":0.4,"floodTsunami":0,"quakeProb":28.7,"quakeProb6s":4.7,"liquefyRate":1.6,"foodAccessRate":31.5,"clinicDensity":247.7,"schoolDensity":40.6,"habitableKm2":51.67,"nursingPer1k":9.1,"pop2050":151940,"popRate2050":-17.6,"leakageRate":0,"industry":[[6,5],[196,156],[304,252],[416,383],[604,491],[52,47],[414,376],[70,67],[75,76],[243,226],[367,363],[196,255]]},
+{"id":"takaishi","name":"高石市","region":"sen-hoku","lat":34.5225,"lng":135.4344,"population":55635,"popChangeRate":-0.32,"agingRate":28.2,"areaKm2":11.3,"households":23130,"fiscalIndex":0.79,"vacantRate":12.04,"aloneElderlyRate":14.18,"cardRate":82.95,"hazardCount":0,"carCommuteRate":27.8,"railCover1km":99.8,"dxAi":0,"dxRpa":0,"dxGenai":0,"onlineDone":34,"onlineApplicable":48,"workAgeChange":-3.56,"est2016":2036,"est2021":1884,"agingRise":1.23,"elderlyAloneShare":20.9,"elderlyOnlyHH":27.6,"floodExposure":59.5,"floodRiver":25.7,"floodSurge":57.7,"floodTsunami":35.1,"quakeProb":45.4,"quakeProb6s":10.2,"liquefyRate":19.4,"foodAccessRate":28.6,"clinicDensity":451.3,"schoolDensity":61.9,"habitableKm2":11.3,"nursingPer1k":7.8,"pop2050":40293,"popRate2050":-27.6,"leakageRate":-23.6,"industry":[[null,null],[45,30],[104,95],[134,102],[231,176],[30,30],[149,139],[26,24],[21,16],[95,83],[164,144],[64,88]]},
+{"id":"tadaoka","name":"忠岡町","region":"sen-hoku","lat":34.4989,"lng":135.4319,"population":16567,"popChangeRate":-0.86,"agingRate":28.8,"areaKm2":3.97,"households":6749,"fiscalIndex":0.55,"vacantRate":15.74,"aloneElderlyRate":14.35,"cardRate":78.21,"hazardCount":0,"carCommuteRate":37.8,"railCover1km":70.8,"dxAi":2,"dxRpa":0,"dxGenai":0,"onlineDone":21,"onlineApplicable":47,"workAgeChange":-3.49,"est2016":580,"est2021":608,"agingRise":1.46,"elderlyAloneShare":20.2,"elderlyOnlyHH":27.6,"floodExposure":90,"floodRiver":89.6,"floodSurge":26.9,"floodTsunami":11.9,"quakeProb":44.1,"quakeProb6s":9.4,"liquefyRate":14.3,"foodAccessRate":29.65,"clinicDensity":352.6,"schoolDensity":50.4,"habitableKm2":3.97,"nursingPer1k":21,"pop2050":11699,"popRate2050":-29.4,"leakageRate":-17.4,"industry":[[null,null],[10,9],[31,27],[36,27],[45,39],[8,7],[35,29],[6,6],[1,3],[10,11],[41,44],[23,34]]},
+{"id":"kishiwada","name":"岸和田市","region":"sen-nan","lat":34.4614,"lng":135.3719,"population":190658,"popChangeRate":-0.44,"agingRate":28.1,"areaKm2":72.72,"households":79073,"fiscalIndex":0.61,"vacantRate":13.82,"aloneElderlyRate":13.67,"cardRate":80.05,"hazardCount":177,"carCommuteRate":41.2,"railCover1km":65.9,"dxAi":2,"dxRpa":2,"dxGenai":2,"onlineDone":32,"onlineApplicable":47,"workAgeChange":-5.75,"est2016":7230,"est2021":7050,"agingRise":2.22,"elderlyAloneShare":20.2,"elderlyOnlyHH":26,"floodExposure":28,"floodRiver":23,"floodSurge":14.1,"floodTsunami":6.1,"quakeProb":29.8,"quakeProb6s":5.1,"liquefyRate":4.6,"foodAccessRate":29.78,"clinicDensity":272,"schoolDensity":45,"habitableKm2":53.3,"nursingPer1k":7.7,"pop2050":137512,"popRate2050":-27.9,"leakageRate":6.5,"industry":[[2,2],[191,113],[424,321],[544,455],[810,741],[68,71],[452,419],[85,89],[79,66],[245,251],[425,410],[228,324]]},
+{"id":"kaizuka","name":"貝塚市","region":"sen-nan","lat":34.4339,"lng":135.3486,"population":84443,"popChangeRate":-0.98,"agingRate":27.3,"areaKm2":43.93,"households":33284,"fiscalIndex":0.65,"vacantRate":14.83,"aloneElderlyRate":13.39,"cardRate":82.83,"hazardCount":158,"carCommuteRate":44.4,"railCover1km":92,"dxAi":1,"dxRpa":2,"dxGenai":0,"onlineDone":29,"onlineApplicable":40,"workAgeChange":-6.72,"est2016":3295,"est2021":3139,"agingRise":2.45,"elderlyAloneShare":19.3,"elderlyOnlyHH":26.1,"floodExposure":16.7,"floodRiver":7.3,"floodSurge":14.6,"floodTsunami":2.6,"quakeProb":30.3,"quakeProb6s":5.3,"liquefyRate":11.3,"foodAccessRate":31.51,"clinicDensity":217.7,"schoolDensity":42,"habitableKm2":26.18,"nursingPer1k":8.9,"pop2050":59365,"popRate2050":-29.7,"leakageRate":-10.2,"industry":[[1,null],[66,47],[198,152],[196,167],[327,262],[30,34],[213,187],[43,42],[38,34],[123,115],[166,161],[130,156]]},
+{"id":"izumisano","name":"泉佐野市","region":"sen-nan","lat":34.4067,"lng":135.3097,"population":100131,"popChangeRate":-0.17,"agingRate":26.2,"areaKm2":56.51,"households":43864,"fiscalIndex":0.9,"vacantRate":12.28,"aloneElderlyRate":11.98,"cardRate":85.74,"hazardCount":103,"carCommuteRate":41.6,"railCover1km":81.4,"dxAi":2,"dxRpa":2,"dxGenai":0,"onlineDone":27,"onlineApplicable":41,"workAgeChange":-2.09,"est2016":4694,"est2021":4636,"agingRise":1.47,"elderlyAloneShare":20,"elderlyOnlyHH":22.8,"floodExposure":10,"floodRiver":3.7,"floodSurge":8.7,"floodTsunami":0.9,"quakeProb":30.9,"quakeProb6s":4.6,"liquefyRate":5.5,"foodAccessRate":31.05,"clinicDensity":243.4,"schoolDensity":35.6,"habitableKm2":36.56,"nursingPer1k":10.3,"pop2050":80921,"popRate2050":-19.2,"leakageRate":24.7,"industry":[[3,3],[289,226],[248,227],[336,316],[538,470],[44,42],[254,251],[64,70],[74,71],[126,122],[235,235],[165,217]]},
+{"id":"sennan","name":"泉南市","region":"sen-nan","lat":34.3833,"lng":135.2822,"population":60102,"popChangeRate":-0.76,"agingRate":29.6,"areaKm2":48.98,"households":23123,"fiscalIndex":0.69,"vacantRate":13.49,"aloneElderlyRate":13.36,"cardRate":82.38,"hazardCount":185,"carCommuteRate":49.6,"railCover1km":67.7,"dxAi":2,"dxRpa":0,"dxGenai":1,"onlineDone":35,"onlineApplicable":47,"workAgeChange":-5.31,"est2016":2128,"est2021":1943,"agingRise":2.67,"elderlyAloneShare":17.3,"elderlyOnlyHH":28.2,"floodExposure":13.5,"floodRiver":11.7,"floodSurge":11.1,"floodTsunami":0.8,"quakeProb":31.9,"quakeProb6s":5.1,"liquefyRate":11.3,"foodAccessRate":40.74,"clinicDensity":150.4,"schoolDensity":37.6,"habitableKm2":26.6,"nursingPer1k":12.4,"pop2050":40136,"popRate2050":-33.2,"leakageRate":10.3,"industry":[[2,2],[83,72],[132,113],[160,137],[183,152],[19,17],[130,103],[28,23],[33,29],[61,51],[112,102],[80,95]]},
+{"id":"hannan","name":"阪南市","region":"sen-nan","lat":34.3489,"lng":135.2244,"population":51254,"popChangeRate":-1.14,"agingRate":33.3,"areaKm2":36.17,"households":20774,"fiscalIndex":0.52,"vacantRate":15.17,"aloneElderlyRate":14.52,"cardRate":81.72,"hazardCount":231,"carCommuteRate":48.7,"railCover1km":55.9,"dxAi":2,"dxRpa":0,"dxGenai":2,"onlineDone":36,"onlineApplicable":47,"workAgeChange":-10.56,"est2016":1506,"est2021":1459,"agingRise":4.63,"elderlyAloneShare":17.6,"elderlyOnlyHH":33.3,"floodExposure":10.8,"floodRiver":8,"floodSurge":8.7,"floodTsunami":3.2,"quakeProb":26.4,"quakeProb6s":3.9,"liquefyRate":4,"foodAccessRate":39.79,"clinicDensity":246.8,"schoolDensity":45.9,"habitableKm2":17.43,"nursingPer1k":11.7,"pop2050":29574,"popRate2050":-42.3,"leakageRate":-8.4,"industry":[[null,null],[23,22],[96,87],[138,118],[145,115],[11,8],[126,116],[27,24],[20,21],[62,59],[118,113],[63,85]]},
+{"id":"kumatori","name":"熊取町","region":"sen-nan","lat":34.4083,"lng":135.3489,"population":43763,"popChangeRate":-0.3,"agingRate":28.4,"areaKm2":17.24,"households":17256,"fiscalIndex":0.57,"vacantRate":9.92,"aloneElderlyRate":10.21,"cardRate":84.88,"hazardCount":62,"carCommuteRate":49,"railCover1km":23.2,"dxAi":2,"dxRpa":2,"dxGenai":1,"onlineDone":36,"onlineApplicable":47,"workAgeChange":-6.89,"est2016":1239,"est2021":1154,"agingRise":2.75,"elderlyAloneShare":14.1,"elderlyOnlyHH":26.5,"floodExposure":4,"floodRiver":4,"floodSurge":0,"floodTsunami":0,"quakeProb":23.7,"quakeProb6s":3.1,"liquefyRate":0,"foodAccessRate":39.09,"clinicDensity":264.2,"schoolDensity":40.1,"habitableKm2":12.48,"nursingPer1k":14.4,"pop2050":33329,"popRate2050":-23.8,"leakageRate":-15.6,"industry":[[null,null],[23,19],[67,57],[85,74],[111,93],[16,26],[80,75],[18,18],[7,9],[76,63],[78,85],[79,79]]},
+{"id":"tajiri","name":"田尻町","region":"sen-nan","lat":34.4142,"lng":135.3125,"population":8434,"popChangeRate":0.04,"agingRate":23.7,"areaKm2":5.62,"households":3734,"fiscalIndex":1.3,"vacantRate":null,"aloneElderlyRate":11.13,"cardRate":86.22,"hazardCount":1,"carCommuteRate":35.4,"railCover1km":99.7,"dxAi":0,"dxRpa":0,"dxGenai":0,"onlineDone":6,"onlineApplicable":35,"workAgeChange":0.99,"est2016":386,"est2021":347,"agingRise":0.86,"elderlyAloneShare":20.8,"elderlyOnlyHH":20.1,"floodExposure":68.5,"floodRiver":64.7,"floodSurge":52.1,"floodTsunami":3.2,"quakeProb":45.2,"quakeProb6s":9.1,"liquefyRate":29.7,"foodAccessRate":44.01,"clinicDensity":142.3,"schoolDensity":17.8,"habitableKm2":5.62,"nursingPer1k":30,"pop2050":7638,"popRate2050":-9.4,"leakageRate":-17,"industry":[[null,1],[5,2],[40,34],[36,33],[59,32],[3,4],[26,20],[3,5],[2,1],[12,11],[20,19],[4,6]]},
+{"id":"misaki","name":"岬町","region":"sen-nan","lat":34.3181,"lng":135.1461,"population":14741,"popChangeRate":-1.55,"agingRate":40.5,"areaKm2":49.18,"households":6273,"fiscalIndex":0.47,"vacantRate":null,"aloneElderlyRate":19.37,"cardRate":83.66,"hazardCount":327,"carCommuteRate":50,"railCover1km":79.5,"dxAi":1,"dxRpa":0,"dxGenai":1,"onlineDone":32,"onlineApplicable":48,"workAgeChange":-13.43,"est2016":452,"est2021":391,"agingRise":4.16,"elderlyAloneShare":20.3,"elderlyOnlyHH":38.5,"floodExposure":13.7,"floodRiver":5.5,"floodSurge":10.9,"floodTsunami":4.4,"quakeProb":31.1,"quakeProb6s":6.1,"liquefyRate":14.6,"foodAccessRate":41.88,"clinicDensity":79,"schoolDensity":28.7,"habitableKm2":13.92,"nursingPer1k":10.6,"pop2050":7296,"popRate2050":-50.5,"leakageRate":-3,"industry":[[null,null],[4,3],[39,30],[48,36],[37,28],[2,2],[27,16],[4,4],[20,18],[16,8],[26,21],[20,21]]}
+]
+}/*DATA-END*/;
+
 /* ===================== 市町村データ（大阪府43市町村、実データ） =====================
    出典：人口・高齢人口・世帯数＝e-Stat 社会・人口統計体系「市区町村データ」（2020年国勢調査）
    面積＝国土地理院全国都道府県市区町村別面積調、財政力指数＝総務省 地方財政状況調査（直近公表年度）
@@ -1015,51 +1074,7 @@ var REGIONS={
    土砂災害警戒区域数＝大阪府「土砂災害防止法の指定状況」
    [id, 名称, 地域, 緯度, 経度, 人口, 人口増減率%, 高齢化率%, 面積km2, 世帯数, 財政力指数,
     空き家率%, 65歳以上単独世帯率%, マイナンバーカード保有率%, 土砂災害警戒区域数] */
-var RAW=[
-['osaka','大阪市','osaka-city',34.6937,135.5023,2752412,0.45,24.6,225.34,1469718,0.92,16.12,14.56,81.69,0],
-['sakai','堺市','sen-hoku',34.5732,135.483,826161,-0.32,28.2,149.83,366079,0.78,12.90,14.12,82.69,142],
-['ikeda','池田市','toyono-area',34.8167,135.4308,104993,0.37,26.5,22.14,48611,0.82,12.95,12.03,85.19,163],
-['toyonaka','豊中市','toyono-area',34.7815,135.4695,401558,0.31,26.2,36.39,176967,0.87,13.70,14.51,84.48,49],
-['suita','吹田市','toyono-area',34.7617,135.5158,385567,0.59,23.0,36.09,180099,0.96,12.03,10.99,85.25,75],
-['takatsuki','高槻市','mishima',34.8467,135.6178,352698,0.05,29.0,105.29,152869,0.78,9.63,12.92,83.32,468],
-['ibaraki','茨木市','mishima',34.8156,135.5686,287730,0.54,23.9,76.49,125089,0.97,9.12,10.59,84.16,382],
-['minoh','箕面市','toyono-area',34.8256,135.47,136868,0.51,25.8,47.9,58088,0.9,11.69,11.12,84.47,340],
-['settsu','摂津市','mishima',34.7736,135.5661,87456,0.57,25.3,14.87,40243,0.95,11.39,12.05,82.74,0],
-['shimamoto','島本町','mishima',34.8867,135.6767,30927,0.62,27.5,16.81,12747,0.71,6.29,13.31,86.87,67],
-['toyono','豊能町','toyono-area',34.9264,135.4581,18279,-1.72,47.4,34.34,7580,0.41,8.92,13.15,84.25,415],
-['nose','能勢町','toyono-area',34.9694,135.4231,9079,-2.41,41.5,98.75,3645,0.36,null,14.01,75.88,1072],
-['moriguchi','守口市','kita-kawachi',34.7377,135.5697,143096,0.01,28.6,12.71,67860,0.7,17.07,15.66,83.75,0],
-['hirakata','枚方市','kita-kawachi',34.8153,135.6567,397289,-0.34,27.8,65.12,172253,0.77,11.43,11.53,83.78,165],
-['neyagawa','寝屋川市','kita-kawachi',34.7642,135.6283,229733,-0.66,29.6,24.7,101538,0.64,13.31,14.68,79.84,43],
-['daito','大東市','kita-kawachi',34.7136,135.6197,119367,-0.63,26.3,18.27,52686,0.72,14.92,13.01,81.34,120],
-['kadoma','門真市','kita-kawachi',34.7369,135.5789,119764,-0.62,29.7,12.3,57379,0.68,16.99,16.98,80.38,0],
-['shijonawate','四條畷市','kita-kawachi',34.7378,135.6478,55177,-0.32,27.5,18.69,22415,0.59,15.54,12.88,83.81,70],
-['katano','交野市','kita-kawachi',34.7692,135.6667,75033,-0.37,28.8,25.55,29569,0.69,11.03,12.05,84.48,135],
-['yao','八尾市','naka-kawachi',34.6247,135.6003,264642,-0.31,28.3,41.72,114265,0.71,13.91,14.96,82.82,71],
-['kashiwara','柏原市','naka-kawachi',34.5789,135.6444,68775,-0.67,29.0,25.33,30009,0.6,20.79,13.21,82.81,239],
-['higashiosaka','東大阪市','naka-kawachi',34.6797,135.6008,493940,-0.35,27.5,61.78,232303,0.74,16.25,13.97,80.05,167],
-['tondabayashi','富田林市','minami-kawachi',34.5,135.5983,108699,-0.95,30.2,39.72,45699,0.62,13.02,14.06,81.53,199],
-['kawachinagano','河内長野市','minami-kawachi',34.4581,135.5686,101692,-1.01,35.4,109.63,42367,0.59,12.11,14.33,83.71,1671],
-['matsubara','松原市','minami-kawachi',34.5772,135.5442,117641,-0.52,30.0,16.66,51902,0.59,13.42,15.07,81.45,0],
-['habikino','羽曳野市','minami-kawachi',34.5561,135.61,108736,-0.71,30.6,26.45,45008,0.56,14.50,13.91,82.4,37],
-['fujiidera','藤井寺市','minami-kawachi',34.5697,135.5983,63688,-0.54,28.4,8.89,27814,0.61,14.40,14.62,82.64,0],
-['osakasayama','大阪狭山市','minami-kawachi',34.5133,135.5683,58435,0.22,28.1,11.92,24216,0.66,11.96,13.11,83.7,24],
-['taishi','太子町','minami-kawachi',34.5061,135.6394,13009,-1.1,29.5,14.17,5048,0.47,null,11.32,84.09,131],
-['kanan','河南町','minami-kawachi',34.4881,135.6486,15697,-0.54,31.2,25.26,6392,0.43,15.07,9.87,83.92,251],
-['chihayaakasaka','千早赤阪村','minami-kawachi',34.4494,135.6394,4909,-1.81,45.5,37.3,1944,0.26,null,15.15,83.11,306],
-['izumiotsu','泉大津市','sen-hoku',34.5033,135.4106,74412,-0.39,25.5,14.33,32516,0.71,13.98,13.46,82.94,0],
-['izumi','和泉市','sen-hoku',34.4839,135.4181,184495,-0.17,25.5,84.98,73701,0.72,11.42,11.16,83.43,458],
-['takaishi','高石市','sen-hoku',34.5225,135.4344,55635,-0.32,28.2,11.3,23130,0.79,12.04,14.18,82.95,0],
-['tadaoka','忠岡町','sen-hoku',34.4989,135.4319,16567,-0.86,28.8,3.97,6749,0.55,15.74,14.35,78.21,0],
-['kishiwada','岸和田市','sen-nan',34.4614,135.3719,190658,-0.44,28.1,72.72,79073,0.61,13.82,13.67,80.05,177],
-['kaizuka','貝塚市','sen-nan',34.4339,135.3486,84443,-0.98,27.3,43.93,33284,0.65,14.83,13.39,82.83,158],
-['izumisano','泉佐野市','sen-nan',34.4067,135.3097,100131,-0.17,26.2,56.51,43864,0.9,12.28,11.98,85.74,103],
-['sennan','泉南市','sen-nan',34.3833,135.2822,60102,-0.76,29.6,48.98,23123,0.69,13.49,13.36,82.38,185],
-['hannan','阪南市','sen-nan',34.3489,135.2244,51254,-1.14,33.3,36.17,20774,0.52,15.17,14.52,81.72,231],
-['kumatori','熊取町','sen-nan',34.4083,135.3489,43763,-0.3,28.4,17.24,17256,0.57,9.92,10.21,84.88,62],
-['tajiri','田尻町','sen-nan',34.4142,135.3125,8434,0.04,23.7,5.62,3734,1.3,null,11.13,86.22,1],
-['misaki','岬町','sen-nan',34.3181,135.1461,14741,-1.55,40.5,49.18,6273,0.47,null,19.37,83.66,327]
-];
+var RAW = DATA.munis.map(function(r){ return [r.id, r.name, r.region, r.lat, r.lng, r.population, r.popChangeRate, r.agingRate, r.areaKm2, r.households, r.fiscalIndex, r.vacantRate, r.aloneElderlyRate, r.cardRate, r.hazardCount]; });
 
 var MUNIS = RAW.map(function(r){
   return {
@@ -1119,28 +1134,8 @@ function orderedMunis(order){
    国土数値情報「鉄道データ」(N02-23)の駅位置と、2020年国勢調査250mメッシュ人口（e-Stat統計GIS、
    各メッシュを5×5＝50m四方に等分し人口を均等配分）から算出。
    これらの数値は tools/ のスクリプト（estat.py・geo.py）で再作成できる。 */
-var CAR_COMMUTE_RATE = {
-  osaka:10.5, sakai:28.5, ikeda:18.1, toyonaka:16.0, suita:13.5,
-  takatsuki:18.6, ibaraki:18.1, minoh:24.9, settsu:19.1, shimamoto:15.4,
-  toyono:44.3, nose:75.7, moriguchi:15.7, hirakata:23.2, neyagawa:20.3,
-  daito:18.9, kadoma:18.3, shijonawate:26.4, katano:26.0, yao:21.1,
-  kashiwara:23.6, higashiosaka:18.0, tondabayashi:39.5, kawachinagano:40.8, matsubara:24.3,
-  habikino:32.8, fujiidera:26.3, osakasayama:36.2, taishi:50.4, kanan:57.5,
-  chihayaakasaka:67.5, izumiotsu:30.3, izumi:41.2, takaishi:27.8, tadaoka:37.8,
-  kishiwada:41.2, kaizuka:44.4, izumisano:41.6, sennan:49.6, hannan:48.7,
-  kumatori:49.0, tajiri:35.4, misaki:50.0
-};
-var RAIL_COVER_1KM = {
-  osaka:96.9, sakai:67.6, ikeda:59.5, toyonaka:79.6, suita:80.4,
-  takatsuki:29.6, ibaraki:62.5, minoh:50.0, settsu:73.6, shimamoto:90.1,
-  toyono:61.8, nose:0.0, moriguchi:68.7, hirakata:57.8, neyagawa:50.6,
-  daito:69.6, kadoma:67.4, shijonawate:66.7, katano:78.7, yao:76.7,
-  kashiwara:95.4, higashiosaka:84.8, tondabayashi:60.5, kawachinagano:57.2, matsubara:73.6,
-  habikino:51.3, fujiidera:77.2, osakasayama:52.1, taishi:22.0, kanan:0.0,
-  chihayaakasaka:0.0, izumiotsu:86.8, izumi:44.1, takaishi:99.8, tadaoka:70.8,
-  kishiwada:65.9, kaizuka:92.0, izumisano:81.4, sennan:67.7, hannan:55.9,
-  kumatori:23.2, tajiri:99.7, misaki:79.5
-};
+var CAR_COMMUTE_RATE = dataMap(function(r){ return r.carCommuteRate; });
+var RAIL_COVER_1KM = dataMap(function(r){ return r.railCover1km; });
 
 /* ===================== 行政DXデータ =====================
    DX_ADMIN: [AI, RPA, 生成AI, オンライン化済の手続数, 対象手続数]
@@ -1149,19 +1144,7 @@ var RAIL_COVER_1KM = {
    オンライン化済の手続数＝総務省「自治体DX・情報化推進概要」個別資料（令和7年4月1日現在）の
    オンライン利用状況調査。重点計画で対象となっている手続（図書館予約・粗大ごみ・児童手当・保育・介護・
    転出入など）のうち、その団体で「オンライン化済」の手続の数と、「済」「未」いずれかの対象手続の数。 */
-var DX_ADMIN = {
-  osaka:[2,2,2,33,47], sakai:[2,2,2,47,48], ikeda:[2,0,1,32,46], toyonaka:[2,2,2,46,48],
-  suita:[2,2,1,41,48], takatsuki:[2,2,0,36,47], ibaraki:[2,2,2,37,47], minoh:[1,2,2,37,45],
-  settsu:[2,2,2,12,47], shimamoto:[2,2,2,31,46], toyono:[0,0,0,4,46], nose:[0,0,0,34,48],
-  moriguchi:[2,2,1,39,47], hirakata:[2,2,1,37,45], neyagawa:[2,2,2,38,48], daito:[2,2,1,36,47],
-  kadoma:[2,2,0,45,47], shijonawate:[2,2,1,24,48], katano:[2,2,1,17,46], yao:[2,2,2,36,47],
-  kashiwara:[2,0,2,35,46], higashiosaka:[2,2,2,37,48], tondabayashi:[2,2,2,16,45], kawachinagano:[2,0,2,35,47],
-  matsubara:[2,2,2,11,46], habikino:[2,2,2,43,47], fujiidera:[2,2,2,19,43], osakasayama:[2,2,2,19,46],
-  taishi:[0,0,1,34,45], kanan:[0,2,0,7,49], chihayaakasaka:[0,0,0,11,43], izumiotsu:[2,2,2,25,47],
-  izumi:[2,2,2,37,47], takaishi:[0,0,0,34,48], tadaoka:[2,0,0,21,47], kishiwada:[2,2,2,32,47],
-  kaizuka:[1,2,0,29,40], izumisano:[2,2,0,27,41], sennan:[2,0,1,35,47], hannan:[2,0,2,36,47],
-  kumatori:[2,2,1,36,47], tajiri:[0,0,0,6,35], misaki:[1,0,1,32,48]
-};
+var DX_ADMIN = dataMap(function(r){ return [r.dxAi, r.dxRpa, r.dxGenai, r.onlineDone, r.onlineApplicable]; });
 
 /* ===================== 担い手・変化・水害データ =====================
    WORK_AGE_CHANGE: 生産年齢人口（15〜64歳）の増減率%（2015→2020年、国勢調査。e-Stat 社会・人口統計体系 A1302）
@@ -1177,77 +1160,15 @@ var DX_ADMIN = {
    同じ250mメッシュ人口で重み付け平均したもの（地盤の揺れやすさを含む）。液状化は J-SHIS 250mメッシュ微地形区分のうち、
    国土交通省「地形区分に基づく液状化の発生傾向」で発生傾向が強い・やや強いとされる地形（埋立地・旧河道・旧池沼・
    砂丘・砂州間低地・干拓地・自然堤防・三角州・海岸低地）に住む人の割合。 */
-var WORK_AGE_CHANGE = {
-  osaka:0.24, sakai:-4.90, ikeda:-0.97, toyonaka:0.43, suita:-0.43, takatsuki:-2.92,
-  ibaraki:0.30, minoh:5.62, settsu:-0.52, shimamoto:-0.43, toyono:-20.93, nose:-21.91,
-  moriguchi:3.94, hirakata:-8.90, neyagawa:-9.53, daito:-5.00, kadoma:-4.91, shijonawate:-1.94,
-  katano:-4.51, yao:-3.34, kashiwara:-7.70, higashiosaka:-3.99, tondabayashi:-9.23, kawachinagano:-11.37,
-  matsubara:-5.64, habikino:-6.21, fujiidera:-5.11, osakasayama:-2.97, taishi:-9.56, kanan:-8.75,
-  chihayaakasaka:-16.09, izumiotsu:-3.88, izumi:-4.13, takaishi:-3.56, tadaoka:-3.49, kishiwada:-5.75,
-  kaizuka:-6.72, izumisano:-2.09, sennan:-5.31, hannan:-10.56, kumatori:-6.89, tajiri:0.99,
-  misaki:-13.43
-};
-var ESTABLISHMENTS = {
-  osaka:[179252,177184], sakai:[28733,27315], ikeda:[3647,3629], toyonaka:[13044,13180], suita:[11526,11703],
-  takatsuki:[9320,9224], ibaraki:[9279,8945], minoh:[4215,4159], settsu:[4082,3935], shimamoto:[610,583],
-  toyono:[311,379], nose:[365,383], moriguchi:[6127,5881], hirakata:[10074,9839], neyagawa:[7096,6742],
-  daito:[4606,4208], kadoma:[5462,5128], shijonawate:[1862,1848], katano:[1934,1930], yao:[11940,10930],
-  kashiwara:[2268,2200], higashiosaka:[24644,24408], tondabayashi:[3304,3388], kawachinagano:[2701,2688], matsubara:[4607,4362],
-  habikino:[3638,3394], fujiidera:[2665,2581], osakasayama:[1835,1761], taishi:[402,355], kanan:[491,490],
-  chihayaakasaka:[198,194], izumiotsu:[3269,3033], izumi:[5887,5742], takaishi:[2036,1884], tadaoka:[580,608],
-  kishiwada:[7230,7050], kaizuka:[3295,3139], izumisano:[4694,4636], sennan:[2128,1943], hannan:[1506,1459],
-  kumatori:[1239,1154], tajiri:[386,347], misaki:[452,391]
-};
-var AGING_RISE = {
-  osaka:-0.26, sakai:1.52, ikeda:0.91, toyonaka:0.96, suita:0.42, takatsuki:1.51,
-  ibaraki:0.68, minoh:1.19, settsu:1.01, shimamoto:1.92, toyono:8.52, nose:6.69,
-  moriguchi:1.19, hirakata:1.68, neyagawa:0.97, daito:1.13, kadoma:1.96, shijonawate:2.02,
-  katano:2.53, yao:1.26, kashiwara:2.70, higashiosaka:0.70, tondabayashi:3.12, kawachinagano:4.30,
-  matsubara:1.54, habikino:2.38, fujiidera:1.77, osakasayama:1.43, taishi:3.71, kanan:2.25,
-  chihayaakasaka:4.82, izumiotsu:1.73, izumi:2.83, takaishi:1.23, tadaoka:1.46, kishiwada:2.22,
-  kaizuka:2.45, izumisano:1.47, sennan:2.67, hannan:4.63, kumatori:2.75, tajiri:0.86,
-  misaki:4.16
-};
+var WORK_AGE_CHANGE = dataMap(function(r){ return r.workAgeChange; });
+var ESTABLISHMENTS = dataMap(function(r){ return [r.est2016, r.est2021]; });
+var AGING_RISE = dataMap(function(r){ return r.agingRise; });
 /* ELDERLY_HOUSEHOLDS: 高齢者の世帯の形（2020年国勢調査、e-Stat 社会・人口統計体系 A8301・A8201・A1303・A710101）。
    [65歳以上のうち一人暮らしの割合%, 高齢者のみの世帯（65歳以上の単独＋夫65歳以上・妻60歳以上の夫婦のみ）が一般世帯に占める割合%]。
    「高齢者の見守り」のスコアには使わず、カルテの参考値として表示する（理由は指標の計算方法の画面を参照）。 */
-var ELDERLY_HOUSEHOLDS = {
-  osaka:[31.5,22.2], sakai:[22.1,26.7], ikeda:[21.0,24.0], toyonaka:[24.3,26.4], suita:[22.3,21.6],
-  takatsuki:[19.3,27.2], ibaraki:[19.3,22.1], minoh:[18.3,24.7], settsu:[21.9,22.9], shimamoto:[20.0,29.1],
-  toyono:[11.5,44.7], nose:[13.5,36.0], moriguchi:[25.9,26.6], hirakata:[18.0,25.5], neyagawa:[21.9,28.0],
-  daito:[21.8,25.0], kadoma:[27.4,28.0], shijonawate:[19.0,26.3], katano:[16.5,28.8], yao:[22.8,27.7],
-  kashiwara:[19.8,27.1], higashiosaka:[23.9,24.7], tondabayashi:[19.6,29.4], kawachinagano:[16.8,34.3], matsubara:[22.2,28.3],
-  habikino:[18.8,28.9], fujiidera:[22.5,27.7], osakasayama:[19.3,28.0], taishi:[14.8,28.9], kanan:[12.9,26.0],
-  chihayaakasaka:[13.2,41.3], izumiotsu:[23.1,24.6], izumi:[17.5,24.3], takaishi:[20.9,27.6], tadaoka:[20.2,27.6],
-  kishiwada:[20.2,26.0], kaizuka:[19.3,26.1], izumisano:[20.0,22.8], sennan:[17.3,28.2], hannan:[17.6,33.3],
-  kumatori:[14.1,26.5], tajiri:[20.8,20.1], misaki:[20.3,38.5]
-};
-var FLOOD_EXPOSURE = {
-  osaka:[81.4,62.8,51.2,27.9], sakai:[17.6,12.4,13.4,6.0], ikeda:[18.4,18.4,0.0,0.0], toyonaka:[22.1,21.5,18.6,0.0],
-  suita:[23.4,22.7,15.3,0.0], takatsuki:[54.0,54.0,0.0,0.0], ibaraki:[44.4,44.4,0.0,0.0], minoh:[1.2,1.2,0.0,0.0],
-  settsu:[75.9,75.9,0.0,0.0], shimamoto:[54.4,54.4,0.0,0.0], toyono:[0.4,0.4,0.0,0.0], nose:[7.9,7.9,0.0,0.0],
-  moriguchi:[90.7,90.7,0.0,0.0], hirakata:[29.5,29.5,0.0,0.0], neyagawa:[54.5,54.5,0.0,0.0], daito:[63.0,63.0,0.0,0.0],
-  kadoma:[96.5,96.5,0.0,0.0], shijonawate:[5.3,5.3,0.0,0.0], katano:[7.2,7.2,0.0,0.0], yao:[38.0,38.0,0.0,0.0],
-  kashiwara:[47.3,47.3,0.0,0.0], higashiosaka:[27.6,27.6,0.0,0.0], tondabayashi:[8.2,8.2,0.0,0.0], kawachinagano:[7.2,7.2,0.0,0.0],
-  matsubara:[24.8,24.8,0.0,0.0], habikino:[22.1,22.1,0.0,0.0], fujiidera:[51.7,51.7,0.0,0.0], osakasayama:[1.5,1.5,0.0,0.0],
-  taishi:[6.2,6.2,0.0,0.0], kanan:[8.8,8.8,0.0,0.0], chihayaakasaka:[3.5,3.5,0.0,0.0], izumiotsu:[72.6,51.4,48.7,16.2],
-  izumi:[14.2,13.8,0.4,0.0], takaishi:[59.5,25.7,57.7,35.1], tadaoka:[90.0,89.6,26.9,11.9], kishiwada:[28.0,23.0,14.1,6.1],
-  kaizuka:[16.7,7.3,14.6,2.6], izumisano:[10.0,3.7,8.7,0.9], sennan:[13.5,11.7,11.1,0.8], hannan:[10.8,8.0,8.7,3.2],
-  kumatori:[4.0,4.0,0.0,0.0], tajiri:[68.5,64.7,52.1,3.2], misaki:[13.7,5.5,10.9,4.4]
-};
-var QUAKE_HAZARD = {
-  osaka:[52.2,13.6,37.6], sakai:[36.2,6.6,10.7], ikeda:[14.1,3.1,4.7], toyonaka:[22.2,5.4,9.7],
-  suita:[25.2,5.9,0.6], takatsuki:[36.0,8.9,3.1], ibaraki:[31.9,7.6,3.2], minoh:[9.0,2.6,0.0],
-  settsu:[50.5,12.9,17.3], shimamoto:[37.6,9.4,1.1], toyono:[5.9,1.0,0.0], nose:[3.9,0.4,0.0],
-  moriguchi:[62.3,18.2,12.3], hirakata:[24.0,4.6,2.5], neyagawa:[46.2,11.8,10.4], daito:[53.5,15.1,9.9],
-  kadoma:[63.7,19.2,7.4], shijonawate:[21.9,3.5,0.0], katano:[16.8,2.2,2.8], yao:[60.7,18.3,23.1],
-  kashiwara:[38.9,8.9,13.8], higashiosaka:[55.6,16.3,20.4], tondabayashi:[24.5,2.6,0.0], kawachinagano:[16.7,1.4,0.0],
-  matsubara:[42.4,9.8,6.3], habikino:[25.9,3.0,0.0], fujiidera:[36.4,8.2,0.0], osakasayama:[25.6,2.9,0.0],
-  taishi:[19.7,1.8,0.0], kanan:[14.5,1.2,0.0], chihayaakasaka:[17.8,1.4,0.0], izumiotsu:[51.1,13.4,51.1],
-  izumi:[28.7,4.7,1.6], takaishi:[45.4,10.2,19.4], tadaoka:[44.1,9.4,14.3], kishiwada:[29.8,5.1,4.6],
-  kaizuka:[30.3,5.3,11.3], izumisano:[30.9,4.6,5.5], sennan:[31.9,5.1,11.3], hannan:[26.4,3.9,4.0],
-  kumatori:[23.7,3.1,0.0], tajiri:[45.2,9.1,29.7], misaki:[31.1,6.1,14.6]
-};
+var ELDERLY_HOUSEHOLDS = dataMap(function(r){ return [r.elderlyAloneShare, r.elderlyOnlyHH]; });
+var FLOOD_EXPOSURE = dataMap(function(r){ return [r.floodExposure, r.floodRiver, r.floodSurge, r.floodTsunami]; });
+var QUAKE_HAZARD = dataMap(function(r){ return [r.quakeProb, r.quakeProb6s, r.liquefyRate]; });
 
 /* 実データ（percentile: 25%→約2点, 50%→3点, 75%→約4点）をスコア化する共通変換 */
 function scaleScore(x, center, step){ return clampRound(3 + (x - center) / step); }
@@ -1338,34 +1259,11 @@ MUNIS.forEach(function(m){
    [3] 可住地面積（km²、林野・湖沼を除いた実際に人が住む面積。国土地理院／農林水産省）
    ※山林・湖沼を含む総面積ではなく可住地面積を使うことで、面積の大半が山地の町村でも
      「住んでいる場所からの行きやすさ」に近い値になる。 */
-var RESIDENT_RAW = {
-  osaka: [13.56,1657.1,130.5,225.34], sakai: [26.44,510.0,64.4,145.93], ikeda: [25.32,619.7,66.2,16.63],
-  toyonaka: [16.91,1182.3,110.0,36.35], suita: [22.26,1044.5,100.9,35.69], takatsuki: [26.24,532.3,75.3,55.8],
-  ibaraki: [28.51,500.0,65.1,49.18], minoh: [22.78,593.7,65.9,22.75], settsu: [29.29,390.0,67.2,14.87],
-  shimamoto: [26.95,355.0,59.2,6.76], toyono: [29.68,115.4,33.0,12.12], nose: [33.95,32.8,4.7,21.33],
-  moriguchi: [16.36,1093.6,102.3,12.71], hirakata: [28.09,489.8,77.6,57.96], neyagawa: [22.23,761.5,100.4,23.91],
-  daito: [19.48,517.8,84.1,15.46], kadoma: [20.99,935.0,105.7,12.3], shijonawate: [31.77,317.2,52.9,11.34],
-  katano: [29.34,345.0,56.5,15.94], yao: [24.91,574.5,75.9,36.88], kashiwara: [33.69,266.8,55.6,17.98],
-  higashiosaka: [22.05,767.9,98.6,51.71], tondabayashi: [35.67,236.9,46.3,36.74], kawachinagano: [38.1,220.8,37.8,34.42],
-  matsubara: [28.91,576.2,90.0,16.66], habikino: [24.75,287.7,58.4,23.99], fujiidera: [22.82,787.4,90.0,8.89],
-  osakasayama: [39.48,481.5,60.2,11.63], taishi: [37.92,77.9,22.3,8.98], kanan: [45.66,68.1,15.1,13.21],
-  chihayaakasaka: [41.3,69.3,27.8,7.2], izumiotsu: [21.65,488.5,55.8,14.33], izumi: [31.5,247.7,40.6,51.67],
-  takaishi: [28.6,451.3,61.9,11.3], tadaoka: [29.65,352.6,50.4,3.97], kishiwada: [29.78,272.0,45.0,53.3],
-  kaizuka: [31.51,217.7,42.0,26.18], izumisano: [31.05,243.4,35.6,36.56], sennan: [40.74,150.4,37.6,26.6],
-  hannan: [39.79,246.8,45.9,17.43], kumatori: [39.09,264.2,40.1,12.48], tajiri: [44.01,142.3,17.8,5.62],
-  misaki: [41.88,79.0,28.7,13.92]
-};
+var RESIDENT_RAW = dataMap(function(r){ return [r.foodAccessRate, r.clinicDensity, r.schoolDensity, r.habitableKm2]; });
 /* 介護定員（65歳以上人口千人当たり、介護保険事業状況報告ほか）。広域から利用者を受け入れる大規模施設が
    小規模町村に1つあるだけで数値が跳ね上がる（＝その町の住民が受けやすいとは限らない）ため、
    スコアには使わずカルテの参考値としてのみ表示する。 */
-var NURSING_PER1K = {
-  osaka:20.2, sakai:13.1, ikeda:14.2, toyonaka:11.2, suita:16.9, takatsuki:12.4, ibaraki:10.0, minoh:10.8,
-  settsu:12.4, shimamoto:5.9, toyono:15.0, nose:13.3, moriguchi:9.5, hirakata:10.9, neyagawa:13.4, daito:11.5,
-  kadoma:12.7, shijonawate:17.8, katano:10.9, yao:12.3, kashiwara:11.0, higashiosaka:13.7, tondabayashi:13.3, kawachinagano:12.3,
-  matsubara:9.2, habikino:13.8, fujiidera:12.2, osakasayama:11.0, taishi:13.0, kanan:32.7, chihayaakasaka:30.4, izumiotsu:15.2,
-  izumi:9.1, takaishi:7.8, tadaoka:21.0, kishiwada:7.7, kaizuka:8.9, izumisano:10.3, sennan:12.4, hannan:11.7,
-  kumatori:14.4, tajiri:30.0, misaki:10.6
-};
+var NURSING_PER1K = dataMap(function(r){ return r.nursingPer1k; });
 var RESIDENT_CATEGORIES=[
   {key:'food', label:'買い物の不便さ'},
   {key:'clinic', label:'医療への行きにくさ'},
@@ -1381,74 +1279,13 @@ var RESIDENT_CATEGORIES=[
    負=域外へ流出。データ非公開の市町村はnull）（出典：地域経済循環分析、内閣府等）
    RESAS_INDUSTRY: 生活関連12業種の事業所数[2016年,2021年]（出典：経済センサス。秘匿（事業所数1-2件）は
    null。データ非公開の市町村は全体がnull） */
-var RESAS_POP2050 = {
-  osaka:[2430185,-11.7], sakai:[653087,-20.9], ikeda:[94005,-10.5], toyonaka:[367696,-8.4], suita:[366647,-4.9],
-  takatsuki:[300685,-14.7], ibaraki:[266518,-7.4], minoh:[128501,-6.1], settsu:[77289,-11.6], shimamoto:[28158,-9],
-  toyono:[7516,-58.9], nose:[3838,-57.7], moriguchi:[116069,-18.9], hirakata:[307802,-22.5], neyagawa:[172808,-24.8],
-  daito:[87420,-26.8], kadoma:[79332,-33.8], shijonawate:[41138,-25.4], katano:[55115,-26.5], yao:[207696,-21.5],
-  kashiwara:[44402,-35.4], higashiosaka:[377297,-23.6], tondabayashi:[67795,-37.6], kawachinagano:[58342,-42.6],
-  matsubara:[80074,-31.9], habikino:[73479,-32.4], fujiidera:[47772,-25], osakasayama:[47801,-18.2], taishi:[8141,-37.4],
-  kanan:[9989,-36.4], chihayaakasaka:[2045,-58.3], izumiotsu:[54837,-26.3], izumi:[151940,-17.6], takaishi:[40293,-27.6],
-  tadaoka:[11699,-29.4], kishiwada:[137512,-27.9], kaizuka:[59365,-29.7], izumisano:[80921,-19.2], sennan:[40136,-33.2],
-  hannan:[29574,-42.3], kumatori:[33329,-23.8], tajiri:[7638,-9.4], misaki:[7296,-50.5]
-};
-var RESAS_LEAKAGE = {
-  osaka:42.3, sakai:-1.7, ikeda:-17.2, toyonaka:-10.7, suita:-4.6, takatsuki:-4, ibaraki:-9.1, minoh:-5.3, settsu:3.8,
-  shimamoto:-45.4, toyono:-41.7, nose:6.1, moriguchi:-5.6, hirakata:-2.7, neyagawa:-2.1, daito:-3.8, kadoma:9.5,
-  shijonawate:-13.6, katano:-22.1, yao:2.5, kashiwara:-12.9, higashiosaka:null, tondabayashi:-9, kawachinagano:null,
-  matsubara:-0.9, habikino:-9, fujiidera:-10.3, osakasayama:12.7, taishi:-11.7, kanan:-9.1, chihayaakasaka:-29,
-  izumiotsu:-3.8, izumi:0, takaishi:-23.6, tadaoka:-17.4, kishiwada:6.5, kaizuka:-10.2, izumisano:24.7, sennan:10.3,
-  hannan:-8.4, kumatori:-15.6, tajiri:-17, misaki:-3
-};
+var RESAS_POP2050 = dataMap(function(r){ return [r.pop2050, r.popRate2050]; });
+var RESAS_LEAKAGE = dataMap(function(r){ return r.leakageRate; });
 var INDUSTRY_LABELS = [
   '各種商品小売業（百貨店等）','衣料品店','飲食料品店','その他小売業','飲食店','持ち帰り・配達飲食',
   '理美容・浴場業','その他生活関連サービス','娯楽業','教育・学習支援業','医療業','社会福祉・介護事業'
 ];
-var RESAS_INDUSTRY = {
-  osaka:[[67,66],[5801,4499],[7543,6447],[9456,8302],[24426,20549],[1482,1466],[7662,7075],[1962,1842],[1536,1491],[3164,3451],[8427,8544],[4247,5886]],
-  sakai:[[15,14],[697,525],[1419,1141],[1788,1552],[3265,2626],[387,350],[1810,1611],[303,300],[303,245],[853,838],[1919,1899],[1126,1443]],
-  ikeda:[[4,2],[91,68],[215,176],[241,206],[558,474],[59,63],[249,230],[50,51],[46,36],[147,156],[286,272],[145,167]],
-  toyonaka:[[8,5],[318,246],[704,578],[763,694],[1498,1305],[148,148],[927,845],[177,160],[121,119],[556,548],[1036,1014],[588,699]],
-  suita:[[9,10],[289,269],[553,488],[646,590],[1170,1018],[130,129],[703,634],[130,122],[145,150],[435,456],[789,842],[469,559]],
-  takatsuki:[[8,11],[250,194],[542,490],[666,580],[1117,963],[114,111],[762,701],[147,143],[99,102],[364,367],[755,754],[402,489]],
-  ibaraki:[[9,4],[215,164],[475,402],[505,473],[1031,830],[134,110],[574,527],[84,87],[90,85],[354,326],[608,615],[335,406]],
-  minoh:[[2,2],[120,86],[256,219],[298,261],[457,361],[56,55],[249,223],[46,49],[27,29],[141,129],[296,305],[158,205]],
-  settsu:[[null,null],[26,24],[142,106],[170,141],[316,265],[43,41],[182,158],[36,40],[35,27],[82,83],[146,153],[96,109]],
-  shimamoto:[[null,null],[12,6],[49,41],[43,38],[48,41],[15,12],[49,46],[11,8],[5,8],[35,33],[50,53],[35,39]],
-  toyono:[[null,null],[4,7],[20,18],[17,19],[14,15],[3,5],[14,21],[6,8],[2,5],[5,13],[25,30],[15,15]],
-  nose:[[1,1],[null,null],[23,18],[21,26],[21,18],[2,2],[14,13],[1,1],[3,5],[3,2],[9,9],[16,23]],
-  moriguchi:[[4,4],[162,139],[293,246],[391,338],[763,594],[89,83],[440,367],[67,71],[56,42],[140,134],[352,342],[189,276]],
-  hirakata:[[8,9],[308,256],[586,470],[757,669],[1237,966],[154,139],[823,760],[139,135],[127,111],[440,453],[776,784],[544,641]],
-  neyagawa:[[3,5],[198,127],[425,359],[486,422],[992,783],[86,76],[580,502],[104,101],[77,68],[219,198],[482,458],[303,404]],
-  daito:[[3,1],[89,68],[206,165],[244,223],[453,343],[55,44],[257,211],[43,48],[29,29],[110,88],[222,216],[143,166]],
-  kadoma:[[2,2],[99,75],[258,217],[313,267],[786,621],[100,74],[343,300],[73,64],[59,51],[95,91],[308,294],[191,237]],
-  shijonawate:[[null,1],[100,88],[107,92],[149,126],[211,190],[22,21],[134,127],[28,24],[20,23],[71,68],[91,98],[67,94]],
-  katano:[null,null,null,null,null,null,null,null,null,null,null,null],
-  yao:[[6,10],[263,186],[534,437],[681,537],[1149,908],[125,115],[629,543],[106,101],[91,73],[314,282],[606,589],[356,443]],
-  kashiwara:[[null,null],[48,38],[124,108],[165,143],[191,170],[25,20],[144,135],[37,48],[29,21],[76,64],[141,137],[92,127]],
-  higashiosaka:[[7,5],[480,352],[1071,912],[1209,1040],[2369,1910],[215,202],[1218,1089],[218,223],[187,181],[522,513],[1168,1176],[756,996]],
-  tondabayashi:[[3,2],[89,69],[176,146],[230,215],[259,239],[46,52],[196,184],[41,38],[27,28],[117,126],[220,227],[132,181]],
-  kawachinagano:[[2,1],[67,57],[169,152],[216,204],[266,205],[28,24],[198,194],[41,41],[29,23],[122,125],[225,223],[119,152]],
-  matsubara:[[2,2],[90,63],[248,183],[273,252],[509,389],[54,42],[287,248],[53,47],[32,33],[134,121],[273,258],[131,172]],
-  habikino:[[3,2],[48,38],[199,182],[226,200],[304,250],[38,33],[217,188],[43,42],[28,29],[136,113],[219,205],[162,174]],
-  fujiidera:[[null,null],[70,62],[134,127],[184,148],[389,324],[27,34],[178,164],[32,34],[21,19],[101,96],[192,189],[93,128]],
-  osakasayama:[[3,1],[38,29],[82,74],[127,114],[215,168],[19,20],[147,146],[25,23],[17,14],[95,90],[154,152],[55,110]],
-  taishi:[[null,null],[7,4],[21,16],[20,19],[16,13],[8,6],[17,14],[3,2],[3,1],[19,11],[19,17],[17,21]],
-  kanan:[[null,null],[2,2],[28,23],[24,23],[33,23],[2,1],[20,22],[2,3],[5,4],[14,16],[15,14],[15,16]],
-  chihayaakasaka:[[null,null],[1,1],[8,8],[8,8],[9,10],[3,3],[3,3],[3,1],[1,4],[7,5],[5,4],[7,8]],
-  izumiotsu:[[2,2],[71,61],[155,122],[193,164],[408,326],[35,37],[174,167],[26,21],[38,30],[120,105],[196,179],[79,96]],
-  izumi:[[6,5],[196,156],[304,252],[416,383],[604,491],[52,47],[414,376],[70,67],[75,76],[243,226],[367,363],[196,255]],
-  takaishi:[[null,null],[45,30],[104,95],[134,102],[231,176],[30,30],[149,139],[26,24],[21,16],[95,83],[164,144],[64,88]],
-  tadaoka:[[null,null],[10,9],[31,27],[36,27],[45,39],[8,7],[35,29],[6,6],[1,3],[10,11],[41,44],[23,34]],
-  kishiwada:[[2,2],[191,113],[424,321],[544,455],[810,741],[68,71],[452,419],[85,89],[79,66],[245,251],[425,410],[228,324]],
-  kaizuka:[[1,null],[66,47],[198,152],[196,167],[327,262],[30,34],[213,187],[43,42],[38,34],[123,115],[166,161],[130,156]],
-  izumisano:[[3,3],[289,226],[248,227],[336,316],[538,470],[44,42],[254,251],[64,70],[74,71],[126,122],[235,235],[165,217]],
-  sennan:[[2,2],[83,72],[132,113],[160,137],[183,152],[19,17],[130,103],[28,23],[33,29],[61,51],[112,102],[80,95]],
-  hannan:[[null,null],[23,22],[96,87],[138,118],[145,115],[11,8],[126,116],[27,24],[20,21],[62,59],[118,113],[63,85]],
-  kumatori:[[null,null],[23,19],[67,57],[85,74],[111,93],[16,26],[80,75],[18,18],[7,9],[76,63],[78,85],[79,79]],
-  tajiri:[[null,1],[5,2],[40,34],[36,33],[59,32],[3,4],[26,20],[3,5],[2,1],[12,11],[20,19],[4,6]],
-  misaki:[[null,null],[4,3],[39,30],[48,36],[37,28],[2,2],[27,16],[4,4],[20,18],[16,8],[26,21],[20,21]]
-};
+var RESAS_INDUSTRY = dataMap(function(r){ return r.industry; });
 /* 値が小さいほど「行きにくい」指標は反転（3 − 偏差）、値が大きいほど課題の指標はそのまま（3 ＋ 偏差） */
 function residentScaleScore(x, center, step){ return clampRound(3 - (x - center) / step); }
 function residentScaleScoreUp(x, center, step){ return clampRound(3 + (x - center) / step); }
@@ -1632,7 +1469,7 @@ var LIFE_SCENES = [
 /* 参考値（スコア化されていない統計）。生活場面には表示するが、重なり数・判定に使用できた指標数には含めない */
 var SCENE_REFS = {
   railCover1km:{label:'鉄道駅1km圏に住む人の割合', v:function(m){ return m.railCover1km; }, unit:'%', d:1,
-    year:'鉄道 国土数値情報N02-23、人口2020年', source:'国土数値情報 鉄道データ（N02-23）＋ 国勢調査250mメッシュ人口'}
+    year:DATA.years.railCover1km, source:'国土数値情報 鉄道データ（N02-23）＋ 国勢調査250mメッシュ人口'}
 };
 /* 判定根拠に出す「基準値」＝スコア3点に相当する元の統計値。既存のスコア式から逆算したもので、新しい基準ではない。
    既存の式は score = 3 + dir × (f(x) − center) / step の形（f は恒等、医療・学校は常用対数）。
@@ -1987,61 +1824,61 @@ function fixedFmt(d, unit){ return function(x){ return x.toFixed(d)+(unit||''); 
 function signed(d){ return function(x){ return (x>0?'+':'')+x.toFixed(d); }; }
 var INDICATOR_META = {
   population:{name:'人口増減率（年率換算）', unit:'%/年', v:function(m){return m.popChangeRate;}, d:2, fmt:signed(2),
-    year:'2015→2020年', base:'増減0%で3点。1ポイント減るごとに1.1点上がる（score = 3 − 増減率 × 1.1）',
+    year:DATA.years.population, base:'増減0%で3点。1ポイント減るごとに1.1点上がる（score = 3 − 増減率 × 1.1）',
     source:'国勢調査（e-Stat 社会・人口統計体系）', kind:'加工値', note:'2時点の国勢調査人口から年率に換算'},
   aging:{name:'高齢化率', unit:'%', v:function(m){return m.agingRate;}, d:1,
-    year:'2020年', base:'高齢化率15%で0点、5.5ポイントごとに1点（31.5%で3点）',
+    year:DATA.years.aging, base:'高齢化率15%で0点、5.5ポイントごとに1点（31.5%で3点）',
     source:'国勢調査（e-Stat 社会・人口統計体系）', kind:'実測値', note:'65歳以上人口 ÷ 総人口'},
   vacant:{name:'空き家率', unit:'%', v:function(m){return m.vacantRate;}, d:1,
-    year:'2023年（令和5年）', base:'府内中央値13.4%で3点、1.6ポイントごとに1点',
+    year:DATA.years.vacant, base:'府内中央値13.4%で3点、1.6ポイントごとに1点',
     source:'総務省 住宅・土地統計調査', kind:'推計値', note:'標本調査による推計値',
     naReason:'人口規模の小さい町村のため総務省が非公表'},
   transit:{name:'通勤・通学の自家用車利用率', unit:'%', v:function(m){return m.carCommuteRate;}, d:1,
-    year:'2020年', base:'府内中央値27.8%で3点、11.2ポイントごとに1点',
+    year:DATA.years.transit, base:'府内中央値27.8%で3点、11.2ポイントごとに1点',
     source:'国勢調査「利用交通手段」（e-Stat 統計表0003454514）', kind:'代理指標',
     note:'通勤・通学に自家用車を利用する人の割合から、日常移動における自家用車への依存度を把握する代理指標です。公共交通の路線数、便数、所要時間を直接評価したものではありません。'},
   community:{name:'65歳以上単独世帯率（一般世帯に占める割合）', unit:'%', v:function(m){return m.aloneElderlyRate;}, d:1,
-    year:'2020年', base:'府内中央値13.4%で3点、1.3ポイントごとに1点',
+    year:DATA.years.community, base:'府内中央値13.4%で3点、1.3ポイントごとに1点',
     source:'国勢調査（e-Stat 社会・人口統計体系）', kind:'代理指標', note:'見守りの必要量を一人暮らし高齢者の世帯の割合で代えている'},
   successor:{name:'生産年齢人口（15〜64歳）の増減率', unit:'%', v:function(m){return m.workAgeChange;}, d:1, fmt:signed(1),
-    year:'2015→2020年', base:'府内中央値−4.9%で3点、3.4ポイントごとに1点',
+    year:DATA.years.successor, base:'府内中央値−4.9%で3点、3.4ポイントごとに1点',
     source:'国勢調査（e-Stat 社会・人口統計体系 A1302）', kind:'加工値', note:'2時点の15〜64歳人口から算出'},
   dx:{name:'重点計画対象手続のオンライン化済割合', unit:'%', v:function(m){return m.onlineDoneRate;}, d:0,
     text:function(m){ return 'オンライン化済 '+m.onlineDone+'/'+m.onlineApplicable+'件（'+m.onlineDoneRate.toFixed(0)+'%）・AI／RPA／生成AI：'+
       [m.dxAi,m.dxRpa,m.dxGenai].map(function(v){return v===2?'導入済':(v===1?'実証中':'未導入');}).join('／'); },
-    year:'令和7年度（手続は令和7年4月1日現在）',
+    year:DATA.years.dx,
     base:'AI・RPA・生成AIの導入点（0〜3点、3点で1・0点で5）と、オンライン化済割合（中央値72.5%で3点、17ポイントごとに1点）の平均',
     source:'総務省「地方自治体におけるAI・RPAの実証実験・導入状況等調査」「自治体DX・情報化推進概要」', kind:'加工値',
     note:'2つの調査結果を本ツールで合成'},
   food:{name:'食料品アクセス困難人口割合（65歳以上）', unit:'%', v:function(m){return m.foodAccessRate;}, d:1,
-    year:'2020年', base:'府内中央値29.29%で3点、6.4ポイントごとに1点',
+    year:DATA.years.food, base:'府内中央値29.29%で3点、6.4ポイントごとに1点',
     source:'農林水産省 農林水産政策研究所「食料品アクセスマップ」', kind:'推計値',
     note:'店舗まで500m以上かつ自動車を使いにくい高齢者の割合を国が推計'},
   clinic:{name:'一般診療所の密度（可住地面積100km²当たり）', unit:'施設/100km²', v:function(m){return m.clinicDensity;}, d:1,
-    year:'2023年度公表値', base:'小規模自治体補正後の密度の常用対数2.60（約398施設/100km²）で3点、0.19ごとに1点',
+    year:DATA.years.clinic, base:'小規模自治体補正後の密度の常用対数2.60（約398施設/100km²）で3点、0.19ごとに1点',
     source:'e-Stat 社会・人口統計体系「市区町村データ」', kind:'代理指標',
     note:'実際の移動時間・距離ではなく、可住地面積当たりの施設密度で代えている'},
   school:{name:'小学校＋義務教育学校の密度（可住地面積100km²当たり）', unit:'校/100km²', v:function(m){return m.schoolDensity;}, d:1,
-    year:'2024年度公表値', base:'小規模自治体補正後の密度の常用対数1.81（約65校/100km²）で3点、0.14ごとに1点',
+    year:DATA.years.school, base:'小規模自治体補正後の密度の常用対数1.81（約65校/100km²）で3点、0.14ごとに1点',
     source:'学校基本調査（e-Stat 社会・人口統計体系）', kind:'代理指標',
     note:'実際の通学時間・距離ではなく、可住地面積当たりの学校密度で代えている'},
   leakage:{name:'支出流出入率', unit:'%', v:function(m){return m.leakageRate;}, d:1, fmt:signed(1),
-    year:'2022年（RESAS掲載値）', base:'府内中央値−5.6%で3点、6ポイントごとに1点（域外への流出が大きいほど高い）',
+    year:DATA.years.leakage, base:'府内中央値−5.6%で3点、6ポイントごとに1点（域外への流出が大きいほど高い）',
     source:'RESAS「地域ビジネス環境分析」（地域経済循環分析）', kind:'推計値', note:'地域経済循環分析による推計値',
     naReason:'RESASで非公開'},
   landslide:{name:'土砂災害警戒区域の密度', unit:'区域/km²', v:function(m){return m.hazardCount/m.areaKm2;}, d:1,
     text:function(m){ return fmtNum(m.hazardCount)+'区域（'+(m.hazardCount/m.areaKm2).toFixed(1)+'区域/km²）'; },
-    year:'大阪府の指定状況（掲載時点）', base:'0区域/km²で1点、2.2区域/km²ごとに1点',
+    year:DATA.years.landslide, base:'0区域/km²で1点、2.2区域/km²ごとに1点',
     source:'大阪府「土砂災害防止法の指定状況」', kind:'加工値', note:'指定区域数 ÷ 面積'},
   flood:{name:'浸水想定区域（床上浸水以上）に住む人の割合', unit:'%', v:function(m){return m.floodExposure;}, d:1,
-    year:'洪水2024年度・高潮2021年度・津波2016年度、人口2020年', base:'0%で1点、20ポイントごとに1点',
+    year:DATA.years.flood, base:'0%で1点、20ポイントごとに1点',
     source:'国土数値情報 A31a・A49・A40 ＋ 国勢調査250mメッシュ人口', kind:'加工値',
     note:'250mメッシュ人口をメッシュ内で均等に配分して数えた近似'},
   quake:{name:'30年以内に震度6強以上の揺れに見舞われる確率（人口加重平均）', unit:'%', v:function(m){return m.quakeProb6s;}, d:1,
-    year:'2024年版（人口2020年）', base:'0%で1点、4.5ポイントごとに1点',
+    year:DATA.years.quake, base:'0%で1点、4.5ポイントごとに1点',
     source:'防災科学技術研究所 J-SHIS「確率論的地震動予測地図」', kind:'推計値', note:'国の長期評価に基づく予測値'},
   liquefy:{name:'液状化しやすい地形に住む人の割合', unit:'%', v:function(m){return m.liquefyRate;}, d:1,
-    year:'微地形区分V4、人口2020年', base:'0%で1点、12ポイントごとに1点',
+    year:DATA.years.liquefy, base:'0%で1点、12ポイントごとに1点',
     source:'J-SHIS 250mメッシュ微地形区分 ＋ 国土交通省「地形区分に基づく液状化の発生傾向」', kind:'代理指標',
     note:'地盤調査ではなく、地形から見た液状化の発生しやすさで代えている'}
 };
@@ -2303,15 +2140,15 @@ function renderKarte(){
       '<div class="card">'+
         '<div class="section-title">基本指標</div>'+
         '<div class="stat-grid">'+
-          statTile('人口（2020年）', fmtNum(m.population)+'人')+
-          statTile('人口増減率（2015→2020年、年率）', (m.popChangeRate>0?'+':'')+m.popChangeRate.toFixed(2)+'%')+
-          statTile('高齢化率（2020年）', m.agingRate.toFixed(1)+'%')+
+          statTile('人口（'+DATA.years.census+'年）', fmtNum(m.population)+'人')+
+          statTile('人口増減率（'+DATA.years.censusPrev+'→'+DATA.years.census+'年、年率）', (m.popChangeRate>0?'+':'')+m.popChangeRate.toFixed(2)+'%')+
+          statTile('高齢化率（'+DATA.years.census+'年）', m.agingRate.toFixed(1)+'%')+
           statTile('面積', m.areaKm2.toFixed(2)+' km²')+
           statTile('可住地面積', m.habitableKm2.toFixed(2)+' km²')+
-          statTile('世帯数（2020年）', fmtNum(m.households)+'世帯')+
+          statTile('世帯数（'+DATA.years.census+'年）', fmtNum(m.households)+'世帯')+
           statTile('財政力指数', m.fiscalIndex.toFixed(2))+
-          statTile('将来人口（2050年推計）', fmtNum(m.pop2050)+'人')+
-          statTile('将来人口増減率（2020→2050）', m.popRate2050.toFixed(1)+'%')+
+          statTile('将来人口（'+DATA.years.popFuture+'年推計）', fmtNum(m.pop2050)+'人')+
+          statTile('将来人口増減率（'+DATA.years.popFutureBase+'→'+DATA.years.popFuture+'）', m.popRate2050.toFixed(1)+'%')+
           statTile('マイナンバーカード保有率', m.cardRate.toFixed(1)+'%')+
         '</div>'+
       '</div>'+
@@ -2339,7 +2176,7 @@ function renderKarte(){
           pctTile('65歳以上のうち一人暮らしの割合', m.elderlyAloneShare, 1)+
           pctTile('高齢者のみの世帯の割合（単身＋夫婦）', m.elderlyOnlyHH, 1)+
           statTile('介護施設定員（高齢者千人当たり）', m.nursingPer1k.toFixed(1)+'人分')+
-          statTile('生産年齢人口の増減（2015→2020）', (m.workAgeChange>0?'+':'')+m.workAgeChange.toFixed(1)+'%')+
+          statTile('生産年齢人口の増減（'+DATA.years.censusPrev+'→'+DATA.years.census+'）', (m.workAgeChange>0?'+':'')+m.workAgeChange.toFixed(1)+'%')+
           statTile('AI／RPA／生成AI', [m.dxAi,m.dxRpa,m.dxGenai].map(function(v){return v===2?'導入済':(v===1?'実証中':'未導入');}).join('／'))+
           statTile('オンライン化済の手続', m.onlineDone+' / '+m.onlineApplicable+'件（'+m.onlineDoneRate.toFixed(0)+'%）')+
         '</div>'+
@@ -2392,7 +2229,7 @@ function renderKarte(){
       '<div class="card">'+
         '<div class="section-title">事業所数</div>'+
         '<div class="stat-grid">'+
-          statTile('民営事業所数（2016→2021）', fmtNum(m.est2016)+'→'+fmtNum(m.est2021)+'（'+(m.estChange>0?'+':'')+m.estChange.toFixed(1)+'%）')+
+          statTile('民営事業所数（'+DATA.years.estPrev+'→'+DATA.years.est+'）', fmtNum(m.est2016)+'→'+fmtNum(m.est2021)+'（'+(m.estChange>0?'+':'')+m.estChange.toFixed(1)+'%）')+
         '</div>'+
         '<div class="section-title" style="margin-top:16px;">業種別事業所数（参考：RESAS）<span class="count">生活関連12業種</span></div>'+
         (m.industry.every(function(i){return i==null;})?
@@ -2410,7 +2247,7 @@ function renderKarte(){
               '<span class="mono" style="min-width:64px;text-align:right;white-space:nowrap;">'+(c21!=null?fmtNum(c21)+'件':naHtml('秘匿（事業所数1〜2件）'))+'</span></div>';
           }).join('')
         )+
-        '<p style="font-size:11px; color:var(--ink-faint); margin-top:10px;">出典：RESAS「地域ビジネス環境分析」（経済センサス基準、2016年→2021年）。事業所数が1〜2件の業種は秘匿のため「'+NA_TEXT+'」と表示しています。</p>'+
+        '<p style="font-size:11px; color:var(--ink-faint); margin-top:10px;">出典：RESAS「地域ビジネス環境分析」（経済センサス基準、'+DATA.years.estPrev+'年→'+DATA.years.est+'年）。事業所数が1〜2件の業種は秘匿のため「'+NA_TEXT+'」と表示しています。</p>'+
       '</div>'+
     '</section>';
 
@@ -2524,7 +2361,7 @@ var RAW_STAT = {
   vacant: function(m){ return m.vacantRate==null ? null : {v:m.vacantRate, f:function(x){return x.toFixed(1)+'%';}, name:'空き家率'}; },
   transit: function(m){ return {v:m.carCommuteRate, f:function(x){return x.toFixed(1)+'%';}, name:'通勤・通学の自家用車利用率'}; },
   community: function(m){ return {v:m.aloneElderlyRate, f:function(x){return x.toFixed(1)+'%';}, name:'65歳以上単独世帯率'}; },
-  successor: function(m){ return {v:m.workAgeChange, f:function(x){return (x>0?'+':'')+x.toFixed(1)+'%';}, name:'生産年齢人口の増減率（2015→2020）'}; },
+  successor: function(m){ return {v:m.workAgeChange, f:function(x){return (x>0?'+':'')+x.toFixed(1)+'%';}, name:'生産年齢人口の増減率（'+DATA.years.censusPrev+'→'+DATA.years.census+'）'}; },
   dx: function(m){ return {v:m.onlineDoneRate, f:function(x){return x.toFixed(0)+'%';}, name:'手続のオンライン化済割合'}; }
 };
 function pctFmt(x){ return x.toFixed(1)+'%'; }
@@ -2631,13 +2468,13 @@ function comboHits(list){
 
 /* 変化：同規模グループの中で悪化が目立つもの。badは「大きいほど悪い」向きにそろえた値 */
 var TRENDS = [
-  {key:'agingRise', label:'高齢化の進み方', bad:function(m){return m.agingRise;}, fmt:function(m){return '高齢化率が5年で'+m.agingRise.toFixed(1)+'ポイント上昇（2015→2020）';}},
-  {key:'estChange', label:'事業所の減り方', bad:function(m){return -m.estChange;}, fmt:function(m){return '民営事業所が'+fmtNum(m.est2016)+'→'+fmtNum(m.est2021)+'（'+(m.estChange>0?'+':'')+m.estChange.toFixed(1)+'%、2016→2021）';}},
-  {key:'pop2050', label:'将来の人口減少', bad:function(m){return -m.popRate2050;}, fmt:function(m){return '2050年の推計人口が2020年比'+m.popRate2050.toFixed(1)+'%';}},
+  {key:'agingRise', label:'高齢化の進み方', bad:function(m){return m.agingRise;}, fmt:function(m){return '高齢化率が5年で'+m.agingRise.toFixed(1)+'ポイント上昇（'+DATA.years.censusPrev+'→'+DATA.years.census+'）';}},
+  {key:'estChange', label:'事業所の減り方', bad:function(m){return -m.estChange;}, fmt:function(m){return '民営事業所が'+fmtNum(m.est2016)+'→'+fmtNum(m.est2021)+'（'+(m.estChange>0?'+':'')+m.estChange.toFixed(1)+'%、'+DATA.years.estPrev+'→'+DATA.years.est+'）';}},
+  {key:'pop2050', label:'将来の人口減少', bad:function(m){return -m.popRate2050;}, fmt:function(m){return DATA.years.popFuture+'年の推計人口が'+DATA.years.popFutureBase+'年比'+m.popRate2050.toFixed(1)+'%';}},
   {key:'foodStores', label:'食料品店の減り方', bad:function(m){
       var i=m.industry[2]; if(!i || i.count2016==null || i.count2021==null || i.count2016<5) return null;
       return -(i.count2021/i.count2016-1)*100; },
-    fmt:function(m){ var i=m.industry[2]; return '飲食料品店が'+i.count2016+'→'+i.count2021+'件（'+((i.count2021/i.count2016-1)*100).toFixed(0)+'%、2016→2021）'; }}
+    fmt:function(m){ var i=m.industry[2]; return '飲食料品店が'+i.count2016+'→'+i.count2021+'件（'+((i.count2021/i.count2016-1)*100).toFixed(0)+'%、'+DATA.years.estPrev+'→'+DATA.years.est+'）'; }}
 ];
 function sd(arr){ var a=avgOf(arr); return Math.sqrt(avgOf(arr.map(function(v){return (v-a)*(v-a);}))); }
 /* 自分以外の同規模グループと比べて、標準偏差の何倍悪いか */
@@ -2993,6 +2830,7 @@ function aiBlock(title, items){
 /* ===================== 初期化 ===================== */
 function init(){
   buildNav();
+  document.getElementById('dataUpdated').innerHTML = 'データ更新日：'+DATA.updated+'<br>';
   Object.keys(MAPS).forEach(function(k){ MAPS[k].setup(); });
   /* ガイドの区分バッジは INDICATOR_META から入れる（ポップアップと同じ区分を表示するため） */
   document.querySelectorAll('[data-ind]').forEach(function(el){

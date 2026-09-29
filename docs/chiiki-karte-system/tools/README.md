@@ -15,7 +15,9 @@ pip install -r requirements.txt   # numpy, shapely>=2.0, pyshp, openpyxl
 
 ## スクリプトで作り直せるデータ
 
-各スクリプトは `out/*.json` に結果を保存し、`app.html` にそのまま貼れる形の JavaScript を画面に出力します。
+各スクリプトは `out/*.json` に結果を保存し、結果を画面に出力します。`app.html` の統計値は `DATA` ブロックに1か所にまとめてあるため、
+結果の数値はデータ更新ツール（`../data-update.html`）で書き出したCSVの該当列に貼り、ツールで取り込んでください
+（下の表の「作る変数」は、`DATA.munis` から作られる変数名です）。
 
 | スクリプト | 作る変数（app.html） | 入力 | 所要時間 |
 |---|---|---|---|

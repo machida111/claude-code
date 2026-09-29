@@ -72,6 +72,18 @@
 
 サーバー・DBを持たないため、`app.html`内のJavaScriptオブジェクトがそのままデータモデルです。
 
+市町村ごとの統計値と画面に出る年次は、すべて `app.html` の `DATA` ブロック（`/*DATA-BEGIN*/` 〜 `/*DATA-END*/` の間のJSON）に1か所にまとめています。
+`RAW`・`CAR_COMMUTE_RATE` などの変数は、この `DATA.munis` から作っています。年次の更新は、プログラムを書かずに
+`data-update.html`（データ更新ツール）で行います：CSVで書き出す → Excelで直す → 取り込んで検証 → 新しいHTMLを保存。
+手順は `handoff/保守マニュアル.docx` を参照。
+
+| `DATA` の項目 | 内容 |
+|---|---|
+| `updated` | データ更新日（サイドバー左下に表示） |
+| `history` | 更新履歴（日付・メモ・変更か所数。データ更新ツールが追記） |
+| `years` | 画面に出る年次（`INDICATOR_META.year`・カルテの見出し・レポートの年の表示に使う） |
+| `munis` | 43市町村の統計値（`null`＝データなし）。項目名は下の4.1〜4.4の各項目と同じ |
+
 ### 4.1 市町村マスタ（`RAW` → `MUNIS`）
 | 項目 | 説明 |
 |---|---|
@@ -183,6 +195,8 @@ GeoJSON `FeatureCollection`。各Featureの`properties.id`が4.1の`id`と対応
 docs/chiiki-karte-system/
 ├─ README.md   本書
 ├─ app.html    実装一式（HTML/CSS/JSを1ファイルに集約。指標の計算方法の説明画面も同ファイル内）
+├─ data-update.html  データ更新ツール（ブラウザだけで統計値をCSV経由で入れ替える）
+├─ handoff/    引き継ぎ資料（保守マニュアル.docx・HANDOFF.md・Supabase投入用SQL）
 └─ tools/      埋め込みデータを作り直すスクリプト（データ更新手順は tools/README.md）
    ├─ download.sh   地理データ・公開ファイルの取得
    ├─ estat.py      e-Stat API（自家用車利用率・生産年齢人口・高齢化率の上昇幅・事業所数）
@@ -197,7 +211,8 @@ docs/chiiki-karte-system/
 `app.html`内部の主なセクション（`<script>`内のコメント区切りに対応）:
 
 ```
-市町村データ（RAW配列、e-Stat・総務省・大阪府の実データ）
+統計データ（DATA。すべての市町村の統計値と年次。データ更新ツールが書き換える）
+市町村データ（RAW配列。DATA.munis から作る）
 自家用車への依存度データ（CAR_COMMUTE_RATE / RAIL_COVER_1KM、国勢調査・国土数値情報）
 行政DXデータ（DX_ADMIN、総務省）
 担い手・変化・防災データ（WORK_AGE_CHANGE / ESTABLISHMENTS / AGING_RISE / FLOOD_EXPOSURE / QUAKE_HAZARD）

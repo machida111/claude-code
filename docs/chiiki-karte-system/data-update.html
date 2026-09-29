@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>データ更新ツール（地域課題分析カルテ）</title>
+<style>
+:root{
+  --bg:#F2F4F8; --surface:#FFFFFF; --surface-2:#EAEEF3; --surface-3:#DEE4EC;
+  --border:#D7DEE8; --ink:#19222F; --ink-muted:#5C6779; --ink-faint:#8993A3;
+  --accent:#1F5C99; --accent-ink:#123E6B; --accent-soft:#E3ECF8;
+  --good:#2E7D5B; --good-soft:#E4F1EA; --warn:#C77D12; --warn-soft:#FBEEDA; --crit:#B23A32; --crit-soft:#F7E3E1;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141920; --surface:#1B222C; --surface-2:#232B37; --surface-3:#2C3542;
+    --border:#39424F; --ink:#EAEDF2; --ink-muted:#A7B0BE; --ink-faint:#748094;
+    --accent:#5B9BDB; --accent-ink:#BFDBFF; --accent-soft:#20344A;
+    --good:#4CA894; --good-soft:#1D3129; --warn:#D9A544; --warn-soft:#33291A; --crit:#CC5147; --crit-soft:#3A2020;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#141920; --surface:#1B222C; --surface-2:#232B37; --surface-3:#2C3542;
+  --border:#39424F; --ink:#EAEDF2; --ink-muted:#A7B0BE; --ink-faint:#748094;
+  --accent:#5B9BDB; --accent-ink:#BFDBFF; --accent-soft:#20344A;
+  --good:#4CA894; --good-soft:#1D3129; --warn:#D9A544; --warn-soft:#33291A; --crit:#CC5147; --crit-soft:#3A2020;
+}
+*{box-sizing:border-box;}
+body{margin:0; background:var(--bg); color:var(--ink); font-family:'Noto Sans JP','Yu Gothic UI','Meiryo',sans-serif; font-size:14px; line-height:1.7;}
+.wrap{max-width:960px; margin:0 auto; padding:24px 16px 60px;}
+h1{font-size:20px; margin:0 0 4px;}
+.lead{color:var(--ink-muted); margin:0 0 18px;}
+.step{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:18px; margin-top:16px;}
+.step h2{font-size:15px; margin:0 0 8px; display:flex; align-items:center; gap:10px;}
+.step h2 .n{display:inline-flex; width:26px; height:26px; border-radius:50%; background:var(--accent); color:#fff; align-items:center; justify-content:center; font-size:13px; flex:none;}
+.step.off{opacity:.55;}
+.step p{margin:6px 0;}
+.note{font-size:12.5px; color:var(--ink-muted);}
+.btn{display:inline-flex; align-items:center; gap:6px; padding:9px 16px; border-radius:8px; border:1px solid var(--border); background:var(--surface); color:var(--ink); font:inherit; font-size:13.5px; font-weight:600; cursor:pointer;}
+.btn:hover{background:var(--surface-2);}
+.btn-primary{background:var(--accent); border-color:var(--accent); color:#fff;}
+.btn-primary:hover{background:var(--accent-ink);}
+.btn[disabled]{opacity:.45; cursor:not-allowed;}
+input[type=file]{font:inherit; font-size:13px; max-width:100%;}
+input[type=text], textarea{width:100%; font:inherit; font-size:13px; padding:7px 9px; border:1px solid var(--border); border-radius:7px; background:var(--bg); color:var(--ink);}
+.msg{padding:10px 12px; border-radius:9px; margin-top:10px; font-size:13px;}
+.msg.ok{background:var(--good-soft); color:var(--good);}
+.msg.err{background:var(--crit-soft); color:var(--crit);}
+.msg.warn{background:var(--warn-soft); color:var(--warn);}
+.msg ul{margin:6px 0 0; padding-left:20px;}
+.tbl-wrap{overflow-x:auto; margin-top:10px; border:1px solid var(--border); border-radius:10px; max-height:420px; overflow-y:auto;}
+table{border-collapse:collapse; width:100%; font-size:12.5px;}
+th,td{padding:6px 10px; border-bottom:1px solid var(--border); text-align:left; vertical-align:top;}
+th{background:var(--surface-2); color:var(--ink-muted); position:sticky; top:0; white-space:nowrap;}
+td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+.years{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1.4fr); gap:6px 12px; align-items:center; margin-top:8px;}
+.years label{font-size:12.5px; color:var(--ink-muted);}
+@media (max-width:640px){ .years{grid-template-columns:minmax(0,1fr);} }
+details{margin-top:10px;}
+summary{cursor:pointer; color:var(--accent-ink); font-weight:600;}
+.hist{font-size:12.5px; margin:6px 0 0; padding-left:18px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>データ更新ツール</h1>
+  <p class="lead">「地域課題分析カルテ」のHTMLに入っている市町村の統計値を、Excelで直して入れ替えるためのツールです。インターネット接続やプログラムは要りません。元のHTMLファイルは書き換えず、新しいHTMLファイルを保存します。手順の詳細は保守マニュアルの「年次のデータ更新」を見てください。</p>
+
+  <section class="step" id="s1">
+    <h2><span class="n">1</span>今の「地域課題分析カルテ」のHTMLファイルを選ぶ</h2>
+    <input type="file" id="fileHtml" accept=".html,.htm">
+    <div id="htmlInfo"></div>
+  </section>
+
+  <section class="step off" id="s2">
+    <h2><span class="n">2</span>今のデータをCSVで保存し、Excelで直す</h2>
+    <p>ボタンを押すと、43市町村の統計値が1つの表（CSV）で保存されます。Excelで開き、変わった数値だけを直して、<b>CSV形式のまま</b>上書き保存してください（「CSV UTF-8」「CSV（コンマ区切り）」のどちらでも構いません）。</p>
+    <p class="note">・1行目の見出しと「市町村ID」「市町村名」の列は変えないでください（行の並べ替えは構いません）。<br>
+    ・空欄は「データなし」になります。空欄にしてよいのは、空き家率・支出流出入率・業種別事業所数（秘匿）だけです。推定値や中間値で埋めないでください。<br>
+    ・業種別事業所数の24マスがすべて空欄の市町村は「RESASで非公開」として扱います。</p>
+    <button class="btn" id="btnCsv" disabled>今のデータをCSVで保存</button>
+    <details><summary>CSVの各列の意味（単位・空欄の可否）</summary><div class="tbl-wrap"><table id="colTable"></table></div></details>
+  </section>
+
+  <section class="step off" id="s3">
+    <h2><span class="n">3</span>直したCSVを選ぶ（数値を変えない場合は飛ばしてよい）</h2>
+    <input type="file" id="fileCsv" accept=".csv,.txt" disabled>
+    <div id="csvResult"></div>
+  </section>
+
+  <section class="step off" id="s4">
+    <h2><span class="n">4</span>画面に出る年次と、今回の更新メモ</h2>
+    <p class="note">統計を新しい年のものに差し替えた場合は、その項目の年次も直してください（地図の「判定根拠」やカルテに表示されます）。「指標の計算方法」画面の説明文にある年次や例示の数値は自動では変わらないため、保守マニュアルの手順で直してください。</p>
+    <div class="years" id="yearForm"></div>
+    <p style="margin-top:12px;"><label for="memo" class="note">更新メモ（例：2025年国勢調査の人口・世帯数に更新）</label><input type="text" id="memo"></p>
+  </section>
+
+  <section class="step off" id="s5">
+    <h2><span class="n">5</span>新しいHTMLを保存する</h2>
+    <p>保存したファイルをブラウザで開き、保守マニュアルの「更新後の確認」の項目を確かめてから、共有フォルダの元のファイルと入れ替えてください。元のファイルは念のため「旧版」フォルダに残してください。</p>
+    <button class="btn btn-primary" id="btnSave" disabled>新しいHTMLを保存</button>
+    <div id="saveInfo"></div>
+  </section>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ---------- 列の定義（HTML内の DATA.munis の項目と対応） ----------
+   type：int＝整数、num＝数値、dx＝0・1・2のいずれか
+   min / max：これを外れる値はエラー（明らかな入力ミスを止めるための範囲）
+   nullable：空欄（データなし）を認めるか */
+var INDUSTRY_LABELS = ['各種商品小売業（百貨店等）','衣料品店','飲食料品店','その他小売業','飲食店','持ち帰り・配達飲食','理美容・浴場業','その他生活関連サービス','娯楽業','教育・学習支援業','医療業','社会福祉・介護事業'];
+var PCT = {type:'num', min:0, max:100};
+function c(key, label, unit, o){ var r={key:key, label:label, unit:unit}; for(var k in o) r[k]=o[k]; return r; }
+function ext(a, b){ var r={}; for(var k in a) r[k]=a[k]; for(var k2 in b) r[k2]=b[k2]; return r; }
+var COLS = [
+  c('population','人口','人',{type:'int', min:1, max:1e8}),
+  c('popChangeRate','人口増減率（年率換算）','%/年',{type:'num', min:-20, max:20}),
+  c('agingRate','高齢化率','%',PCT),
+  c('areaKm2','面積','平方km',{type:'num', min:0.01, max:5000}),
+  c('households','世帯数','世帯',{type:'int', min:1, max:1e8}),
+  c('fiscalIndex','財政力指数','',{type:'num', min:0, max:3}),
+  c('vacantRate','空き家率','%',ext(PCT,{nullable:true})),
+  c('aloneElderlyRate','65歳以上単独世帯率（一般世帯に占める割合）','%',PCT),
+  c('cardRate','マイナンバーカード保有率','%',PCT),
+  c('hazardCount','土砂災害警戒区域数','区域',{type:'int', min:0, max:100000}),
+  c('carCommuteRate','通勤・通学の自家用車利用率','%',PCT),
+  c('railCover1km','鉄道駅1km圏に住む人の割合','%',PCT),
+  c('dxAi','AIの導入状況（2=導入済・1=実証中・0=未導入）','',{type:'dx'}),
+  c('dxRpa','RPAの導入状況（2=導入済・1=実証中・0=未導入）','',{type:'dx'}),
+  c('dxGenai','生成AIの導入状況（2=導入済・1=実証中・0=未導入）','',{type:'dx'}),
+  c('onlineDone','オンライン化済の手続数','件',{type:'int', min:0, max:1000}),
+  c('onlineApplicable','重点計画の対象手続数','件',{type:'int', min:1, max:1000}),
+  c('workAgeChange','生産年齢人口（15〜64歳）の増減率','%',{type:'num', min:-100, max:100}),
+  c('est2016','民営事業所数（前回調査）','事業所',{type:'int', min:1, max:1e7}),
+  c('est2021','民営事業所数（最新調査）','事業所',{type:'int', min:1, max:1e7}),
+  c('agingRise','高齢化率の上昇幅（前回→最新の国勢調査）','ポイント',{type:'num', min:-30, max:30}),
+  c('elderlyAloneShare','65歳以上のうち一人暮らしの割合','%',PCT),
+  c('elderlyOnlyHH','高齢者のみの世帯の割合','%',PCT),
+  c('floodExposure','浸水想定区域に住む人の割合（合計）','%',PCT),
+  c('floodRiver','浸水想定区域に住む人の割合（洪水）','%',PCT),
+  c('floodSurge','浸水想定区域に住む人の割合（高潮）','%',PCT),
+  c('floodTsunami','浸水想定区域に住む人の割合（津波）','%',PCT),
+  c('quakeProb','30年以内に震度6弱以上の確率','%',PCT),
+  c('quakeProb6s','30年以内に震度6強以上の確率','%',PCT),
+  c('liquefyRate','液状化しやすい地形に住む人の割合','%',PCT),
+  c('foodAccessRate','食料品アクセス困難人口割合（65歳以上）','%',PCT),
+  c('clinicDensity','一般診療所の密度（可住地面積100平方km当たり）','施設',{type:'num', min:0.01, max:100000}),
+  c('schoolDensity','小学校＋義務教育学校の密度（可住地面積100平方km当たり）','校',{type:'num', min:0.01, max:100000}),
+  c('habitableKm2','可住地面積','平方km',{type:'num', min:0.01, max:5000}),
+  c('nursingPer1k','介護施設定員（65歳以上千人当たり）','人分',{type:'num', min:0, max:10000}),
+  c('pop2050','将来推計人口','人',{type:'int', min:0, max:1e8}),
+  c('popRate2050','将来人口増減率（基準年→推計年）','%',{type:'num', min:-100, max:100}),
+  c('leakageRate','支出流出入率','%',{type:'num', min:-100, max:500, nullable:true})
+];
+INDUSTRY_LABELS.forEach(function(l, i){
+  COLS.push(c('ind'+i+'a','業種別事業所数：'+l+'（前回）','事業所',{type:'int', min:0, max:1e6, nullable:true, ind:i, pos:0}));
+  COLS.push(c('ind'+i+'b','業種別事業所数：'+l+'（最新）','事業所',{type:'int', min:0, max:1e6, nullable:true, ind:i, pos:1}));
+});
+function header(col){ return col.label+(col.unit ? '（'+col.unit+'）' : ''); }
+var ID_H = '市町村ID（変えない）', NAME_H = '市町村名（変えない）';
+/* 画面に出る年次の表示（DATA.years） */
+var YEAR_FIELDS = [
+  ['census','国勢調査の年（最新）　例：2020'], ['censusPrev','国勢調査の年（前回）　例：2015'],
+  ['estPrev','経済センサスの年（前回）　例：2016'], ['est','経済センサスの年（最新）　例：2021'],
+  ['popFutureBase','将来推計人口の基準年　例：2020'], ['popFuture','将来推計人口の推計年　例：2050'],
+  ['population','人口減少（人口増減率）の年次'], ['aging','高齢化の年次'], ['vacant','空き家の年次'],
+  ['transit','自家用車への依存度の年次'], ['community','高齢者の見守りの年次'], ['successor','担い手不足の年次'],
+  ['dx','DXの年次'], ['food','買い物の不便さの年次'], ['clinic','医療への行きにくさの年次'],
+  ['school','学校への通いにくさの年次'], ['leakage','地元で買えない度の年次'], ['landslide','土砂災害の年次'],
+  ['flood','水害の年次'], ['quake','地震の揺れの年次'], ['liquefy','液状化の年次'], ['railCover1km','鉄道駅1km圏人口（参考値）の年次']
+];
+
+var BEGIN = '/*DATA-BEGIN*/', END = '/*DATA-END*/';
+var st = {html:null, htmlName:'', data:null, newMunis:null, csvOk:false};
+function $(id){ return document.getElementById(id); }
+function esc(t){ return String(t).replace(/[&<>"]/g, function(ch){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]; }); }
+function today(){ var d=new Date(); function z(n){ return (n<10?'0':'')+n; } return d.getFullYear()+'-'+z(d.getMonth()+1)+'-'+z(d.getDate()); }
+function readAsText(file, enc){ return new Promise(function(ok, ng){ var r=new FileReader(); r.onload=function(){ ok(r.result); }; r.onerror=ng; r.readAsText(file, enc||'utf-8'); }); }
+function readAsBuffer(file){ return new Promise(function(ok, ng){ var r=new FileReader(); r.onload=function(){ ok(r.result); }; r.onerror=ng; r.readAsArrayBuffer(file); }); }
+function download(name, text, type){
+  var blob = new Blob([text], {type:type});
+  var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function enable(){
+  var has = !!st.data;
+  ['s2','s3','s4','s5'].forEach(function(id){ $(id).classList.toggle('off', !has); });
+  $('btnCsv').disabled = !has; $('fileCsv').disabled = !has;
+  $('btnSave').disabled = !has || st.csvOk===false;
+}
+
+/* ---------- 1. HTMLを読む ---------- */
+/* 同じファイルを選び直しても読み直せるよう、選択欄は読み込み後に空に戻す（読み込んだファイル名は下に表示する） */
+$('fileHtml').addEventListener('change', function(){
+  var f = this.files[0]; if(!f) return; this.value = '';
+  readAsText(f).then(function(t){
+    var info = $('htmlInfo');
+    var i = t.indexOf(BEGIN), j = t.indexOf(END);
+    if(i<0 || j<0 || t.indexOf(BEGIN, i+1)>=0 || t.indexOf(END, j+1)>=0 || j<i){
+      st.data=null; enable();
+      info.innerHTML = '<div class="msg err">このファイルからデータの位置（DATA-BEGIN と DATA-END の目印）が見つかりません。「地域課題分析カルテ」のHTMLファイルを選んでください。</div>';
+      return;
+    }
+    var d;
+    try{ d = JSON.parse(t.slice(i+BEGIN.length, j)); }catch(e){
+      st.data=null; enable();
+      info.innerHTML = '<div class="msg err">データの部分が壊れていて読めません（'+esc(e.message)+'）。旧版フォルダのファイルから作り直してください。</div>';
+      return;
+    }
+    st.html = t; st.htmlName = f.name; st.data = d; st.newMunis = null; st.csvOk = true;
+    $('csvResult').innerHTML = ''; $('saveInfo').innerHTML = ''; st.changeCount = 0;
+    info.innerHTML = '<div class="msg ok">読み込みました：'+esc(f.name)+'（'+d.munis.length+'市町村、データ更新日 '+esc(d.updated)+'）</div>'+
+      '<details><summary>これまでの更新履歴（'+d.history.length+'件）</summary><ul class="hist">'+
+      d.history.map(function(h){ return '<li>'+esc(h.date)+'：'+esc(h.note)+(h.changes!=null ? '（変更 '+h.changes+'か所）' : '')+'</li>'; }).join('')+'</ul></details>';
+    buildYearForm(); enable();
+  });
+});
+
+/* ---------- 2. CSVを書き出す ---------- */
+function cellOf(m, col){
+  if(col.ind!=null){ var v = m.industry ? m.industry[col.ind] : null; return v ? v[col.pos] : null; }
+  return m[col.key];
+}
+function csvField(v){ var t = v==null ? '' : String(v); return /[",\r\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t; }
+$('btnCsv').addEventListener('click', function(){
+  var rows = [[ID_H, NAME_H].concat(COLS.map(header))];
+  st.data.munis.forEach(function(m){ rows.push([m.id, m.name].concat(COLS.map(function(col){ return cellOf(m, col); }))); });
+  var text = '﻿' + rows.map(function(r){ return r.map(csvField).join(','); }).join('\r\n') + '\r\n';
+  download('chiiki-karte-data_'+today()+'.csv', text, 'text/csv');
+});
+$('colTable').innerHTML = '<tr><th>列の見出し</th><th>空欄</th><th>入力できる値</th></tr>'+
+  COLS.map(function(col){
+    var rule = col.type==='dx' ? '0・1・2のいずれか' : (col.type==='int' ? '整数' : '数値')+(col.type!=='dx' ? '（'+col.min+'〜'+col.max+'）' : '');
+    return '<tr><td>'+esc(header(col))+'</td><td>'+(col.nullable ? '可（データなし）' : '不可')+'</td><td>'+rule+'</td></tr>';
+  }).join('');
+
+/* ---------- 3. CSVを読んで確かめる ---------- */
+function decode(buf){
+  var u8 = new Uint8Array(buf);
+  try{ return new TextDecoder('utf-8', {fatal:true}).decode(u8).replace(/^﻿/, ''); }
+  catch(e){ return new TextDecoder('shift_jis').decode(u8); }   // Excelの「CSV（コンマ区切り）」はShift_JISで保存される
+}
+function parseCsv(text){
+  var rows=[], row=[], f='', q=false;
+  for(var i=0;i<text.length;i++){
+    var ch=text[i];
+    if(q){ if(ch==='"'){ if(text[i+1]==='"'){ f+='"'; i++; } else q=false; } else f+=ch; continue; }
+    if(ch==='"') q=true;
+    else if(ch===','){ row.push(f); f=''; }
+    else if(ch==='\n' || ch==='\r'){ if(ch==='\r' && text[i+1]==='\n') i++; row.push(f); rows.push(row); row=[]; f=''; }
+    else f+=ch;
+  }
+  if(f!=='' || row.length){ row.push(f); rows.push(row); }
+  return rows.filter(function(r){ return r.some(function(x){ return x.trim()!==''; }); });
+}
+/* Excelで入りがちな書き方をそろえる：全角数字、カンマ区切り、%、▲・−（マイナス） */
+function toNumber(raw){
+  var t = raw.normalize('NFKC').trim().replace(/,/g,'').replace(/%$/,'').replace(/^▲/,'-').replace(/^[−–ー]/,'-');
+  if(t==='') return {blank:true};
+  if(!/^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/.test(t)) return {bad:true};
+  return {v:Number(t)};
+}
+$('fileCsv').addEventListener('change', function(){
+  var f = this.files[0]; if(!f) return; this.value = '';
+  readAsBuffer(f).then(function(buf){ checkCsv(parseCsv(decode(buf)), f.name); enable(); });
+});
+function checkCsv(rows, fname){
+  var errs=[], warns=[], changes=[];
+  var box = $('csvResult');
+  st.newMunis = null; st.csvOk = false;
+  if(!rows.length){ errs.push('CSVが空です。'); return show(); }
+  /* 見出しの照合：Excelで保存し直すと「〜」「（）」などの文字が変わることがあるため、同じ文字にそろえてから比べる */
+  var norm = function(h){ return String(h).normalize('NFKC').replace(/[\u301C\uFF5E~]/g,'~').replace(/\s+/g,'').trim(); };
+  var head = rows[0].map(norm);
+  var idIdx = head.indexOf(norm(ID_H)), nameIdx = head.indexOf(norm(NAME_H));
+  if(idIdx<0) errs.push('「'+ID_H+'」の列がありません。ツールで保存したCSVの見出しを変えずに使ってください。');
+  var colIdx = {};
+  COLS.forEach(function(col){ var k = head.indexOf(norm(header(col))); if(k<0) errs.push('「'+header(col)+'」の列がありません。'); else colIdx[col.key]=k; });
+  var known = [norm(ID_H), norm(NAME_H)].concat(COLS.map(function(col){ return norm(header(col)); }));
+  head.forEach(function(h){ if(h && known.indexOf(h)<0) warns.push('見出し「'+h+'」の列は使われません（無視します）。'); });
+  if(errs.length) return show();
+
+  var byId = {}; st.data.munis.forEach(function(m){ byId[m.id]=m; });
+  var seen = {}, out = {};
+  rows.slice(1).forEach(function(r, n){
+    var line = n+2;
+    var id = (r[idIdx]||'').trim();
+    if(!byId[id]){ errs.push(line+'行目：市町村ID「'+id+'」は登録されていません。'); return; }
+    if(seen[id]){ errs.push(line+'行目：市町村ID「'+id+'」が2回出てきます。'); return; }
+    seen[id]=true;
+    var old = byId[id];
+    if(nameIdx>=0 && norm(r[nameIdx]||'')!==norm(old.name)) errs.push(line+'行目：市町村名が「'+(r[nameIdx]||'')+'」になっています（'+old.name+'のはず）。行がずれていないか確かめてください。');
+    var m = JSON.parse(JSON.stringify(old));
+    var ind = old.industry ? JSON.parse(JSON.stringify(old.industry)) : null, indVals = [];
+    COLS.forEach(function(col){
+      var raw = r[colIdx[col.key]]; raw = raw==null ? '' : raw;
+      var p = toNumber(raw), v = null;
+      var where = line+'行目 '+old.name+'「'+header(col)+'」';
+      if(p.bad){ errs.push(where+'：「'+raw+'」は数値として読めません。'); return; }
+      if(p.blank){ if(!col.nullable){ errs.push(where+'：空欄にはできません（この項目はデータなしにできない項目です）。'); return; } }
+      else{
+        v = p.v;
+        if(col.type==='dx' && [0,1,2].indexOf(v)<0){ errs.push(where+'：0・1・2のどれかを入れてください（'+raw+'）。'); return; }
+        if(col.type==='int' && Math.round(v)!==v){ errs.push(where+'：整数を入れてください（'+raw+'）。'); return; }
+        if(col.type!=='dx' && (v<col.min || v>col.max)){ errs.push(where+'：'+v+' は入力できる範囲（'+col.min+'〜'+col.max+'）の外です。'); return; }
+      }
+      if(col.ind!=null){ indVals.push({col:col, v:v}); return; }
+      var ov = old[col.key];
+      if(ov!==v){ changes.push([old.name, header(col), ov, v]); bigChange(old.name, col, ov, v, warns); }
+      m[col.key] = v;
+    });
+    /* 業種別：24マスすべて空欄＝RESASで非公開の団体 */
+    if(indVals.length===COLS.filter(function(col){ return col.ind!=null; }).length){
+      var allBlank = indVals.every(function(x){ return x.v==null; });
+      var newInd = allBlank ? INDUSTRY_LABELS.map(function(){ return null; }) :
+        INDUSTRY_LABELS.map(function(l, i){ return [indVals[i*2].v, indVals[i*2+1].v]; });
+      indVals.forEach(function(x){
+        var ov = old.industry && old.industry[x.col.ind] ? old.industry[x.col.ind][x.col.pos] : null;
+        if(ov!==x.v) changes.push([old.name, header(x.col), ov, x.v]);
+      });
+      if(JSON.stringify(newInd)!==JSON.stringify(old.industry) && allBlank) warns.push(old.name+'：業種別事業所数がすべて空欄のため「RESASで非公開」として扱います。');
+      m.industry = newInd;
+    }
+    /* 項目どうしの関係 */
+    if(m.onlineDone!=null && m.onlineApplicable!=null && m.onlineDone>m.onlineApplicable) errs.push(line+'行目 '+old.name+'：オンライン化済の手続数が対象手続数より多くなっています。');
+    if(m.habitableKm2>m.areaKm2) warns.push(old.name+'：可住地面積が面積より大きくなっています。');
+    if(m.quakeProb6s>m.quakeProb) warns.push(old.name+'：震度6強以上の確率が6弱以上の確率より大きくなっています。');
+    ['floodRiver','floodSurge','floodTsunami'].forEach(function(k){ if(m[k]>m.floodExposure) warns.push(old.name+'：浸水の内訳（'+k+'）が合計より大きくなっています。'); });
+    out[id] = m;
+  });
+  st.data.munis.forEach(function(m){ if(!seen[m.id]) errs.push(m.name+'（'+m.id+'）の行がありません。43市町村すべての行が必要です。'); });
+  if(!errs.length){ st.newMunis = st.data.munis.map(function(m){ return out[m.id]; }); st.csvOk = true; }
+  return show();
+
+  function show(){
+    var h = '';
+    if(errs.length) h += '<div class="msg err"><b>直す必要があるところが '+errs.length+' 件あります。</b>CSVを直してから、もう一度選んでください（このままでは保存できません）。<ul>'+errs.slice(0,200).map(function(e){ return '<li>'+esc(e)+'</li>'; }).join('')+'</ul></div>';
+    else h += '<div class="msg ok">'+esc(fname)+' を確かめました。問題はありません。変更 '+changes.length+' か所。</div>';
+    if(warns.length) h += '<div class="msg warn"><b>念のため確かめてほしいところが '+warns.length+' 件あります</b>（保存はできます）。<ul>'+warns.slice(0,200).map(function(e){ return '<li>'+esc(e)+'</li>'; }).join('')+'</ul></div>';
+    if(!errs.length && changes.length){
+      h += '<div class="tbl-wrap"><table><tr><th>市町村</th><th>項目</th><th>今の値</th><th>新しい値</th></tr>'+
+        changes.map(function(x){ return '<tr><td>'+esc(x[0])+'</td><td>'+esc(x[1])+'</td><td class="num">'+(x[2]==null?'データなし':esc(x[2]))+'</td><td class="num">'+(x[3]==null?'データなし':esc(x[3]))+'</td></tr>'; }).join('')+'</table></div>';
+    }
+    st.changeCount = errs.length ? null : changes.length;
+    box.innerHTML = h;
+  }
+}
+/* 大きな変化（入力ミスの可能性）を知らせる。止めはしない */
+function bigChange(name, col, ov, v, warns){
+  var where = name+'「'+header(col)+'」';
+  if(ov==null && v!=null){ warns.push(where+'：データなし → '+v+' になります。'); return; }
+  if(ov!=null && v==null){ warns.push(where+'：'+ov+' → データなし になります。'); return; }
+  if(col.type==='dx') return;
+  var d = Math.abs(v-ov);
+  var pct = col.unit==='%' || col.unit==='%/年' || col.unit==='ポイント';
+  if(pct ? d>=10 : (Math.abs(ov)>0 && d/Math.abs(ov)>=0.3)) warns.push(where+'：'+ov+' → '+v+'（大きく変わっています。桁や列のずれがないか確かめてください）');
+}
+
+/* ---------- 4. 年次の表示 ---------- */
+function buildYearForm(){
+  var y = st.data.years;
+  $('yearForm').innerHTML = YEAR_FIELDS.map(function(f){
+    return '<label for="y_'+f[0]+'">'+esc(f[1])+'</label><input type="text" id="y_'+f[0]+'" value="'+esc(y[f[0]]==null?'':y[f[0]])+'">';
+  }).join('');
+}
+
+/* ---------- 5. 新しいHTMLを作る ---------- */
+/* 文字列に「<」や、コメントの終わりの記号（アスタリスク＋スラッシュ）が入っても、HTMLやデータの目印が壊れないようにエスケープする */
+function J(v){ return JSON.stringify(v).replace(/</g,'\\u003c').replace(/>/g,'\\u003e').replace(/\*\//g,'*\\/'); }
+function formatData(d){
+  return '{\n"schema":'+J(d.schema)+',\n"updated":'+J(d.updated)+',\n"history":'+J(d.history)+
+    ',\n"years":'+J(d.years)+',\n"munis":[\n'+d.munis.map(function(m){ return J(m); }).join(',\n')+'\n]\n}';
+}
+$('btnSave').addEventListener('click', function(){
+  var d = JSON.parse(JSON.stringify(st.data));
+  var yearChanges = 0, emptyYear = [];
+  YEAR_FIELDS.forEach(function(f){
+    var v = $('y_'+f[0]).value.trim();
+    if(!v || /[<>]/.test(v)) emptyYear.push(f[1]);
+    if(v!==d.years[f[0]]) yearChanges++;
+    d.years[f[0]] = v;
+  });
+  if(emptyYear.length){ $('saveInfo').innerHTML = '<div class="msg err">年次が空欄か、使えない文字（&lt; &gt;）が入っている項目があります：'+esc(emptyYear.join('、'))+'</div>'; return; }
+  var n = st.changeCount || 0;
+  if(st.newMunis) d.munis = st.newMunis;
+  if(!n && !yearChanges){ $('saveInfo').innerHTML = '<div class="msg warn">数値も年次も変わっていないため、保存しませんでした。</div>'; return; }
+  var memo = $('memo').value.trim() || '（メモなし）';
+  d.updated = today();
+  d.history.push({date:d.updated, note:memo, changes:n + yearChanges});
+  var t = st.html, i = t.indexOf(BEGIN), j = t.indexOf(END);
+  var html = t.slice(0, i+BEGIN.length) + formatData(d) + t.slice(j);
+  download('chiiki-bunseki-karte_'+d.updated+'.html', html, 'text/html');
+  $('saveInfo').innerHTML = '<div class="msg ok">保存しました（数値の変更 '+n+' か所、年次の変更 '+yearChanges+' か所）。保存したファイルを開いて確かめてから、共有フォルダの「地域課題分析カルテ」と入れ替えてください。</div>';
+});
+enable();
+})();
+</script>
+</body>
+</html>
