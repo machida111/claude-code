@@ -8,9 +8,9 @@
 |---|---|
 | 成果物 | `docs/chiiki-karte-system/app.html`（単一HTML、約404KB、外部API・ログイン・サーバー不要）、`data-update.html`（データ更新ツール）、`handoff/保守マニュアル.docx` |
 | 最新コミット | ブランチ `claude/pensive-mayer-gacgyv` の先頭（リポジトリ `machida111/claude-code`） |
-| 公開版 | https://claude.ai/artifact/Xi3tvZ8pzCfiqBkT4RAEij （Version 36、非公開・本人のみ） |
+| 公開版 | https://claude.ai/artifact/Xi3tvZ8pzCfiqBkT4RAEij （Version 37、非公開・本人のみ） |
 | 配布ファイル | `地域課題分析カルテ.html`（app.html と同一内容）・`データ更新ツール.html`（data-update.html と同一内容）・`保守マニュアル.docx` |
-| app.html の SHA-256 | `664cbe1554a0938eb04bbdf9f362584c7c56df4668563141807d2b1435ad8bf5` |
+| app.html の SHA-256 | `bb98a59c00d9187419f5e3fe96a06e5707444bd84d884044bb4b8b50420dd190` |
 | 状態 | ベータ版として機能は一通りそろっている。PRは未作成 |
 
 ## 引き継ぎ用の仕組み（2026-09-29追加）

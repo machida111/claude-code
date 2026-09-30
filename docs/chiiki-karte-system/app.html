@@ -233,6 +233,8 @@ label.field{display:flex; flex-direction:column; gap:5px; font-size:12px; color:
 .ai-report .scene-note{font-size:11.5px; color:var(--ink-faint);}
 .scene-card{scroll-margin-top:64px;}
 @media (max-width:780px){ .scene-card{scroll-margin-top:120px;} }
+.src-note{font-size:11px; color:var(--ink-faint); margin-top:8px; line-height:1.6;}
+.src a, .src-note a, .map-note a{color:var(--accent-ink);}
 .scene-map-note{font-size:12px; color:var(--ink-muted); margin:10px 0 0; line-height:1.6;}
 @media (max-width:780px){ .karte-nav{top:-16px;} }
 
@@ -490,7 +492,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <div class="legend" id="mapLegend" style="margin-left:auto;"></div>
       </div>
       <div class="map-box" id="mapCanvas"></div>
-      <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地理院タイル</a>） ／ 行政区域境界：国土数値情報（行政区域データ N03）</p>
+      <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>） ／ 統計：人口・高齢化・高齢者の見守り・担い手不足・自家用車への依存度＝総務省統計局 国勢調査（e-Stat）、空き家＝住宅・土地統計調査、DX＝総務省「地方自治体におけるAI・RPAの実証実験・導入状況等調査」「自治体DX・情報化推進概要」 ／ 行政区域境界：国土数値情報（行政区域データ N03） ／ 詳しい出典は「指標の計算方法」の1章</p>
     </section>
 
     <!-- RESIDENT MAP -->
@@ -509,7 +511,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <div class="legend" id="residentMapLegend" style="margin-left:auto;"></div>
       </div>
       <div class="map-box" id="residentMapCanvas"></div>
-      <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地理院タイル</a>） ／ 統計：e-Stat 社会・人口統計体系「市区町村データ」 ／ 行政区域境界：国土数値情報（行政区域データ N03）</p>
+      <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>） ／ 統計：買い物＝農林水産政策研究所「食料品アクセスマップ」、医療・学校＝e-Stat 社会・人口統計体系「市区町村データ」（学校は学校基本調査）、地元で買えない度＝RESAS「地域ビジネス環境分析」 ／ 行政区域境界：国土数値情報（行政区域データ N03） ／ 詳しい出典は「指標の計算方法」の1章</p>
     </section>
 
     <!-- HAZARD MAP -->
@@ -528,7 +530,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <div class="legend" id="hazardMapLegend" style="margin-left:auto;"></div>
       </div>
       <div class="map-box" id="hazardMapCanvas"></div>
-      <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地理院タイル</a>） ／ 災害データ：大阪府（土砂災害警戒区域）・国土数値情報（浸水想定区域）・防災科学技術研究所 J-SHIS（地震動予測・微地形区分）・国土交通省（液状化の発生傾向） ／ 人口：2020年国勢調査250mメッシュ ／ 行政区域境界：国土数値情報（行政区域データ N03）</p>
+      <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>） ／ 災害データ：大阪府（土砂災害警戒区域）・国土数値情報（浸水想定区域）・防災科学技術研究所 J-SHIS（地震動予測・微地形区分）・国土交通省（液状化の発生傾向） ／ 人口：2020年国勢調査250mメッシュ ／ 行政区域境界：国土数値情報（行政区域データ N03）</p>
     </section>
 
     <!-- LIFE SCENE MAP -->
@@ -548,7 +550,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
       </div>
       <div class="map-box" id="sceneMapCanvas"></div>
       <p class="scene-map-note" id="sceneMapNote"></p>
-      <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地理院タイル</a>） ／ 統計：地域課題マップ・住民目線マップ・防災マップの各指標と同じ（「指標の計算方法」画面を参照） ／ 行政区域境界：国土数値情報（行政区域データ N03）</p>
+      <p class="map-note">地図データ：国土地理院（<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地理院タイル</a>） ／ 統計：地域課題マップ・住民目線マップ・防災マップの各指標と同じ（「指標の計算方法」画面を参照） ／ 行政区域境界：国土数値情報（行政区域データ N03）</p>
     </section>
 
     <!-- LIST -->
@@ -575,7 +577,7 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
       </div>
       <div class="print-msg" id="listPrintMsg" hidden></div>
       <div class="list-wrap"><table class="data-table" id="listTable"></table></div>
-      <p class="list-note" id="listNote">「データなし」は非公表値です（空き家：未公表の5町村、地元で買えない度：非公開の2市）。非公表値はデータなしとして扱い、推定値や中間値による補完は行わない。総合スコアは利用可能な指標だけで算出する。CSVではデータなしを空欄にしています。スコアは5が最も課題（リスク）が大きい。元の値の単位は列見出しの下に表示しています。</p>
+      <p class="list-note" id="listNote">出典：各列の出典（作成機関・資料名・表番号・リンク）は「指標の計算方法」の「1. データソース」にまとめています。地図の吹き出しの「判定根拠を表示」でも指標ごとの出典を確認できます。<br>「データなし」は非公表値です（空き家：未公表の5町村、地元で買えない度：非公開の2市）。非公表値はデータなしとして扱い、推定値や中間値による補完は行わない。総合スコアは利用可能な指標だけで算出する。CSVではデータなしを空欄にしています。スコアは5が最も課題（リスク）が大きい。元の値の単位は列見出しの下に表示しています。</p>
     </section>
 
     <!-- KARTE -->
@@ -646,35 +648,44 @@ section.block:first-of-type{border-top:none; margin-top:0; padding-top:0;}
         <section class="block" id="sources">
           <div class="k">1 &middot; Data sources</div>
           <h2>元になっているデータ</h2>
-          <p class="desc">指標の入力に使っている値はすべて公的統計・地理データです。年次はデータソースの最新公表年に依存します。</p>
+          <p class="desc">このツールに入っている数値・地図・境界のすべての出典です。指標の入力に使っている値はすべて公的統計・地理データです。資料名のリンクから公表元のページを開けます（公表元のページの場所は変わることがあります）。統計表ID・項目コードは e-Stat の「社会・人口統計体系」のものです。</p>
           <div class="table-wrap">
             <table>
-              <tr><th>項目</th><th>出典</th><th>備考</th></tr>
-              <tr><td>人口・世帯数・高齢化率</td><td class="src">e-Stat（政府統計の総合窓口）<br>社会・人口統計体系「市区町村データ」</td><td class="src">2020年国勢調査。高齢化率は65歳以上人口÷総人口。</td></tr>
-              <tr><td>面積</td><td class="src">国土地理院<br>全国都道府県市区町村別面積調</td><td class="src">人口密度（人口÷面積）の算出に使用。</td></tr>
-              <tr><td>財政力指数</td><td class="src">総務省 地方財政状況調査</td><td class="src">直近公表年度。1に近いほど自主財源の割合が高い。</td></tr>
-              <tr><td>空き家率</td><td class="src">総務省統計局 令和5年住宅・土地統計調査</td><td class="src">人口規模の小さい5町村（能勢町・田尻町・岬町・太子町・千早赤阪村）は未公表。これらの町村の空き家指標はデータなしとする。非公表値はデータなしとして扱い、推定値や中間値による補完は行わない。総合スコアは利用可能な指標だけで算出する。</td></tr>
-              <tr><td>65歳以上単独世帯率</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">2020年度公表値（2020年国勢調査ベース）。</td></tr>
-              <tr><td>AI・RPA・生成AI導入状況（DX）</td><td class="src">総務省「地方自治体におけるAI・RPAの実証実験・導入状況等調査」</td><td class="src">令和7年度。導入済・実証実験中の団体一覧に掲載がない団体は未導入として扱う。</td></tr>
-              <tr><td>手続のオンライン化状況（DX）</td><td class="src">総務省「自治体DX・情報化推進概要」個別資料<br>（オンライン利用状況調査）</td><td class="src">令和7年4月1日現在（令和8年9月18日公表）。重点計画対象手続のうち「オンライン化済」の数。</td></tr>
-              <tr><td>マイナンバーカード保有率（カルテのみ）</td><td class="src">総務省「マイナンバーカードの交付・保有状況」</td><td class="src">令和8年8月末時点。人口に対する保有枚数の割合。カルテに参考表示（スコア化なし）。</td></tr>
-              <tr><td>生産年齢人口・民営事業所数（担い手不足・変化）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」（国勢調査・経済センサス‐活動調査）</td><td class="src">15〜64歳人口の2015→2020年の増減率。民営事業所数の2016→2021年の増減（カルテ・分析レポートの参考）。</td></tr>
-              <tr><td>浸水想定区域（防災マップ）</td><td class="src">国土数値情報 洪水浸水想定区域（A31a、2024年度・国管理＋府管理河川）・高潮浸水想定区域（A49）・津波浸水想定（A40）<br>＋ e-Stat 2020年国勢調査250mメッシュ人口</td><td class="src">床上浸水以上が想定される区域に住む人の割合。250mメッシュを5×5（50m四方）に等分し人口を均等配分して算出。</td></tr>
-              <tr><td>地震の揺れ（防災マップ）</td><td class="src">防災科学技術研究所 J-SHIS「確率論的地震動予測地図」<br>（2024年版・平均ケース・全地震、250mメッシュ）<br>＋ e-Stat 2020年国勢調査250mメッシュ人口</td><td class="src">今後30年以内に震度6強以上（カルテには6弱以上も表示）の揺れに見舞われる確率を、住んでいる人の数で重み付け平均。地盤の揺れやすさを含む。</td></tr>
-              <tr><td>液状化しやすい地形（防災マップ）</td><td class="src">J-SHIS 250mメッシュ微地形区分（表層地盤V4）<br>＋ 国土交通省「地形区分に基づく液状化の発生傾向」<br>＋ e-Stat 2020年国勢調査250mメッシュ人口</td><td class="src">発生傾向が「強い」「やや強い」とされる地形（埋立地・旧河道・旧池沼・砂丘・砂州間低地・干拓地・自然堤防・三角州・海岸低地）に住む人の割合。</td></tr>
-              <tr><td>土砂災害警戒区域数</td><td class="src">大阪府「土砂災害防止法の指定状況」</td><td class="src">土砂災害警戒区域（イエローゾーン）の指定数。市街地中心部は指定なし（0件）の市町村が複数ある。</td></tr>
-              <tr><td>自家用車利用率（自家用車への依存度）</td><td class="src">e-Stat 2020年国勢調査<br>「利用交通手段」（統計表0003454514）</td><td class="src">15歳以上の自宅外就業者・通学者のうち、通勤・通学に自家用車を利用する人の割合。複数手段の併用があるため各手段の割合の合計は100%を超える。</td></tr>
-              <tr><td>鉄道駅1km圏人口（カルテのみ）</td><td class="src">国土数値情報 鉄道データ（N02-23）<br>＋ e-Stat 2020年国勢調査250mメッシュ人口</td><td class="src">駅から半径1km圏内に住む人の割合。250mメッシュを5×5（50m四方）に等分し人口を均等配分して算出。カルテに参考表示（スコア化なし）。</td></tr>
-              <tr><td>食料品アクセス困難人口割合（買い物）</td><td class="src">農林水産省 農林水産政策研究所<br>「食料品アクセスマップ」</td><td class="src">2020年。店舗まで直線500m以上かつ自動車利用が困難な65歳以上人口の割合。500mメッシュの店舗立地と国勢調査人口から国が算出。</td></tr>
-              <tr><td>一般診療所数（医療）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">可住地面積100km²当たり。2023年度公表値。</td></tr>
-              <tr><td>小学校＋義務教育学校数（学校）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」（学校基本調査）</td><td class="src">可住地面積100km²当たり。2024年度公表値。義務教育学校に統合済みの町村も小学校相当として合算。</td></tr>
-              <tr><td>可住地面積</td><td class="src">国土地理院／農林水産省<br>（e-Stat 社会・人口統計体系）</td><td class="src">総面積から林野・湖沼を除いた面積。医療・学校の施設密度の母数に使用。</td></tr>
-              <tr><td>介護施設定員（カルテのみ）</td><td class="src">e-Stat 社会・人口統計体系「市区町村データ」</td><td class="src">65歳以上人口千人当たりの定員。広域利用の影響が大きいためスコア化せず、カルテに参考表示。</td></tr>
-              <tr><td>支出流出入率（地元で買えない度）</td><td class="src">RESAS「地域ビジネス環境分析」</td><td class="src">2022年。住民の消費が地域内に留まるか流出するかを示す。2市（河内長野市・東大阪市）は非公開のためデータなしとする。非公表値はデータなしとして扱い、推定値や中間値による補完は行わない。総合スコアは利用可能な指標だけで算出する。</td></tr>
-              <tr><td>将来人口（2050年推計、カルテのみ）</td><td class="src">RESAS「地域ビジネス環境分析」（国立社会保障・人口問題研究所推計）</td><td class="src">2020年を基準とした2050年の人口推計。カルテの基本指標に参考表示。</td></tr>
-              <tr><td>業種別事業所数（カルテのみ）</td><td class="src">RESAS「地域ビジネス環境分析」（経済センサス）</td><td class="src">生活関連12業種の事業所数、2016年→2021年。カルテに参考表示（スコア化なし）。</td></tr>
-              <tr><td>市町村境界</td><td class="src">国土数値情報 行政区域データ（N03）</td><td class="src">大阪市24区・堺市7区は1つの市域ポリゴンに結合。</td></tr>
-              <tr><td>地図背景</td><td class="src">国土地理院 地理院タイル（淡色地図）</td><td class="src">出典表示：地図：国土地理院。</td></tr>
+              <tr><th>項目（使う画面）</th><th>出典（作成機関・資料名・表番号）</th><th>時点</th><th>計算・備考</th></tr>
+              <tr><td>人口・人口増減率（地図・カルテ・一覧表）</td><td class="src"><a href="https://www.stat.go.jp/data/kokusei/2020/index.html" target="_blank" rel="noopener">総務省統計局 令和2年（2020年）国勢調査</a><br><a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a>（統計表ID 0000020201、項目 A1101 総人口）</td><td class="src">2015年・2020年</td><td class="src">人口増減率は ((2020年人口÷2015年人口)^(1/5)−1)×100 の年率換算。</td></tr>
+              <tr><td>高齢化率（地図・カルテ・一覧表）</td><td class="src"><a href="https://www.stat.go.jp/data/kokusei/2020/index.html" target="_blank" rel="noopener">総務省統計局 令和2年（2020年）国勢調査</a><br><a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a>（A1303 65歳以上人口、A1101 総人口）</td><td class="src">2020年</td><td class="src">65歳以上人口÷総人口×100。</td></tr>
+              <tr><td>世帯数（カルテ）</td><td class="src"><a href="https://www.stat.go.jp/data/kokusei/2020/index.html" target="_blank" rel="noopener">総務省統計局 令和2年（2020年）国勢調査</a><br><a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a></td><td class="src">2020年</td><td class="src">総世帯数。</td></tr>
+              <tr><td>面積（カルテ・防災）</td><td class="src"><a href="https://www.gsi.go.jp/KOKUJYOHO/MENCHO-title.htm" target="_blank" rel="noopener">国土地理院「全国都道府県市区町村別面積調」</a></td><td class="src">公表値（作成時点）</td><td class="src">土砂災害警戒区域の密度（区域数÷面積）の算出とカルテの表示に使用。</td></tr>
+              <tr><td>財政力指数（カルテ）</td><td class="src"><a href="https://www.soumu.go.jp/iken/zaisei/card.html" target="_blank" rel="noopener">総務省 地方財政状況調査（決算カード）</a></td><td class="src">直近公表年度</td><td class="src">1に近いほど自主財源の割合が高い。</td></tr>
+              <tr><td>空き家率（地図・カルテ・一覧表）</td><td class="src"><a href="https://www.stat.go.jp/data/jyutaku/index.html" target="_blank" rel="noopener">総務省統計局 令和5年住宅・土地統計調査</a></td><td class="src">2023年（令和5年）</td><td class="src">空き家数÷住宅総数×100。人口規模の小さい5町村（能勢町・田尻町・岬町・太子町・千早赤阪村）は未公表。これらの町村の空き家指標はデータなしとする。非公表値はデータなしとして扱い、推定値や中間値による補完は行わない。総合スコアは利用可能な指標だけで算出する。</td></tr>
+              <tr><td>65歳以上単独世帯率（高齢者の見守り）</td><td class="src"><a href="https://www.stat.go.jp/data/kokusei/2020/index.html" target="_blank" rel="noopener">総務省統計局 令和2年（2020年）国勢調査</a><br><a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a>（A8301 65歳以上世帯員の単独世帯数、A710101 一般世帯数）</td><td class="src">2020年</td><td class="src">A8301÷A710101×100。</td></tr>
+              <tr><td>高齢者の世帯の割合（カルテの参考値）</td><td class="src"><a href="https://www.stat.go.jp/data/kokusei/2020/index.html" target="_blank" rel="noopener">総務省統計局 令和2年（2020年）国勢調査</a><br><a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a>（A8301、A8201 夫65歳以上・妻60歳以上の夫婦のみの世帯数、A1303、A710101）</td><td class="src">2020年</td><td class="src">65歳以上のうち一人暮らしの割合＝A8301÷A1303×100。高齢者のみの世帯の割合＝(A8301＋A8201)÷A710101×100。スコア化なし。</td></tr>
+              <tr><td>自家用車利用率（自家用車への依存度）</td><td class="src"><a href="https://www.stat.go.jp/data/kokusei/2020/index.html" target="_blank" rel="noopener">総務省統計局 令和2年（2020年）国勢調査</a>「利用交通手段」<br><a href="https://www.e-stat.go.jp/dbview?sid=0003454514" target="_blank" rel="noopener">e-Stat 統計表 0003454514</a></td><td class="src">2020年</td><td class="src">15歳以上の自宅外就業者・通学者のうち、通勤・通学に自家用車を利用する人の割合。複数手段の併用があるため各手段の割合の合計は100%を超える。</td></tr>
+              <tr><td>鉄道駅1km圏に住む人の割合（カルテ・生活場面の参考値）</td><td class="src"><a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-2023.html" target="_blank" rel="noopener">国土数値情報 鉄道データ（N02-23）</a><br>＋ <a href="https://www.e-stat.go.jp/gis" target="_blank" rel="noopener">e-Stat 統計GIS</a> 2020年国勢調査250mメッシュ人口（T001102）</td><td class="src">鉄道2023年、人口2020年</td><td class="src">駅から半径1km圏内に住む人の割合。250mメッシュを5×5（50m四方）に等分し人口を均等配分して算出。スコア化なし。</td></tr>
+              <tr><td>生産年齢人口の増減率（担い手不足）</td><td class="src"><a href="https://www.stat.go.jp/data/kokusei/2020/index.html" target="_blank" rel="noopener">総務省統計局 令和2年（2020年）国勢調査</a><br><a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a>（A1302 15〜64歳人口）</td><td class="src">2015年・2020年</td><td class="src">(2020年÷2015年−1)×100。</td></tr>
+              <tr><td>高齢化率の上昇幅（分析レポートの「変化」）</td><td class="src"><a href="https://www.stat.go.jp/data/kokusei/2020/index.html" target="_blank" rel="noopener">総務省統計局 令和2年（2020年）国勢調査</a><br><a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a>（A1303、A1101）</td><td class="src">2015年・2020年</td><td class="src">2020年の高齢化率−2015年の高齢化率（ポイント）。</td></tr>
+              <tr><td>民営事業所数（カルテ・分析レポートの「変化」）</td><td class="src"><a href="https://www.stat.go.jp/data/e-census/index.html" target="_blank" rel="noopener">総務省統計局・経済産業省 経済センサス‐活動調査</a><br><a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a>（統計表ID 0000020203、項目 C2108）</td><td class="src">2016年・2021年</td><td class="src">スコア化なし。</td></tr>
+              <tr><td>AI・RPA・生成AI導入状況（DX）</td><td class="src"><a href="https://www.soumu.go.jp/menu_news/s-news/01ryutsu06_02000479.html" target="_blank" rel="noopener">総務省「地方自治体におけるAI・RPAの実証実験・導入状況等調査」</a></td><td class="src">令和7年度</td><td class="src">導入済・実証実験中の団体一覧に掲載がない団体は未導入として扱う。</td></tr>
+              <tr><td>手続のオンライン化状況（DX）</td><td class="src"><a href="https://www.soumu.go.jp/denshijiti/060213_02.html" target="_blank" rel="noopener">総務省「自治体DX・情報化推進概要」個別資料（オンライン利用状況調査）</a></td><td class="src">令和7年4月1日現在（令和8年9月18日公表）</td><td class="src">重点計画対象手続のうち「オンライン化済」の数。</td></tr>
+              <tr><td>マイナンバーカード保有率（カルテのみ）</td><td class="src"><a href="https://www.soumu.go.jp/kojinbango_card/kofujokyo.html" target="_blank" rel="noopener">総務省「マイナンバーカードの交付・保有状況」</a></td><td class="src">令和8年8月末時点</td><td class="src">人口に対する保有枚数の割合。カルテに参考表示（スコア化なし）。</td></tr>
+              <tr><td>土砂災害警戒区域数（防災）</td><td class="src"><a href="https://www.pref.osaka.lg.jp/o130110/damusabo/dosyahou/d_sitei.html" target="_blank" rel="noopener">大阪府「大阪府内の土砂災害防止法の指定状況」（各市町村の指定状況一覧表）</a></td><td class="src">掲載時点</td><td class="src">土砂災害警戒区域（イエローゾーン）の指定数。市街地中心部は指定なし（0件）の市町村が複数ある。</td></tr>
+              <tr><td>浸水想定区域（防災）</td><td class="src"><a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A31a-2024.html" target="_blank" rel="noopener">国土数値情報 洪水浸水想定区域（A31a、2024年度・国管理＋府管理河川）</a>・<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A49-v1_0.html" target="_blank" rel="noopener">国土数値情報 高潮浸水想定区域（A49）</a>・<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-A40.html" target="_blank" rel="noopener">国土数値情報 津波浸水想定（A40）</a><br>＋ <a href="https://www.e-stat.go.jp/gis" target="_blank" rel="noopener">e-Stat 統計GIS</a> 2020年国勢調査250mメッシュ人口（T001102）</td><td class="src">洪水2024年度・高潮2021年度・津波2016年度、人口2020年</td><td class="src">床上浸水以上が想定される区域に住む人の割合。250mメッシュを5×5（50m四方）に等分し人口を均等配分して算出。</td></tr>
+              <tr><td>地震の揺れ（防災）</td><td class="src"><a href="https://www.j-shis.bosai.go.jp/" target="_blank" rel="noopener">防災科学技術研究所 J-SHIS「確率論的地震動予測地図」</a>（2024年版・平均ケース・全地震、250mメッシュ）<br>＋ <a href="https://www.e-stat.go.jp/gis" target="_blank" rel="noopener">e-Stat 統計GIS</a> 2020年国勢調査250mメッシュ人口</td><td class="src">2024年版、人口2020年</td><td class="src">今後30年以内に震度6強以上（カルテには6弱以上も表示）の揺れに見舞われる確率を、住んでいる人の数で重み付け平均。地盤の揺れやすさを含む。</td></tr>
+              <tr><td>液状化しやすい地形（防災）</td><td class="src"><a href="https://www.j-shis.bosai.go.jp/" target="_blank" rel="noopener">J-SHIS 250mメッシュ微地形区分（表層地盤V4）</a><br>＋ <a href="https://www.mlit.go.jp/toshi/toshi_tobou_tk_000038.html" target="_blank" rel="noopener">国土交通省「地形区分に基づく液状化の発生傾向図」</a><br>＋ <a href="https://www.e-stat.go.jp/gis" target="_blank" rel="noopener">e-Stat 統計GIS</a> 2020年国勢調査250mメッシュ人口</td><td class="src">微地形区分V4、人口2020年</td><td class="src">発生傾向が「強い」「やや強い」とされる地形（埋立地・旧河道・旧池沼・砂丘・砂州間低地・干拓地・自然堤防・三角州・海岸低地）に住む人の割合。</td></tr>
+              <tr><td>食料品アクセス困難人口割合（買い物）</td><td class="src"><a href="https://www.maff.go.jp/primaff/seika/fsc/faccess/a_map.html" target="_blank" rel="noopener">農林水産省 農林水産政策研究所「食料品アクセスマップ」</a></td><td class="src">2020年</td><td class="src">店舗まで直線500m以上かつ自動車利用が困難な65歳以上人口の割合。500mメッシュの店舗立地と国勢調査人口から国が推計。</td></tr>
+              <tr><td>一般診療所数（医療）</td><td class="src"><a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a></td><td class="src">2023年度公表値</td><td class="src">可住地面積100km²当たりに換算（一般診療所数÷可住地面積×100）。</td></tr>
+              <tr><td>小学校＋義務教育学校数（学校）</td><td class="src"><a href="https://www.mext.go.jp/b_menu/toukei/chousa01/kihon/1267995.htm" target="_blank" rel="noopener">文部科学省「学校基本調査」</a><br>（<a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a>）</td><td class="src">2024年度公表値</td><td class="src">可住地面積100km²当たりに換算。義務教育学校に統合済みの町村も小学校相当として合算。</td></tr>
+              <tr><td>可住地面積（医療・学校）</td><td class="src"><a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a>（国土地理院・農林水産省の面積をもとに作成）</td><td class="src">公表値（作成時点）</td><td class="src">総面積から林野・湖沼を除いた面積。医療・学校の施設密度の母数に使用。</td></tr>
+              <tr><td>介護施設定員（カルテのみ）</td><td class="src"><a href="https://www.e-stat.go.jp/regional-statistics/ssdsview/municipality" target="_blank" rel="noopener">e-Stat 社会・人口統計体系「市区町村データ」</a></td><td class="src">公表値（作成時点）</td><td class="src">65歳以上人口千人当たりの定員。広域利用の影響が大きいためスコア化せず、カルテに参考表示。</td></tr>
+              <tr><td>支出流出入率（地元で買えない度）</td><td class="src"><a href="https://resas.go.jp/" target="_blank" rel="noopener">RESAS（地域経済分析システム）「地域ビジネス環境分析」</a>（地域経済循環分析）</td><td class="src">2022年</td><td class="src">住民の消費が地域内に留まるか流出するかを示す。2市（河内長野市・東大阪市）は非公開のためデータなしとする。非公表値はデータなしとして扱い、推定値や中間値による補完は行わない。総合スコアは利用可能な指標だけで算出する。</td></tr>
+              <tr><td>将来人口（カルテ・分析レポートの「変化」）</td><td class="src"><a href="https://www.ipss.go.jp/pp-shicyoson/j/shicyoson23/t-page.asp" target="_blank" rel="noopener">国立社会保障・人口問題研究所「日本の地域別将来推計人口（令和5年推計）」</a><br>（<a href="https://resas.go.jp/" target="_blank" rel="noopener">RESAS</a>「地域ビジネス環境分析」に掲載の値）</td><td class="src">2020年基準・2050年推計</td><td class="src">将来人口増減率＝(2050年推計人口÷2020年人口−1)×100。</td></tr>
+              <tr><td>業種別事業所数（カルテのみ）</td><td class="src"><a href="https://resas.go.jp/" target="_blank" rel="noopener">RESAS「地域ビジネス環境分析」</a>（経済センサス）</td><td class="src">2016年・2021年</td><td class="src">生活関連12業種の事業所数。事業所数1〜2件の業種は秘匿のためデータなし。スコア化なし。</td></tr>
+              <tr><td>市町村境界（全マップ）</td><td class="src"><a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N03-2024.html" target="_blank" rel="noopener">国土数値情報 行政区域データ（N03）</a></td><td class="src">国土数値情報の版による</td><td class="src">大阪市24区・堺市7区は1つの市域ポリゴンに結合し、表示用に簡略化。</td></tr>
+              <tr><td>隣接関係（分析レポートの広域連携）</td><td class="src">上の市町村境界（N03）から本ツールで算出</td><td class="src">同上</td><td class="src">境界線を共有する市町村の組。府外の隣接団体は含まない。</td></tr>
+              <tr><td>同規模グループ（分析レポートの比較）</td><td class="src">本ツールで区分（行政区分と、上の国勢調査人口による）</td><td class="src">2020年人口</td><td class="src">政令市・中核市／人口10万人以上の一般市／10万人未満の一般市／町村の4区分。総務省「類似団体区分」の人口規模の考え方に沿った府内での簡易区分で、公式の類似団体区分そのものではない。</td></tr>
+              <tr><td>自治体コード（市町村の並び順）</td><td class="src"><a href="https://www.soumu.go.jp/denshijiti/code.html" target="_blank" rel="noopener">総務省「全国地方公共団体コード」</a></td><td class="src">―</td><td class="src">市町村を自治体コード順に並べるときに使用。</td></tr>
+              <tr><td>地図背景</td><td class="src"><a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">国土地理院 地理院タイル（淡色地図）</a></td><td class="src">閲覧時点</td><td class="src">出典表示：地図：国土地理院。</td></tr>
+              <tr><td>地図・グラフの表示部品（データではない）</td><td class="src"><a href="https://leafletjs.com/" target="_blank" rel="noopener">Leaflet 1.9.4</a>（地図）・<a href="https://www.chartjs.org/" target="_blank" rel="noopener">Chart.js 4.5.1</a>（レーダーチャート）・<a href="https://fonts.google.com/" target="_blank" rel="noopener">Google Fonts</a>（書体）</td><td class="src">―</td><td class="src">いずれもインターネットから読み込む。接続がないと地図とレーダーチャートが表示されない。</td></tr>
             </table>
           </div>
           <h2 style="margin-top:32px;">データの区分</h2>
@@ -1729,7 +1740,7 @@ function createChoropleth(cfg){
     if(map){ setTimeout(function(){ map.invalidateSize(); }, 0); return; }
     map = L.map(cfg.canvasId, { maxZoom:17, scrollWheelZoom:true });
     L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
-      attribution:'<a href="https://maps.gsi.go.jp/development/ich.html" target="_blank" rel="noopener">地図: 国土地理院</a>',
+      attribution:'<a href="https://maps.gsi.go.jp/development/ichiran.html" target="_blank" rel="noopener">地図: 国土地理院</a>',
       maxZoom:18
     }).addTo(map);
     var geoLayer = L.geoJSON(OSAKA_GEOJSON, {
@@ -2151,6 +2162,7 @@ function renderKarte(){
           statTile('将来人口増減率（'+DATA.years.popFutureBase+'→'+DATA.years.popFuture+'）', m.popRate2050.toFixed(1)+'%')+
           statTile('マイナンバーカード保有率', m.cardRate.toFixed(1)+'%')+
         '</div>'+
+        srcNote('overview')+
       '</div>'+
     '</section>'+
 
@@ -2180,6 +2192,7 @@ function renderKarte(){
           statTile('AI／RPA／生成AI', [m.dxAi,m.dxRpa,m.dxGenai].map(function(v){return v===2?'導入済':(v===1?'実証中':'未導入');}).join('／'))+
           statTile('オンライン化済の手続', m.onlineDone+' / '+m.onlineApplicable+'件（'+m.onlineDoneRate.toFixed(0)+'%）')+
         '</div>'+
+        srcNote('main')+
       '</div>'+
     '</section>'+
 
@@ -2199,6 +2212,7 @@ function renderKarte(){
             statTile('支出流出入率', isNum(m.leakageRate) ? (m.leakageRate>0?'+':'')+m.leakageRate.toFixed(1)+'%' : naHtml(INDICATOR_META.leakage.naReason))+
           '</div>'+
           '<p style="font-size:11px; color:var(--ink-faint); margin-top:8px;">公的統計と可住地面積当たり施設密度を用いて、市町村単位でアクセスのしにくさを把握しています。医療・学校は実際の移動時間ではなく、施設密度による代理指標です。'+NA_TEXT+'の指標は総合スコアの算出から除いています。</p>'+
+          srcNote('resident')+
         '</div>'+
       '</div>'+
     '</section>'+
@@ -2219,6 +2233,7 @@ function renderKarte(){
             pctTile('液状化しやすい地形に住む人の割合', m.liquefyRate, 1)+
           '</div>'+
           '<p style="font-size:11px; color:var(--ink-faint); margin-top:8px;">浸水は床上浸水以上（洪水・高潮0.5m以上、津波0.3m以上）の想定区域。地震の確率は住民の数で重み付けした平均で、揺れのスコアには6強以上を使っています。</p>'+
+          srcNote('hazard')+
         '</div>'+
       '</div>'+
     '</section>'+
@@ -2247,7 +2262,7 @@ function renderKarte(){
               '<span class="mono" style="min-width:64px;text-align:right;white-space:nowrap;">'+(c21!=null?fmtNum(c21)+'件':naHtml('秘匿（事業所数1〜2件）'))+'</span></div>';
           }).join('')
         )+
-        '<p style="font-size:11px; color:var(--ink-faint); margin-top:10px;">出典：RESAS「地域ビジネス環境分析」（経済センサス基準、'+DATA.years.estPrev+'年→'+DATA.years.est+'年）。事業所数が1〜2件の業種は秘匿のため「'+NA_TEXT+'」と表示しています。</p>'+
+        '<p style="font-size:11px; color:var(--ink-faint); margin-top:10px;">出典：'+SRC.industry+'。業種別事業所数＝RESAS「地域ビジネス環境分析」（経済センサス基準、'+DATA.years.estPrev+'年→'+DATA.years.est+'年）。事業所数が1〜2件の業種は秘匿のため「'+NA_TEXT+'」と表示しています。</p>'+
       '</div>'+
     '</section>';
 
@@ -2305,6 +2320,16 @@ function openKarteScene(sceneKey){
   toggleSceneCard(card.querySelector('.scene-toggle'), true);
   card.scrollIntoView({block:'start'});
 }
+/* 画面に出す出典（詳しい表番号・リンクは「指標の計算方法」の1章の表） */
+var SRC_MORE = '詳しい出典（表番号・リンク）は「指標の計算方法」の「1. データソース」を参照。';
+var SRC = {
+  overview:'人口・世帯数・高齢化率・人口増減率＝総務省統計局 国勢調査（e-Stat 社会・人口統計体系）、面積＝国土地理院「全国都道府県市区町村別面積調」、可住地面積＝e-Stat 社会・人口統計体系、財政力指数＝総務省 地方財政状況調査、将来人口＝国立社会保障・人口問題研究所「日本の地域別将来推計人口」（RESAS掲載）、マイナンバーカード保有率＝総務省「マイナンバーカードの交付・保有状況」',
+  main:'空き家率＝総務省統計局 住宅・土地統計調査、自家用車利用率＝国勢調査「利用交通手段」（e-Stat 統計表0003454514）、鉄道駅1km圏＝国土数値情報 鉄道データ（N02）＋国勢調査250mメッシュ人口、65歳以上単独世帯率・高齢者の世帯の割合・生産年齢人口＝国勢調査（e-Stat 社会・人口統計体系）、介護施設定員＝e-Stat 社会・人口統計体系、AI／RPA／生成AI＝総務省「地方自治体におけるAI・RPAの実証実験・導入状況等調査」、オンライン化済の手続＝総務省「自治体DX・情報化推進概要」',
+  resident:'食料品アクセス困難人口割合＝農林水産政策研究所「食料品アクセスマップ」、診療所数・可住地面積＝e-Stat 社会・人口統計体系、学校数＝文部科学省「学校基本調査」（e-Stat 社会・人口統計体系）、支出流出入率＝RESAS「地域ビジネス環境分析」（地域経済循環分析）',
+  hazard:'土砂災害警戒区域数＝大阪府「大阪府内の土砂災害防止法の指定状況」、浸水想定区域＝国土数値情報（洪水A31a・高潮A49・津波A40）、地震の確率・微地形区分＝防災科学技術研究所 J-SHIS、液状化の発生傾向＝国土交通省「地形区分に基づく液状化の発生傾向図」、人口＝国勢調査250mメッシュ人口（e-Stat 統計GIS）',
+  industry:'民営事業所数＝経済センサス‐活動調査（e-Stat 社会・人口統計体系）'
+};
+function srcNote(key){ return '<p class="src-note">出典：'+SRC[key]+'。'+SRC_MORE+'</p>'; }
 function statTile(label,value){
   return '<div class="stat-tile"><div class="l">'+label+'</div><div class="v">'+value+'</div></div>';
 }
@@ -2806,7 +2831,8 @@ function runAiAnalysis(){
       aiBlock('🧭 今後の支援の方向性', report.direction)+
       aiBlock('🤝 広域連携の共同検討の候補（隣接する市町村）', report.cooperation)+
     '</div>'+
-    '<p style="font-size:11px; color:var(--ink-faint); margin-top:14px;">※統計データからルールベースで自動生成しています（外部API呼び出しなし）。</p>';
+    '<p style="font-size:11px; color:var(--ink-faint); margin-top:14px;">※統計データからルールベースで自動生成しています（外部API呼び出しなし）。</p>'+
+    '<p class="src-note">出典：'+SRC.overview+'、'+SRC.main+'、'+SRC.resident+'、'+SRC.hazard+'、'+SRC.industry+'、業種別事業所数＝RESAS「地域ビジネス環境分析」。'+SRC_MORE+'</p>';
   document.getElementById('aiPrint').addEventListener('click', function(){ printView('分析レポート：'+scope.label, 'aiPrintMsg'); });
 }
 /* 印刷：ブラウザの印刷画面を開く。claude.ai上の表示などで印刷が止められている環境では
