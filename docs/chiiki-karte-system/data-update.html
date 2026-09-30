@@ -75,7 +75,7 @@ summary{cursor:pointer; color:var(--accent-ink); font-weight:600;}
   <section class="step off" id="s2">
     <h2><span class="n">2</span>今のデータをCSVで保存し、Excelで直す</h2>
     <p>ボタンを押すと、43市町村の統計値が1つの表（CSV）で保存されます。Excelで開き、変わった数値だけを直して、<b>CSV形式のまま</b>上書き保存してください（「CSV UTF-8」「CSV（コンマ区切り）」のどちらでも構いません）。</p>
-    <p class="note">・1行目の見出しと「市町村ID」「市町村名」の列は変えないでください（行の並べ替えは構いません）。<br>
+    <p class="note">・1行目の見出しと「市町村ID」「市町村名」「自治体コード」の列は変えないでください（行の並べ替えは構いません）。自治体コードは、e-Statなどの表と照らし合わせるときに使います。<br>
     ・空欄は「データなし」になります。空欄にしてよいのは、空き家率・支出流出入率・業種別事業所数（秘匿）だけです。推定値や中間値で埋めないでください。<br>
     ・業種別事業所数の24マスがすべて空欄の市町村は「RESASで非公開」として扱います。</p>
     <button class="btn" id="btnCsv" disabled>今のデータをCSVで保存</button>
@@ -159,7 +159,10 @@ INDUSTRY_LABELS.forEach(function(l, i){
   COLS.push(c('ind'+i+'b','業種別事業所数：'+l+'（最新）','事業所',{type:'int', min:0, max:1e6, nullable:true, ind:i, pos:1}));
 });
 function header(col){ return col.label+(col.unit ? '（'+col.unit+'）' : ''); }
-var ID_H = '市町村ID（変えない）', NAME_H = '市町村名（変えない）';
+var ID_H = '市町村ID（変えない）', NAME_H = '市町村名（変えない）', CODE_H = '自治体コード（変えない）';
+/* 総務省の全国地方公共団体コード（e-Stat・農林水産省・国立社会保障・人口問題研究所の表と照らし合わせるための列）。
+   同じ名前の町が他県にもある（例：太子町）ため、名前ではなくコードで照らし合わせる */
+var MUNI_CODE = {osaka:'27100',sakai:'27140',ikeda:'27204',toyonaka:'27203',suita:'27205',takatsuki:'27207',ibaraki:'27211',minoh:'27220',settsu:'27224',shimamoto:'27301',toyono:'27321',nose:'27322',moriguchi:'27209',hirakata:'27210',neyagawa:'27215',daito:'27218',kadoma:'27223',shijonawate:'27229',katano:'27230',yao:'27212',kashiwara:'27221',higashiosaka:'27227',tondabayashi:'27214',kawachinagano:'27216',matsubara:'27217',habikino:'27222',fujiidera:'27226',osakasayama:'27231',taishi:'27381',kanan:'27382',chihayaakasaka:'27383',izumiotsu:'27206',izumi:'27219',takaishi:'27225',tadaoka:'27341',kishiwada:'27202',kaizuka:'27208',izumisano:'27213',sennan:'27228',hannan:'27232',kumatori:'27361',tajiri:'27362',misaki:'27366'};
 /* 画面に出る年次の表示（DATA.years） */
 var YEAR_FIELDS = [
   ['census','国勢調査の年（最新）　例：2020'], ['censusPrev','国勢調査の年（前回）　例：2015'],
@@ -225,8 +228,8 @@ function cellOf(m, col){
 }
 function csvField(v){ var t = v==null ? '' : String(v); return /[",\r\n]/.test(t) ? '"'+t.replace(/"/g,'""')+'"' : t; }
 $('btnCsv').addEventListener('click', function(){
-  var rows = [[ID_H, NAME_H].concat(COLS.map(header))];
-  st.data.munis.forEach(function(m){ rows.push([m.id, m.name].concat(COLS.map(function(col){ return cellOf(m, col); }))); });
+  var rows = [[ID_H, NAME_H, CODE_H].concat(COLS.map(header))];
+  st.data.munis.forEach(function(m){ rows.push([m.id, m.name, MUNI_CODE[m.id]].concat(COLS.map(function(col){ return cellOf(m, col); }))); });
   var text = '﻿' + rows.map(function(r){ return r.map(csvField).join(','); }).join('\r\n') + '\r\n';
   download('chiiki-karte-data_'+today()+'.csv', text, 'text/csv');
 });
@@ -274,11 +277,11 @@ function checkCsv(rows, fname){
   /* 見出しの照合：Excelで保存し直すと「〜」「（）」などの文字が変わることがあるため、同じ文字にそろえてから比べる */
   var norm = function(h){ return String(h).normalize('NFKC').replace(/[\u301C\uFF5E~]/g,'~').replace(/\s+/g,'').trim(); };
   var head = rows[0].map(norm);
-  var idIdx = head.indexOf(norm(ID_H)), nameIdx = head.indexOf(norm(NAME_H));
+  var idIdx = head.indexOf(norm(ID_H)), nameIdx = head.indexOf(norm(NAME_H)), codeIdx = head.indexOf(norm(CODE_H));
   if(idIdx<0) errs.push('「'+ID_H+'」の列がありません。ツールで保存したCSVの見出しを変えずに使ってください。');
   var colIdx = {};
   COLS.forEach(function(col){ var k = head.indexOf(norm(header(col))); if(k<0) errs.push('「'+header(col)+'」の列がありません。'); else colIdx[col.key]=k; });
-  var known = [norm(ID_H), norm(NAME_H)].concat(COLS.map(function(col){ return norm(header(col)); }));
+  var known = [norm(ID_H), norm(NAME_H), norm(CODE_H)].concat(COLS.map(function(col){ return norm(header(col)); }));
   head.forEach(function(h){ if(h && known.indexOf(h)<0) warns.push('見出し「'+h+'」の列は使われません（無視します）。'); });
   if(errs.length) return show();
 
@@ -291,6 +294,7 @@ function checkCsv(rows, fname){
     if(seen[id]){ errs.push(line+'行目：市町村ID「'+id+'」が2回出てきます。'); return; }
     seen[id]=true;
     var old = byId[id];
+    if(codeIdx>=0 && String(norm(r[codeIdx]||'')).replace(/\.0+$/,'')!==MUNI_CODE[id]) errs.push(line+'行目：自治体コードが「'+(r[codeIdx]||'')+'」になっています（'+old.name+'は'+MUNI_CODE[id]+'のはず）。行がずれていないか確かめてください。');
     if(nameIdx>=0 && norm(r[nameIdx]||'')!==norm(old.name)) errs.push(line+'行目：市町村名が「'+(r[nameIdx]||'')+'」になっています（'+old.name+'のはず）。行がずれていないか確かめてください。');
     var m = JSON.parse(JSON.stringify(old));
     var ind = old.industry ? JSON.parse(JSON.stringify(old.industry)) : null, indVals = [];

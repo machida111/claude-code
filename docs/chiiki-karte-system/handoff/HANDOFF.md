@@ -8,16 +8,16 @@
 |---|---|
 | 成果物 | `docs/chiiki-karte-system/app.html`（単一HTML、約404KB、外部API・ログイン・サーバー不要）、`data-update.html`（データ更新ツール）、`handoff/保守マニュアル.docx` |
 | 最新コミット | ブランチ `claude/pensive-mayer-gacgyv` の先頭（リポジトリ `machida111/claude-code`） |
-| 公開版 | https://claude.ai/artifact/Xi3tvZ8pzCfiqBkT4RAEij （Version 37、非公開・本人のみ） |
+| 公開版 | https://claude.ai/artifact/Xi3tvZ8pzCfiqBkT4RAEij （Version 38、非公開・本人のみ） |
 | 配布ファイル | `地域課題分析カルテ.html`（app.html と同一内容）・`データ更新ツール.html`（data-update.html と同一内容）・`保守マニュアル.docx` |
-| app.html の SHA-256 | `bb98a59c00d9187419f5e3fe96a06e5707444bd84d884044bb4b8b50420dd190` |
+| app.html の SHA-256 | `3b3cc187ee8b2dd76e1a66495f7dcc16a0f31eee5e4712efaa5218caa3c76e8b` |
 | 状態 | ベータ版として機能は一通りそろっている。PRは未作成 |
 
 ## 引き継ぎ用の仕組み（2026-09-29追加）
 
 - 統計値と年次は `app.html` の `DATA` ブロック1か所にまとめた（表示・スコアは変更なし）
-- `data-update.html`（データ更新ツール）：ブラウザとExcelだけで年次更新できる。CSVの検証（行・列・数値・範囲・空欄）と変更一覧を表示し、新しいHTMLを保存する
-- `handoff/保守マニュアル.docx`：プログラムを書かない後任向け。更新手順、各列の出典と計算、説明文の直し方、設定変更の難しさ、判断の記録、困ったとき
+- `data-update.html`（データ更新ツール）：ブラウザとExcelだけで年次更新できる。CSVの検証（行・列・数値・範囲・空欄・自治体コードの照合）と変更一覧を表示し、新しいHTMLを保存する
+- `handoff/保守マニュアル.docx`：プログラムを書かない後任向け。更新手順、各列の出典と計算、付録A（e-Statなどの画面操作とExcelの式）、説明文の直し方、設定変更の難しさ、判断の記録、困ったとき
 
 ## 画面（8つ）
 
