@@ -142,16 +142,17 @@
   .cover-enable-row{display:flex; align-items:center; gap:8px; margin-bottom:12px; font-size:13px; color:var(--ink-600);}
 
   @media print{
-    body{background:#fff;}
-    .app{padding:0; max-width:none;}
+    html, body{margin:0; background:#fff;}
+    .app{padding:0; max-width:none; margin:0;}
     header.hero, .card, .toolbar-row{display:none !important;}
-    .sheets-scroll{overflow:visible;}
+    .sheets-scroll{overflow:visible; padding:0;}
     .sheets-row{display:block;}
     /* height is intentionally a hair under one full page: a .sheet sized to
        exactly match @page triggers a Chromium print-pipeline bug where the
        box silently fragments across two physical pages and drops whichever
        flex-row panels land in the phantom second fragment. */
     .sheet{box-shadow:none; border:none; page-break-after:always; height:calc(21cm - 2mm); margin:0;}
+    .sheet:last-child{page-break-after:auto; break-after:auto;}
     .sheet-label{display:none;}
     @page{size:A4 landscape; margin:0;}
   }
