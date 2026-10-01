@@ -471,8 +471,23 @@
         });
         return btn;
       }
+      function makeToCoverBtn(label, targetEl){
+        var btn = document.createElement('button'); btn.type='button'; btn.className='ruby-btn'; btn.textContent=label;
+        btn.addEventListener('click', function(){
+          var text = ta.value;
+          if(!text.trim()){ showMoveMsg('このパネルは空です。'); return; }
+          targetEl.value = targetEl.value.trim() ? (targetEl.value + '\n' + text) : text;
+          coverEnabled.checked = true;
+          panels.splice(idx, 1);
+          renderPanelEditor(); renderSheets();
+        });
+        return btn;
+      }
+      moveBtns.style.flexWrap = 'wrap';
       if(idx > 0) moveBtns.appendChild(makeMoveBtn('◀ 前のパネルへ移動', -1));
       if(idx < panels.length - 1) moveBtns.appendChild(makeMoveBtn('次のパネルへ移動 ▶', 1));
+      moveBtns.appendChild(makeToCoverBtn('表紙タイトルにする', coverTitle));
+      moveBtns.appendChild(makeToCoverBtn('表紙サブタイトルにする', coverSubtitle));
       moveRow.appendChild(moveBtns); moveRow.appendChild(moveMsg);
       taWrap.appendChild(moveRow);
 
@@ -823,7 +838,34 @@
 
   var COVER_CONTENT_PATTERN = /年.*月|開式|午前|午後|会館|ホール|センター|体育館|公民館/;
 
+  var VENUE_TIME_PATTERN = /開式|午前|午後|会館|ホール|センター|体育館|公民館/;
+  var TITLE_KEYWORD_PATTERN = /周年|記念|式典|大会|総会|祝賀/;
+
+  // Fallback for files whose sizes don't separate the cover from the body
+  // (title/subtitle in the same size as body text, missing w:sz, or too few
+  // sized text boxes): pick the subtitle by its venue/time wording, and the
+  // title as the short keyword-bearing text box right before it.
+  function detectCoverByContent(candidates){
+    var subIdx = -1;
+    for(var i=0; i<candidates.length; i++){
+      if(VENUE_TIME_PATTERN.test(candidates[i].text)){ subIdx = i; break; }
+    }
+    if(subIdx < 0) return {title:null, subtitle:null, rest:candidates};
+    var subtitle = candidates[subIdx];
+    var title = null;
+    var prev = subIdx > 0 ? candidates[subIdx-1] : null;
+    if(prev && prev.text.length <= 40 && TITLE_KEYWORD_PATTERN.test(prev.text)){ title = prev; }
+    var rest = candidates.filter(function(c){ return c !== title && c !== subtitle; });
+    return {title:title, subtitle:subtitle, rest:rest};
+  }
+
   function detectCoverParts(candidates){
+    var bySize = detectCoverBySize(candidates);
+    if(bySize.title || bySize.subtitle) return bySize;
+    return detectCoverByContent(candidates);
+  }
+
+  function detectCoverBySize(candidates){
     // Most panels share one common "body text" size by convention — the
     // title and subtitle don't have to be the biggest numbers (this tool's
     // own default is body 30pt > title 24pt > subtitle 18pt), they just have
@@ -913,8 +955,15 @@
       }
       pendingPanels = parsed;
       docxApplyBtn.disabled = false;
-      var detectMsg = parsed.coverTitle ? '（うち表紙タイトル'+(parsed.coverSubtitle?'・サブタイトルを自動判定）':'を自動判定）') : '';
-      docxConfirmMsg.textContent = parsed.panels.length+'個のパネル'+detectMsg+'を検出しました。「パネルに反映」を押すと取り込みます。';
+      var detectMsg = '';
+      if(parsed.coverTitle && parsed.coverSubtitle) detectMsg = '（表紙タイトル・サブタイトルを自動判定済み）';
+      else if(parsed.coverTitle) detectMsg = '（表紙タイトルを自動判定済み）';
+      else if(parsed.coverSubtitle) detectMsg = '（表紙サブタイトルを自動判定済み）';
+      var missing = '';
+      if(!parsed.coverTitle || !parsed.coverSubtitle){
+        missing = ' 表紙の'+(!parsed.coverTitle && !parsed.coverSubtitle ? 'タイトル・サブタイトル' : (!parsed.coverTitle ? 'タイトル' : 'サブタイトル'))+'は自動判定できませんでした。反映後、パネル一覧の「表紙タイトルにする」「表紙サブタイトルにする」で指定できます。';
+      }
+      docxConfirmMsg.textContent = parsed.panels.length+'個のパネル'+detectMsg+'を検出しました。「パネルに反映」を押すと取り込みます。'+missing;
     }).catch(function(err){
       docxConfirmMsg.textContent = '読み込みに失敗しました：'+err.message;
     });
@@ -938,6 +987,7 @@
     docxArmed = false;
     docxApplyBtn.textContent = 'パネルに反映';
     panels = pendingPanels.panels.map(function(p){ return {text: p.text}; });
+    if(pendingPanels.coverTitle || pendingPanels.coverSubtitle) coverEnabled.checked = true;
     if(pendingPanels.coverTitle){
       coverTitle.value = pendingPanels.coverTitle.text;
       if(pendingPanels.coverTitle.sizePt) coverTitleSize.value = Math.round(pendingPanels.coverTitle.sizePt);
