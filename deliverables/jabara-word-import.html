@@ -245,8 +245,8 @@
 
   <div class="card">
     <h2>Wordファイルを読み込む</h2>
-    <div class="ruby-hint">.docx形式のWordファイルを選択すると、ファイル内のテキストボックスを1つずつパネルとして読み込みます（テキストボックスが無い場合は本文の段落を読み込みます）。文字サイズが明らかに大きいテキストボックスは表紙タイトルとして、日付や会場らしい文言（「○年○月」「開式」「会館」など）を含むものは表紙サブタイトルとして自動判定し、本文パネルとは重複させずに表紙欄へ振り分けます（判定できない場合は通常のパネルとして読み込みます）。ふりがな（Wordのルビ機能）が設定されている場合はそのまま「文字[よみ]」の形式に変換されます。古い.doc形式は読み込めないため、Wordで「名前を付けて保存」→ファイルの種類を「Word文書（.docx）」にしてから読み込んでください。テキストボックスの並び順はファイル内部の順序になるため、実際の読み順と異なる場合はパネルごとの「▲」「▼」ボタンで並び替えてください。</div>
-    <input type="file" id="docxFileInput" accept=".docx">
+    <div class="ruby-hint">Wordファイル（.docx、旧形式の.doc）を選択すると、ファイル内のテキストボックスを1つずつパネルとして読み込みます。文字サイズが明らかに大きいテキストボックスは表紙タイトルとして、日付や会場らしい文言（「○年○月」「開式」「会館」など）を含むものは表紙サブタイトルとして自動判定し、本文パネルとは重複させずに表紙欄へ振り分けます（判定できない場合は、反映後にパネル一覧の「表紙タイトルにする」「表紙サブタイトルにする」で指定できます）。テキストボックスが無く本文の行だけのファイルは、1パネルの最大行数に収まるように、文末（「。」）や段落の頭で区切って自動でパネルに分けます。ふりがな（Wordのルビ機能）が設定されている場合は「文字[よみ]」の形式に変換されます。テキストボックスの並び順はファイル内部の順序になるため、実際の読み順と異なる場合はパネルごとの「▲」「▼」ボタンで並び替えてください。</div>
+    <input type="file" id="docxFileInput" accept=".docx,.doc">
     <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
       <button type="button" class="btn" id="docxApplyBtn" disabled>パネルに反映</button>
       <span class="hint" id="docxConfirmMsg" style="margin:0;"></span>
@@ -824,6 +824,10 @@
       var t = xmlParagraphLine(pList[i]);
       if(t) paras.push({text:t, sizePt: xmlParagraphSizePt(pList[i])});
     }
+    return groupParasBySize(paras);
+  }
+
+  function groupParasBySize(paras){
     if(!paras.length) return [];
     var groups = [];
     var cur = [paras[0]];
@@ -909,13 +913,46 @@
       var groups = splitTextboxIntoCandidates(txbxList[i]);
       groups.forEach(function(g){ if(g.text) candidates.push(g); });
     }
+    var plainLines = [];
     if(!candidates.length){
       var body = xmlDoc.getElementsByTagName('w:body')[0];
-      if(body){
-        var lines2 = panelsFromParagraphs(body);
-        lines2.forEach(function(l){ candidates.push({text: l, sizePt: null}); });
+      if(body) plainLines = panelsFromParagraphs(body);
+    }
+    return finishParsed(candidates, plainLines);
+  }
+
+  // A document with no text boxes is just lines of body text. Pack them
+  // into panels the way a person lays out a script: up to the max line
+  // count, closing a panel early after a sentence-ending line ("。") and
+  // before a line that starts a new indented paragraph.
+  function chunkPlainLines(lines){
+    var maxL = Math.max(1, parseInt(maxLinesInput.value, 10) || 3);
+    var segments = [], cur = [];
+    lines.forEach(function(raw){
+      var line = raw.replace(/([一-鿿々〆]+)[（(]([ぁ-ゖー]+)[）)]/g, '$1[$2]');
+      if(cur.length && /^　/.test(line)){ segments.push(cur); cur = []; }
+      cur.push(line);
+      if(/。$/.test(line)){ segments.push(cur); cur = []; }
+    });
+    if(cur.length) segments.push(cur);
+    // Split each sentence/paragraph as evenly as the line limit allows
+    // (4 lines -> 2+2, 5 -> 3+2) so no panel is left holding a lone line.
+    var out = [];
+    segments.forEach(function(seg){
+      var k = Math.ceil(seg.length / maxL);
+      var base = Math.floor(seg.length / k), extra = seg.length % k, pos = 0;
+      for(var n=0; n<k; n++){
+        var size = base + (n < extra ? 1 : 0);
+        out.push(seg.slice(pos, pos + size).join('\n'));
+        pos += size;
       }
-      return {panels: candidates.map(function(c){ return {text:c.text}; }), coverTitle:null, coverSubtitle:null};
+    });
+    return out;
+  }
+
+  function finishParsed(candidates, plainLines){
+    if(!candidates.length){
+      return {panels: chunkPlainLines(plainLines).map(function(t){ return {text:t}; }), coverTitle:null, coverSubtitle:null};
     }
     var parts = detectCoverParts(candidates);
     return {
@@ -923,6 +960,303 @@
       coverTitle: parts.title,
       coverSubtitle: parts.subtitle
     };
+  }
+
+  function parseDocBinaryFile(buf){
+    var r = docParseBinary(buf);
+    var candidates = [];
+    r.textboxes.forEach(function(paras){
+      groupParasBySize(paras).forEach(function(g){ if(g.text) candidates.push(g); });
+    });
+    var plainLines = [];
+    if(!candidates.length){ plainLines = r.mainParagraphs.map(function(p){ return p.text; }); }
+    return finishParsed(candidates, plainLines);
+  }
+
+  // ---- Legacy .doc (Word 97-2003 binary) reader ---------------------------
+  // Minimal OLE2/CFB + Word binary format reader: pulls the text-box story
+  // (or the main story if there are no text boxes), per-paragraph font size
+  // and first-line indent, and converts Word's ruby field (EQ \o\ad(\s\up
+  // N(よみ),漢字)) into 漢字[よみ]. Returns paragraph groups per text box in
+  // the same shape the .docx reader produces.
+  function docCfbOpen(buf){
+    var u8 = new Uint8Array(buf), dv = new DataView(buf);
+    var sig = [0xD0,0xCF,0x11,0xE0,0xA1,0xB1,0x1A,0xE1];
+    if(u8.length < 512) throw new Error('Wordファイルとして読み込めません');
+    for(var i=0; i<8; i++){ if(u8[i] !== sig[i]) throw new Error('Word文書（.doc）ではありません'); }
+    var secSize = 1 << dv.getUint16(0x1E, true);
+    var miniSize = 1 << dv.getUint16(0x20, true);
+    var numFat = dv.getUint32(0x2C, true);
+    var dirStart = dv.getUint32(0x30, true);
+    var miniCutoff = dv.getUint32(0x38, true);
+    var miniFatStart = dv.getUint32(0x3C, true);
+    var numMiniFat = dv.getUint32(0x40, true);
+    var difStart = dv.getUint32(0x44, true);
+    var numDif = dv.getUint32(0x48, true);
+    var END = 0xFFFFFFFA;
+    function secOff(s){ return (s + 1) * secSize; }
+    var fatSecs = [];
+    for(var a=0; a<109 && fatSecs.length < numFat; a++){
+      var v = dv.getUint32(0x4C + 4*a, true);
+      if(v < END) fatSecs.push(v);
+    }
+    var d = difStart;
+    for(var k=0; k<numDif && d < END; k++){
+      var off = secOff(d);
+      for(var j=0; j<secSize/4 - 1; j++){
+        var vv = dv.getUint32(off + 4*j, true);
+        if(vv < END) fatSecs.push(vv);
+      }
+      d = dv.getUint32(off + secSize - 4, true);
+    }
+    var fat = [];
+    fatSecs.forEach(function(s){
+      var o = secOff(s);
+      for(var j=0; j<secSize/4; j++){ fat.push(dv.getUint32(o + 4*j, true)); }
+    });
+    function chain(start, table){
+      var out = [], s = start, guard = 0;
+      while(s < END && guard++ < 1000000){ out.push(s); s = table[s]; if(s === undefined) break; }
+      return out;
+    }
+    function readBig(start, size){
+      var secs = chain(start, fat);
+      var out = new Uint8Array(secs.length * secSize);
+      secs.forEach(function(s, i){ out.set(u8.subarray(secOff(s), secOff(s) + secSize), i * secSize); });
+      return size === undefined ? out : out.subarray(0, size);
+    }
+    var dirBytes = readBig(dirStart);
+    var dirDv = new DataView(dirBytes.buffer, dirBytes.byteOffset, dirBytes.byteLength);
+    var entries = [];
+    for(var e=0; e*128 < dirBytes.length; e++){
+      var base = e * 128;
+      var nameLen = dirDv.getUint16(base + 0x40, true);
+      var name = '';
+      for(var c=0; c < (nameLen/2) - 1; c++){ name += String.fromCharCode(dirDv.getUint16(base + 2*c, true)); }
+      entries.push({name: name, type: dirBytes[base + 0x42], start: dirDv.getUint32(base + 0x74, true), size: dirDv.getUint32(base + 0x78, true)});
+    }
+    var root = entries[0];
+    var miniStream = null, miniFat = null;
+    function readStreamEntry(en){
+      if(en.size < miniCutoff){
+        if(!miniStream){
+          miniStream = readBig(root.start, root.size);
+          var mf = readBig(miniFatStart, numMiniFat * secSize);
+          var mdv = new DataView(mf.buffer, mf.byteOffset, mf.byteLength);
+          miniFat = [];
+          for(var q=0; q < mf.length/4; q++){ miniFat.push(mdv.getUint32(4*q, true)); }
+        }
+        var secs = chain(en.start, miniFat);
+        var out = new Uint8Array(secs.length * miniSize);
+        secs.forEach(function(s, i){ out.set(miniStream.subarray(s * miniSize, (s + 1) * miniSize), i * miniSize); });
+        return out.subarray(0, en.size);
+      }
+      return readBig(en.start, en.size);
+    }
+    return {
+      stream: function(name){
+        for(var i2=0; i2<entries.length; i2++){
+          if(entries[i2].type === 2 && entries[i2].name === name) return readStreamEntry(entries[i2]);
+        }
+        return null;
+      }
+    };
+  }
+
+  function docSprms(bytes, start, len){
+    var out = {}, p = start, end = start + len;
+    var sizes = [1,1,2,4,2,2,-1,3];
+    while(p + 2 <= end){
+      var op = bytes[p] | (bytes[p+1] << 8);
+      p += 2;
+      var spra = op >> 13;
+      var sz = sizes[spra];
+      if(sz < 0){ sz = bytes[p] + 1; if(op === 0xD608){ sz = (bytes[p] | (bytes[p+1] << 8)) + 1; } }
+      if(p + sz > end + 1) break;
+      out[op] = bytes.subarray(p, p + sz);
+      p += sz;
+    }
+    return out;
+  }
+  function docI16(b){ var v = b[0] | (b[1] << 8); return v > 32767 ? v - 65536 : v; }
+
+  function docParseBinary(buf){
+    var cfb = docCfbOpen(buf);
+    var wd = cfb.stream('WordDocument');
+    if(!wd) throw new Error('Word文書（.doc）ではありません');
+    var wdv = new DataView(wd.buffer, wd.byteOffset, wd.byteLength);
+    if(wdv.getUint16(0, true) !== 0xA5EC) throw new Error('Word文書（.doc）ではありません');
+    var flags = wdv.getUint16(10, true);
+    if(flags & 0x100) throw new Error('パスワード付きのファイルは読み込めません');
+    var tbl = cfb.stream((flags & 0x200) ? '1Table' : '0Table');
+    if(!tbl) throw new Error('文書の表データが見つかりません');
+    var tdv = new DataView(tbl.buffer, tbl.byteOffset, tbl.byteLength);
+
+    var csw = wdv.getUint16(32, true);
+    var off = 34 + csw * 2;
+    var cslw = wdv.getUint16(off, true); off += 2;
+    var lw = [];
+    for(var i=0; i<cslw; i++){ lw.push(wdv.getInt32(off + 4*i, true)); }
+    off += cslw * 4;
+    var cbRg = wdv.getUint16(off, true); off += 2;
+    function fcLcb(idx){
+      if(idx >= cbRg) return {fc: 0, lcb: 0};
+      return {fc: wdv.getUint32(off + 8*idx, true), lcb: wdv.getUint32(off + 8*idx + 4, true)};
+    }
+    var ccpText = lw[3], ccpFtn = lw[4], ccpHdd = lw[5], ccpMcr = lw[6], ccpAtn = lw[7], ccpEdn = lw[8], ccpTxbx = lw[9];
+
+    // piece table
+    var clx = fcLcb(33);
+    var p = clx.fc;
+    while(tbl[p] === 1){ p += 3 + tdv.getUint16(p + 1, true); }
+    if(tbl[p] !== 2) throw new Error('文書の構造を解析できませんでした');
+    var lcbPc = tdv.getUint32(p + 1, true); p += 5;
+    var np = (lcbPc - 4) / 12;
+    var pieces = [];
+    for(var pi=0; pi<np; pi++){
+      var cpS = tdv.getInt32(p + 4*pi, true), cpE = tdv.getInt32(p + 4*(pi+1), true);
+      var raw = tdv.getUint32(p + 4*(np+1) + 8*pi + 2, true);
+      var comp = !!(raw & 0x40000000);
+      var fc = raw & 0x3FFFFFFF;
+      pieces.push({cpS: cpS, cpE: cpE, fc: comp ? Math.floor(fc / 2) : fc, comp: comp});
+    }
+    var win1252 = new TextDecoder('windows-1252'), utf16 = new TextDecoder('utf-16le');
+    function textRange(cpA, cpB){
+      var out = '';
+      for(var i2=0; i2<pieces.length; i2++){
+        var pc = pieces[i2];
+        var a = Math.max(cpA, pc.cpS), b = Math.min(cpB, pc.cpE);
+        if(a >= b) continue;
+        var s = pc.fc + (a - pc.cpS) * (pc.comp ? 1 : 2);
+        var n = (b - a) * (pc.comp ? 1 : 2);
+        out += (pc.comp ? win1252 : utf16).decode(wd.subarray(s, s + n));
+      }
+      return out;
+    }
+    function cpToFc(cp){
+      for(var i2=0; i2<pieces.length; i2++){
+        var pc = pieces[i2];
+        if(cp >= pc.cpS && cp < pc.cpE) return pc.fc + (cp - pc.cpS) * (pc.comp ? 1 : 2);
+      }
+      return -1;
+    }
+
+    // formatting lookups (FKP pages)
+    function loadPlcfBte(idx){
+      var f = fcLcb(idx);
+      if(!f.lcb) return null;
+      var n = (f.lcb - 4) / 8, fcs = [], pns = [];
+      for(var i2=0; i2<=n; i2++){ fcs.push(tdv.getUint32(f.fc + 4*i2, true)); }
+      for(var i3=0; i3<n; i3++){ pns.push(tdv.getUint32(f.fc + 4*(n+1) + 4*i3, true) & 0x3FFFFF); }
+      return {fcs: fcs, pns: pns};
+    }
+    var chpxBte = loadPlcfBte(12), papxBte = loadPlcfBte(13);
+    function fkpLookup(bte, fc, isPapx){
+      if(!bte || fc < 0) return {};
+      var idx = -1;
+      for(var i2=0; i2<bte.pns.length; i2++){ if(fc >= bte.fcs[i2] && fc < bte.fcs[i2+1]){ idx = i2; break; } }
+      if(idx < 0) return {};
+      var page = bte.pns[idx] * 512;
+      var crun = wd[page + 511];
+      var run = -1;
+      for(var j=0; j<crun; j++){
+        var f0 = wdv.getUint32(page + 4*j, true), f1 = wdv.getUint32(page + 4*(j+1), true);
+        if(fc >= f0 && fc < f1){ run = j; break; }
+      }
+      if(run < 0) return {};
+      var bxBase = page + 4*(crun + 1);
+      if(isPapx){
+        var bo = wd[bxBase + 13*run];
+        if(!bo) return {};
+        var o = page + bo*2, cb = wd[o], start, len;
+        if(cb === 0){ len = wd[o+1] * 2; start = o + 2; } else { len = cb * 2 - 1; start = o + 1; }
+        return docSprms(wd, start + 2, len - 2);
+      }
+      var co = wd[bxBase + run];
+      if(!co) return {};
+      var o2 = page + co*2, cb2 = wd[o2];
+      return docSprms(wd, o2 + 1, cb2);
+    }
+    function sizeAtCp(cp){
+      var s = fkpLookup(chpxBte, cpToFc(cp), false)[0x4A43];
+      return s ? ((s[0] | (s[1] << 8)) / 2) : null;
+    }
+    function indentCharsAtCp(cp, sizePt){
+      var s = fkpLookup(papxBte, cpToFc(cp), true);
+      if(s[0x4457]) return Math.max(0, Math.round(docI16(s[0x4457]) / 100));
+      var tw = s[0x8460] || s[0x8411];
+      if(tw){
+        var v = docI16(tw);
+        if(v > 0) return Math.max(0, Math.round(v / ((sizePt || 10.5) * 20)));
+      }
+      return 0;
+    }
+
+    // Extract the paragraphs of [cpA, cpB) as [{text, sizePt, indent}]
+    function paragraphsOf(cpA, cpB){
+      var str = textRange(cpA, cpB);
+      var paras = [], cur = '', curStart = cpA, curSize = null, curSizeSet = false;
+      var i2 = 0;
+      function flush(endIdx){
+        paras.push({text: cur.replace(/[ \t　]+$/, ''), cpStart: curStart, sizePt: curSize});
+        cur = ''; curSize = null; curSizeSet = false; curStart = cpA + endIdx + 1;
+      }
+      while(i2 < str.length){
+        var ch = str.charCodeAt(i2);
+        if(ch === 0x13){
+          var depth = 1, j = i2 + 1, sep = -1;
+          while(j < str.length && depth > 0){
+            var c2 = str.charCodeAt(j);
+            if(c2 === 0x13) depth++;
+            else if(c2 === 0x15) depth--;
+            else if(c2 === 0x14 && depth === 1 && sep < 0) sep = j;
+            if(depth > 0) j++;
+          }
+          var code = str.slice(i2 + 1, sep >= 0 ? sep : j);
+          var result = sep >= 0 ? str.slice(sep + 1, j) : '';
+          var m = /\\o\s*\\(?:ad|al|ar|di)\(\s*\\s\\up\s*\d+\(([^)]*)\)\s*,\s*([^)]*)\)/.exec(code);
+          if(/^\s*EQ\b/i.test(code) && m){
+            cur += (m[2] ? m[2] + (m[1] ? '[' + m[1] + ']' : '') : '');
+            if(!curSizeSet){ var sz0 = sizeAtCp(cpA + i2); if(sz0){ curSize = sz0; } }
+          } else {
+            cur += result.replace(/[\u0000-\u001F]/g, '');
+          }
+          i2 = j + 1;
+          continue;
+        }
+        if(ch === 0x0D){ flush(i2); i2++; continue; }
+        if(ch === 0x0B){ cur += '\n'; i2++; continue; }
+        if(ch === 0x09){ cur += '　'; i2++; continue; }
+        if(ch < 0x20){ i2++; continue; }
+        if(!curSizeSet && ch !== 0x20 && ch !== 0x3000){
+          curSize = sizeAtCp(cpA + i2); curSizeSet = true;
+        }
+        cur += str.charAt(i2);
+        i2++;
+      }
+      if(cur.trim()) flush(str.length);
+      return paras.map(function(pr){
+        var t = pr.text.trim();
+        if(!t) return null;
+        var ind = indentCharsAtCp(pr.cpStart, pr.sizePt);
+        return {text: (ind > 0 ? new Array(ind + 1).join('　') : '') + t, sizePt: pr.sizePt};
+      }).filter(function(x){ return x; });
+    }
+
+    var boxes = [];
+    var tx = fcLcb(56);
+    if(ccpTxbx > 0 && tx.lcb >= 4 + 26){
+      var nBox = Math.floor((tx.lcb - 4) / 26);
+      var cpBase = ccpText + ccpFtn + ccpHdd + ccpMcr + ccpAtn + ccpEdn;
+      for(var bi=0; bi<nBox; bi++){
+        var c0 = tdv.getInt32(tx.fc + 4*bi, true), c1 = tdv.getInt32(tx.fc + 4*(bi+1), true);
+        if(c1 <= c0) continue;
+        var ps = paragraphsOf(cpBase + c0, cpBase + c1);
+        if(ps.length) boxes.push(ps);
+      }
+    }
+    var mainParas = paragraphsOf(0, ccpText);
+    return {textboxes: boxes, mainParagraphs: mainParas};
   }
 
   docxFileInput.addEventListener('change', function(){
@@ -933,24 +1267,26 @@
     docxConfirmMsg.textContent = '';
     var file = docxFileInput.files[0];
     if(!file) return;
-    if(!/\.docx$/i.test(file.name)){
-      docxConfirmMsg.textContent = '.docx形式のファイルを選択してください（.docは非対応です）。';
-      return;
-    }
-    if(typeof JSZip === 'undefined'){
-      docxConfirmMsg.textContent = '読み込み用ライブラリが読み込めませんでした。通信環境を確認して再度お試しください。';
+    if(!/\.docx?$/i.test(file.name)){
+      docxConfirmMsg.textContent = 'Wordファイル（.docx または .doc）を選択してください。';
       return;
     }
     docxConfirmMsg.textContent = '読み込み中…';
     file.arrayBuffer().then(function(buf){
-      return JSZip.loadAsync(buf);
-    }).then(function(zip){
-      var doc = zip.file('word/document.xml');
-      if(!doc) throw new Error('word/document.xmlが見つかりません');
-      return doc.async('string');
-    }).then(function(xmlText){
-      var parsed = parseDocxXml(xmlText);
-      if(!parsed.panels.length && !parsed.coverTitle){
+      var head = new Uint8Array(buf, 0, Math.min(4, buf.byteLength));
+      if(head[0] === 0xD0 && head[1] === 0xCF){
+        return parseDocBinaryFile(buf);
+      }
+      if(typeof JSZip === 'undefined'){
+        throw new Error('読み込み用ライブラリが読み込めませんでした。通信環境を確認して再度お試しください。');
+      }
+      return JSZip.loadAsync(buf).then(function(zip){
+        var doc = zip.file('word/document.xml');
+        if(!doc) throw new Error('word/document.xmlが見つかりません');
+        return doc.async('string');
+      }).then(function(xmlText){ return parseDocxXml(xmlText); });
+    }).then(function(parsed){
+      if(!parsed.panels.length && !parsed.coverTitle && !parsed.coverSubtitle){
         docxConfirmMsg.textContent = 'テキストを検出できませんでした。ファイルの内容をご確認ください。';
         return;
       }
