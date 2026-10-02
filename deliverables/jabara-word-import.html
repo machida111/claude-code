@@ -935,18 +935,40 @@
       if(/。$/.test(line)){ segments.push(cur); cur = []; }
     });
     if(cur.length) segments.push(cur);
-    // Split each sentence/paragraph as evenly as the line limit allows
-    // (4 lines -> 2+2, 5 -> 3+2) so no panel is left holding a lone line.
     var out = [];
     segments.forEach(function(seg){
-      var k = Math.ceil(seg.length / maxL);
-      var base = Math.floor(seg.length / k), extra = seg.length % k, pos = 0;
-      for(var n=0; n<k; n++){
-        var size = base + (n < extra ? 1 : 0);
-        out.push(seg.slice(pos, pos + size).join('\n'));
-        pos += size;
-      }
+      splitSegmentIntoPanels(seg, maxL).forEach(function(c){ out.push(c.join('\n')); });
     });
+    return out;
+  }
+
+  // Fewest panels the line limit allows; among those, prefer boundaries that
+  // fall after a line ending in 、or 。 (a natural pause), then the most even
+  // sizes, then the larger panel first.
+  function splitSegmentIntoPanels(seg, maxL){
+    var n = seg.length, k = Math.ceil(n / maxL), best = [];
+    for(var i=0; i<=n; i++){ best.push([]); }
+    best[0][0] = {punct: 0, sq: 0, sizes: []};
+    function better(a, b){
+      if(!b) return true;
+      if(a.punct !== b.punct) return a.punct > b.punct;
+      if(a.sq !== b.sq) return a.sq < b.sq;
+      for(var q=0; q<a.sizes.length; q++){ if(a.sizes[q] !== b.sizes[q]) return a.sizes[q] > b.sizes[q]; }
+      return false;
+    }
+    for(var j=1; j<=k; j++){
+      for(var i2=j; i2<=n; i2++){
+        for(var s=1; s<=Math.min(maxL, i2-(j-1)); s++){
+          var prev = best[i2 - s][j - 1];
+          if(!prev) continue;
+          var pause = (i2 < n && /[、。]$/.test(seg[i2 - 1])) ? 1 : 0;
+          var cand = {punct: prev.punct + pause, sq: prev.sq + s*s, sizes: prev.sizes.concat([s])};
+          if(better(cand, best[i2][j])) best[i2][j] = cand;
+        }
+      }
+    }
+    var sizes = best[n][k] ? best[n][k].sizes : [n], pos = 0, out = [];
+    sizes.forEach(function(sz){ out.push(seg.slice(pos, pos + sz)); pos += sz; });
     return out;
   }
 
