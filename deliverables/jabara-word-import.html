@@ -1145,22 +1145,58 @@
     return out;
   }
 
-  // Plain documents: if the first block (up to the first blank paragraph) is
-  // 2-5 lines and one of its later lines reads like a date/venue, that block
-  // is the cover — the lines before it are the title, the rest the subtitle.
+  // Plain documents (no text boxes): find the cover at the top. Tried in
+  // order: (1) a first block of 2-5 lines ended by a blank paragraph whose
+  // later line reads like a date/venue; (2) leading paragraphs whose explicit
+  // font size differs from the body's; (3) a date/venue line among the first
+  // few paragraphs, with the lines before it as the title.
   function splitPlainCover(paras){
-    var i = 0;
-    while(i < paras.length && !paras[i].text) i++;
-    var start = i, end = i;
-    while(end < paras.length && paras[end].text) end++;
-    var block = paras.slice(start, end);
-    var res = {title: null, subtitle: null, rest: paras.slice(end).filter(function(p){ return p.text; })};
-    if(block.length < 2 || block.length > 5 || end >= paras.length){ res.rest = paras.filter(function(p){ return p.text; }); return res; }
-    var j = -1;
-    for(var k=1; k<block.length; k++){ if(VENUE_TIME_PATTERN.test(block[k].text)){ j = k; break; } }
-    if(j < 0){ res.rest = paras.filter(function(p){ return p.text; }); return res; }
-    res.title = {text: block.slice(0, j).map(function(b){ return b.text; }).join('\n'), sizePt: block[0].sizePt};
-    res.subtitle = {text: block.slice(j).map(function(b){ return b.text; }).join('\n'), sizePt: block[j].sizePt};
+    var nonEmpty = paras.filter(function(p){ return p.text; });
+    var res = {title: null, subtitle: null, rest: nonEmpty};
+    if(nonEmpty.length < 3) return res;
+    function mk(titleParas, subParas, restParas){
+      return {
+        title: titleParas.length ? {text: titleParas.map(function(x){ return x.text; }).join('\n'), sizePt: titleParas[0].sizePt} : null,
+        subtitle: subParas.length ? {text: subParas.map(function(x){ return x.text; }).join('\n'), sizePt: subParas[0].sizePt} : null,
+        rest: restParas
+      };
+    }
+    // (1) block before the first blank paragraph
+    var s = 0;
+    while(s < paras.length && !paras[s].text) s++;
+    var e = s;
+    while(e < paras.length && paras[e].text) e++;
+    var block = paras.slice(s, e);
+    if(block.length >= 2 && block.length <= 5 && e < paras.length){
+      for(var k=1; k<block.length; k++){
+        if(VENUE_TIME_PATTERN.test(block[k].text)){
+          return mk(block.slice(0, k), block.slice(k), paras.slice(e).filter(function(x){ return x.text; }));
+        }
+      }
+    }
+    // (2) leading paragraphs in a size different from the body's
+    var counts = {}, modeKey = null, modeCount = 0;
+    nonEmpty.forEach(function(x){ var key = String(x.sizePt || 0); counts[key] = (counts[key] || 0) + 1; if(counts[key] > modeCount){ modeCount = counts[key]; modeKey = key; } });
+    var lead = 0;
+    while(lead < nonEmpty.length && lead < 6 && nonEmpty[lead].sizePt && String(nonEmpty[lead].sizePt) !== modeKey) lead++;
+    if(lead >= 1 && lead < nonEmpty.length){
+      var first = nonEmpty[0].sizePt, split = 1;
+      while(split < lead && nonEmpty[split].sizePt === first) split++;
+      return mk(nonEmpty.slice(0, split), nonEmpty.slice(split, lead), nonEmpty.slice(lead));
+    }
+    // (3) date/venue line near the top
+    var seen = 0, kIdx = -1;
+    for(var i=0; i<paras.length && seen < 6; i++){
+      if(!paras[i].text) continue;
+      if(seen >= 1 && seen <= 3 && VENUE_TIME_PATTERN.test(paras[i].text)){ kIdx = i; break; }
+      seen++;
+    }
+    if(kIdx >= 0){
+      var titleP = paras.slice(0, kIdx).filter(function(x){ return x.text; });
+      var end = kIdx + 1;
+      while(end < paras.length && end < kIdx + 3 && paras[end].text && VENUE_TIME_PATTERN.test(paras[end].text)) end++;
+      return mk(titleP, paras.slice(kIdx, end), paras.slice(end).filter(function(x){ return x.text; }));
+    }
     return res;
   }
 
