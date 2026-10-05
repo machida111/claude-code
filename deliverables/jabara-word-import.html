@@ -259,7 +259,7 @@
 
   <div class="card">
     <h2>Wordファイルを読み込む</h2>
-    <div class="ruby-hint">Wordファイル（.docx、旧形式の.doc）を選択すると、ファイル内のテキストボックスを1つずつパネルとして読み込みます。文字サイズが明らかに大きいテキストボックスは表紙タイトルとして、日付や会場らしい文言（「○年○月」「開式」「会館」など）を含むものは表紙サブタイトルとして自動判定し、本文パネルとは重複させずに表紙欄へ振り分けます（判定できない場合は、反映後にパネル一覧の「表紙タイトルにする」「表紙サブタイトルにする」で指定できます）。テキストボックスが無く本文の行だけのファイルは、1パネルの最大行数に収まるように、文末（「。」）や段落の頭で区切って自動でパネルに分けます。ふりがな（Wordのルビ機能）が設定されている場合は「文字[よみ]」の形式に変換されます。テキストボックスの並び順はファイル内部の順序になるため、実際の読み順と異なる場合はパネルごとの「▲」「▼」ボタンで並び替えてください。</div>
+    <div class="ruby-hint">Wordファイル（.docx、旧形式の.doc）を選択すると、ファイル内のテキストボックスを1つずつパネルとして読み込みます。文字サイズが明らかに大きいテキストボックスは表紙タイトルとして、日付や会場らしい文言（「○年○月」「開式」「会館」など）を含むものは表紙サブタイトルとして自動判定し、本文パネルとは重複させずに表紙欄へ振り分けます（判定できない場合は、反映後にパネル一覧の「表紙タイトルにする」「表紙サブタイトルにする」で指定できます）。テキストボックスが無く本文の行だけのファイルは、空行で区切られたまとまりを1パネルにします（空行が無いときは、1パネルの最大行数に収まるように、文末「。」や段落の頭で自動的に分けます）。ふりがな（Wordのルビ機能）が設定されている場合は「文字[よみ]」の形式に変換されます。テキストボックスの並び順はファイル内部の順序になるため、実際の読み順と異なる場合はパネルごとの「▲」「▼」ボタンで並び替えてください。</div>
     <input type="file" id="docxFileInput" accept=".docx,.doc">
     <div style="display:flex; align-items:center; gap:10px; margin-top:10px;">
       <button type="button" class="btn" id="docxApplyBtn" disabled>パネルに反映</button>
@@ -1151,26 +1151,31 @@
   // font size differs from the body's; (3) a date/venue line among the first
   // few paragraphs, with the lines before it as the title.
   function splitPlainCover(paras){
-    var nonEmpty = paras.filter(function(p){ return p.text; });
-    var res = {title: null, subtitle: null, rest: nonEmpty};
-    if(nonEmpty.length < 3) return res;
-    function mk(titleParas, subParas, restParas){
+    var idxs = [];
+    paras.forEach(function(p, i){ if(p.text) idxs.push(i); });
+    function restFrom(i){
+      var r = paras.slice(i);
+      while(r.length && !r[0].text) r.shift();
+      return r;
+    }
+    var res = {title: null, subtitle: null, rest: restFrom(0)};
+    if(idxs.length < 3) return res;
+    function mk(titleParas, subParas, restIdx){
       return {
         title: titleParas.length ? {text: titleParas.map(function(x){ return x.text; }).join('\n'), sizePt: titleParas[0].sizePt} : null,
         subtitle: subParas.length ? {text: subParas.map(function(x){ return x.text; }).join('\n'), sizePt: subParas[0].sizePt} : null,
-        rest: restParas
+        rest: restFrom(restIdx)
       };
     }
+    var nonEmpty = idxs.map(function(i){ return paras[i]; });
     // (1) block before the first blank paragraph
-    var s = 0;
-    while(s < paras.length && !paras[s].text) s++;
-    var e = s;
+    var s = idxs[0], e = s;
     while(e < paras.length && paras[e].text) e++;
     var block = paras.slice(s, e);
     if(block.length >= 2 && block.length <= 5 && e < paras.length){
       for(var k=1; k<block.length; k++){
         if(VENUE_TIME_PATTERN.test(block[k].text)){
-          return mk(block.slice(0, k), block.slice(k), paras.slice(e).filter(function(x){ return x.text; }));
+          return mk(block.slice(0, k), block.slice(k), e);
         }
       }
     }
@@ -1182,7 +1187,7 @@
     if(lead >= 1 && lead < nonEmpty.length){
       var first = nonEmpty[0].sizePt, split = 1;
       while(split < lead && nonEmpty[split].sizePt === first) split++;
-      return mk(nonEmpty.slice(0, split), nonEmpty.slice(split, lead), nonEmpty.slice(lead));
+      return mk(nonEmpty.slice(0, split), nonEmpty.slice(split, lead), idxs[lead]);
     }
     // (3) date/venue line near the top
     var seen = 0, kIdx = -1;
@@ -1195,15 +1200,42 @@
       var titleP = paras.slice(0, kIdx).filter(function(x){ return x.text; });
       var end = kIdx + 1;
       while(end < paras.length && end < kIdx + 3 && paras[end].text && VENUE_TIME_PATTERN.test(paras[end].text)) end++;
-      return mk(titleP, paras.slice(kIdx, end), paras.slice(end).filter(function(x){ return x.text; }));
+      return mk(titleP, paras.slice(kIdx, end), end);
     }
     return res;
+  }
+
+  function rubyParen(line){
+    return line.replace(/([\u4E00-\u9FFF々〆]+)[（(]([\u3041-\u3096ー]+)[）)]/g, '$1[$2]');
+  }
+
+  // Body paragraphs of a plain document. If the author separated panels with
+  // blank lines, each blank-separated group is a panel (split further only if
+  // it exceeds the max line count); otherwise pack the lines automatically.
+  function panelsFromBodyParas(paras){
+    var hasBlank = false, started = false;
+    paras.forEach(function(p){ if(p.text) started = true; else if(started) hasBlank = true; });
+    if(!hasBlank){
+      return chunkPlainLines(paras.filter(function(p){ return p.text; }).map(function(p){ return p.text; }));
+    }
+    var maxL = Math.max(1, parseInt(maxLinesInput.value, 10) || 3);
+    var groups = [], cur = [];
+    paras.forEach(function(p){
+      if(p.text){ cur.push(rubyParen(p.text)); }
+      else if(cur.length){ groups.push(cur); cur = []; }
+    });
+    if(cur.length) groups.push(cur);
+    var out = [];
+    groups.forEach(function(g){
+      splitSegmentIntoPanels(g, maxL).forEach(function(c){ out.push(c.join('\n')); });
+    });
+    return out;
   }
 
   function finishParsed(candidates, plainParas){
     if(!candidates.length){
       var pc = splitPlainCover(plainParas);
-      return {panels: chunkPlainLines(pc.rest.map(function(p){ return p.text; })).map(function(t){ return {text:t}; }), coverTitle: pc.title, coverSubtitle: pc.subtitle};
+      return {panels: panelsFromBodyParas(pc.rest).map(function(t){ return {text:t}; }), coverTitle: pc.title, coverSubtitle: pc.subtitle};
     }
     var parts = detectCoverParts(candidates);
     return {
