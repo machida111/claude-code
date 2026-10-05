@@ -51,6 +51,9 @@
   @media (max-width:700px){.settings-grid{grid-template-columns:1fr 1fr;}}
   .hint{font-size:11.5px; color:var(--ink-400); margin-top:4px;}
 
+  .card h2.has-toggle{display:flex; justify-content:space-between; align-items:center; gap:10px; cursor:pointer; user-select:none;}
+  .card.collapsed h2.has-toggle{margin-bottom:0;}
+  .card-toggle{font-weight:400;}
   .board-head{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:10px;}
   .board{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-start;}
   .bpanel{width:158px; min-height:64px; border:1px solid var(--line-strong); border-radius:8px; padding:6px; background:var(--paper-1);}
@@ -265,7 +268,7 @@
   </div>
 
   <div class="card">
-    <h2>行を並べ替える（ドラッグ）</h2>
+    <h2>A. 行ごと動かす（ドラッグで並べ替え）</h2>
     <div class="ruby-hint">行をクリックすると選択／解除できます（複数選択OK、Shiftを押しながらクリックで範囲選択）。選んだ行をつかんで、移したい場所（行と行の間、またはパネルの空いているところ）にドロップすると、まとめて移動します。間違えたときは「元に戻す」を押してください。</div>
     <div class="board-head">
       <button type="button" class="ruby-btn" id="boardClearSel">選択解除</button>
@@ -276,7 +279,7 @@
   </div>
 
   <div class="card">
-    <h2>パネルごとの文言</h2>
+    <h2>B. 文字を直接直す（ふりがな・1文字単位の修正）</h2>
     <div class="ruby-hint">文字を選択して「ふりがなを付ける」ボタンを押すと、そのパネルの読みが正しい位置に付きます。改行すると次の行（列）に送られます。移動したい文字や文を選択して「前のパネルへ移動」「次のパネルへ移動」を押すと、隣のパネルとの境目を微調整できます。</div>
     <div id="panelList"></div>
     <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
@@ -1563,6 +1566,24 @@
   coverSubtitleBtns.appendChild(makeSpaceAdjustBtn(coverSubtitle, [5, 10]));
   coverSubtitleBtns.appendChild(makeRubyBtn(coverSubtitle));
   document.getElementById('coverSubtitleRuby').appendChild(coverSubtitleBtns);
+
+  // Every card can be folded away so only the editing method in use stays open.
+  document.querySelectorAll('.card').forEach(function(card){
+    var h2 = card.querySelector('h2');
+    if(!h2) return;
+    var body = document.createElement('div'); body.className = 'card-body';
+    while(h2.nextSibling){ body.appendChild(h2.nextSibling); }
+    card.appendChild(body);
+    h2.classList.add('has-toggle');
+    var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'ruby-btn card-toggle'; btn.textContent = '閉じる';
+    h2.appendChild(btn);
+    h2.addEventListener('click', function(e){
+      if(e.target.closest && e.target.closest('.card-body')) return;
+      body.hidden = !body.hidden;
+      card.classList.toggle('collapsed', body.hidden);
+      btn.textContent = body.hidden ? '開く' : '閉じる';
+    });
+  });
 
   renderPanelEditor();
   renderSheets();
