@@ -454,7 +454,18 @@
           var start = ta.selectionStart, end = ta.selectionEnd;
           var moving = start !== end ? ta.value.slice(start, end) : '';
           if(!moving){
-            showMoveMsg('移動したい文字をテキスト内で選択してから押してください。');
+            // No selection: move the whole first line (to the previous
+            // panel) or last line (to the next panel) as its own line.
+            var allLines = ta.value.split('\n');
+            if(!ta.value.trim()){ showMoveMsg('このパネルは空です。'); return; }
+            var targetIdx0 = idx + dir;
+            if(targetIdx0 < 0 || targetIdx0 >= panels.length){ return; }
+            var lineMoved = dir < 0 ? allLines.shift() : allLines.pop();
+            p.text = allLines.join('\n');
+            var tgt = panels[targetIdx0];
+            if(!tgt.text){ tgt.text = lineMoved; }
+            else { tgt.text = dir < 0 ? (tgt.text + '\n' + lineMoved) : (lineMoved + '\n' + tgt.text); }
+            renderPanelEditor(); renderSheets();
             return;
           }
           var openCount = (moving.match(/\[/g)||[]).length;
@@ -485,8 +496,8 @@
         return btn;
       }
       moveBtns.style.flexWrap = 'wrap';
-      if(idx > 0) moveBtns.appendChild(makeMoveBtn('◀ 前のパネルへ移動', -1));
-      if(idx < panels.length - 1) moveBtns.appendChild(makeMoveBtn('次のパネルへ移動 ▶', 1));
+      if(idx > 0) moveBtns.appendChild(makeMoveBtn('◀ 先頭行を前のパネルへ', -1));
+      if(idx < panels.length - 1) moveBtns.appendChild(makeMoveBtn('末尾行を次のパネルへ ▶', 1));
       moveBtns.appendChild(makeToCoverBtn('表紙タイトルにする', coverTitle));
       moveBtns.appendChild(makeToCoverBtn('表紙サブタイトルにする', coverSubtitle));
       moveRow.appendChild(moveBtns); moveRow.appendChild(moveMsg);
