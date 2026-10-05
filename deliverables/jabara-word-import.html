@@ -1577,12 +1577,16 @@
     h2.classList.add('has-toggle');
     var btn = document.createElement('button'); btn.type = 'button'; btn.className = 'ruby-btn card-toggle'; btn.textContent = '閉じる';
     h2.appendChild(btn);
+    function applyFold(){
+      card.classList.toggle('collapsed', body.hidden);
+      btn.textContent = body.hidden ? '開く' : '閉じる';
+    }
     h2.addEventListener('click', function(e){
       if(e.target.closest && e.target.closest('.card-body')) return;
       body.hidden = !body.hidden;
-      card.classList.toggle('collapsed', body.hidden);
-      btn.textContent = body.hidden ? '開く' : '閉じる';
+      applyFold();
     });
+    if(/^A\./.test(h2.firstChild.textContent)){ body.hidden = true; applyFold(); }
   });
 
   renderPanelEditor();
