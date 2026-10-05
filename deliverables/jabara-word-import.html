@@ -943,6 +943,17 @@
     return lines;
   }
 
+  // Body paragraphs including blank ones (as '' text) with their font size.
+  function plainParasFromBody(container){
+    var out = [];
+    var pList = container.getElementsByTagName('w:p');
+    for(var i=0; i<pList.length; i++){
+      var t = xmlParagraphLine(pList[i]);
+      out.push({text: t, sizePt: t ? xmlParagraphSizePt(pList[i]) : null});
+    }
+    return out;
+  }
+
   function xmlRunHasText(runEl){
     var ts = runEl.getElementsByTagName('w:t');
     for(var j=0; j<ts.length; j++){ if(ts[j].textContent){ return true; } }
@@ -1075,12 +1086,12 @@
       var groups = splitTextboxIntoCandidates(txbxList[i]);
       groups.forEach(function(g){ if(g.text) candidates.push(g); });
     }
-    var plainLines = [];
+    var plainParas = [];
     if(!candidates.length){
       var body = xmlDoc.getElementsByTagName('w:body')[0];
-      if(body) plainLines = panelsFromParagraphs(body);
+      if(body) plainParas = plainParasFromBody(body);
     }
-    return finishParsed(candidates, plainLines);
+    return finishParsed(candidates, plainParas);
   }
 
   // A document with no text boxes is just lines of body text. Pack them
@@ -1134,9 +1145,29 @@
     return out;
   }
 
-  function finishParsed(candidates, plainLines){
+  // Plain documents: if the first block (up to the first blank paragraph) is
+  // 2-5 lines and one of its later lines reads like a date/venue, that block
+  // is the cover — the lines before it are the title, the rest the subtitle.
+  function splitPlainCover(paras){
+    var i = 0;
+    while(i < paras.length && !paras[i].text) i++;
+    var start = i, end = i;
+    while(end < paras.length && paras[end].text) end++;
+    var block = paras.slice(start, end);
+    var res = {title: null, subtitle: null, rest: paras.slice(end).filter(function(p){ return p.text; })};
+    if(block.length < 2 || block.length > 5 || end >= paras.length){ res.rest = paras.filter(function(p){ return p.text; }); return res; }
+    var j = -1;
+    for(var k=1; k<block.length; k++){ if(VENUE_TIME_PATTERN.test(block[k].text)){ j = k; break; } }
+    if(j < 0){ res.rest = paras.filter(function(p){ return p.text; }); return res; }
+    res.title = {text: block.slice(0, j).map(function(b){ return b.text; }).join('\n'), sizePt: block[0].sizePt};
+    res.subtitle = {text: block.slice(j).map(function(b){ return b.text; }).join('\n'), sizePt: block[j].sizePt};
+    return res;
+  }
+
+  function finishParsed(candidates, plainParas){
     if(!candidates.length){
-      return {panels: chunkPlainLines(plainLines).map(function(t){ return {text:t}; }), coverTitle:null, coverSubtitle:null};
+      var pc = splitPlainCover(plainParas);
+      return {panels: chunkPlainLines(pc.rest.map(function(p){ return p.text; })).map(function(t){ return {text:t}; }), coverTitle: pc.title, coverSubtitle: pc.subtitle};
     }
     var parts = detectCoverParts(candidates);
     return {
@@ -1152,9 +1183,7 @@
     r.textboxes.forEach(function(paras){
       groupParasBySize(paras).forEach(function(g){ if(g.text) candidates.push(g); });
     });
-    var plainLines = [];
-    if(!candidates.length){ plainLines = r.mainParagraphs.map(function(p){ return p.text; }); }
-    return finishParsed(candidates, plainLines);
+    return finishParsed(candidates, candidates.length ? [] : r.mainParagraphs);
   }
 
   // ---- Legacy .doc (Word 97-2003 binary) reader ---------------------------
@@ -1421,7 +1450,7 @@
       if(cur.trim()) flush(str.length);
       return paras.map(function(pr){
         var t = pr.text.trim();
-        if(!t) return null;
+        if(!t) return {text: '', sizePt: null};
         var ind = indentCharsAtCp(pr.cpStart, pr.sizePt);
         return {text: (ind > 0 ? new Array(ind + 1).join('　') : '') + t, sizePt: pr.sizePt};
       }).filter(function(x){ return x; });
@@ -1435,7 +1464,7 @@
       for(var bi=0; bi<nBox; bi++){
         var c0 = tdv.getInt32(tx.fc + 4*bi, true), c1 = tdv.getInt32(tx.fc + 4*(bi+1), true);
         if(c1 <= c0) continue;
-        var ps = paragraphsOf(cpBase + c0, cpBase + c1);
+        var ps = paragraphsOf(cpBase + c0, cpBase + c1).filter(function(q){ return q.text; });
         if(ps.length) boxes.push(ps);
       }
     }
