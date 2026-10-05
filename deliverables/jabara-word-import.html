@@ -51,6 +51,17 @@
   @media (max-width:700px){.settings-grid{grid-template-columns:1fr 1fr;}}
   .hint{font-size:11.5px; color:var(--ink-400); margin-top:4px;}
 
+  .board-head{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-bottom:10px;}
+  .board{display:flex; flex-wrap:wrap; gap:10px; align-items:flex-start;}
+  .bpanel{width:158px; min-height:64px; border:1px solid var(--line-strong); border-radius:8px; padding:6px; background:var(--paper-1);}
+  .bpanel.over{outline:2px dashed var(--indigo-600); outline-offset:1px;}
+  .bpanel .bhead{display:flex; justify-content:space-between; align-items:center; font-size:11px; color:var(--ink-600); margin-bottom:4px;}
+  .bpanel .bhead .cnt.warn{color:var(--vermilion-600); font-weight:700;}
+  .bline{padding:4px 6px; margin:3px 0; border:1px solid var(--line); border-radius:5px; background:var(--paper-0); font-size:12px; line-height:1.9; cursor:grab; user-select:none; word-break:break-all;}
+  .bline.sel{background:var(--indigo-600); color:var(--paper-1); border-color:var(--indigo-600);}
+  .bline.empty{color:var(--ink-400); font-style:italic;}
+  .bline.dropbefore{box-shadow:0 -3px 0 var(--vermilion-600);}
+  .bline.dropafter{box-shadow:0 3px 0 var(--vermilion-600);}
   .panel-row{display:grid; grid-template-columns:44px 1fr 72px 34px; gap:10px; align-items:start; margin-bottom:10px;}
   .panel-row .idx{display:flex; align-items:center; justify-content:center; min-height:38px; font-weight:700; color:var(--ink-600); font-size:12.5px;}
   .panel-row .idx button:disabled{opacity:.35; cursor:default;}
@@ -251,6 +262,17 @@
       <button type="button" class="btn" id="docxApplyBtn" disabled>パネルに反映</button>
       <span class="hint" id="docxConfirmMsg" style="margin:0;"></span>
     </div>
+  </div>
+
+  <div class="card">
+    <h2>行を並べ替える（ドラッグ）</h2>
+    <div class="ruby-hint">行をクリックすると選択／解除できます（複数選択OK、Shiftを押しながらクリックで範囲選択）。選んだ行をつかんで、移したい場所（行と行の間、またはパネルの空いているところ）にドロップすると、まとめて移動します。間違えたときは「元に戻す」を押してください。</div>
+    <div class="board-head">
+      <button type="button" class="ruby-btn" id="boardClearSel">選択解除</button>
+      <button type="button" class="ruby-btn" id="boardUndo" disabled>元に戻す</button>
+      <span class="hint" id="boardMsg" style="margin:0;"></span>
+    </div>
+    <div class="board" id="lineBoard"></div>
   </div>
 
   <div class="card">
@@ -526,7 +548,133 @@
 
   function foldLabel(globalFoldIdx){ return globalFoldIdx % 2 === 0 ? '山' : '谷'; }
 
+
+  // ---- Drag-and-drop line board ----
+  var boardEl = document.getElementById('lineBoard');
+  var boardUndoBtn = document.getElementById('boardUndo');
+  var boardMsg = document.getElementById('boardMsg');
+  var boardUndoStack = [];
+  var boardSel = {};
+  var boardLast = null;
+  var boardDrop = null;
+
+  function boardLinesOf(p){ return p.text ? p.text.split('\n') : []; }
+  function boardFlat(){
+    var out = [];
+    panels.forEach(function(p, pi){ boardLinesOf(p).forEach(function(_, li){ out.push([pi, li]); }); });
+    return out;
+  }
+  function boardSelCount(){ return Object.keys(boardSel).length; }
+  function boardClearDropMarks(){
+    boardEl.querySelectorAll('.dropbefore,.dropafter,.over').forEach(function(el){
+      el.classList.remove('dropbefore'); el.classList.remove('dropafter'); el.classList.remove('over');
+    });
+  }
+  function boardPaintSel(){
+    boardEl.querySelectorAll('.bline').forEach(function(el){
+      el.classList.toggle('sel', !!boardSel[el.dataset.p + ':' + el.dataset.l]);
+    });
+    boardMsg.textContent = boardSelCount() ? (boardSelCount() + '行を選択中') : '';
+  }
+
+  function boardMove(targetP, insertIdx){
+    var keys = Object.keys(boardSel).map(function(k){ var a = k.split(':'); return [parseInt(a[0],10), parseInt(a[1],10)]; });
+    if(!keys.length) return;
+    keys.sort(function(a, b){ return a[0] - b[0] || a[1] - b[1]; });
+    boardUndoStack.push(panels.map(function(p){ return p.text; }));
+    if(boardUndoStack.length > 50) boardUndoStack.shift();
+    var moved = keys.map(function(k){ return boardLinesOf(panels[k[0]])[k[1]]; });
+    var removedBefore = keys.filter(function(k){ return k[0] === targetP && k[1] < insertIdx; }).length;
+    var lines = panels.map(function(p){ return boardLinesOf(p); });
+    var selSet = {}; keys.forEach(function(k){ selSet[k[0] + ':' + k[1]] = true; });
+    var kept = lines.map(function(ls, pi){ return ls.filter(function(_, li){ return !selSet[pi + ':' + li]; }); });
+    var at = insertIdx - removedBefore;
+    Array.prototype.splice.apply(kept[targetP], [at, 0].concat(moved));
+    panels.forEach(function(p, pi){ p.text = kept[pi].join('\n'); });
+    boardSel = {}; boardLast = null; boardDrop = null;
+    renderPanelEditor(); renderSheets();
+  }
+
+  function renderBoard(){
+    if(!boardEl) return;
+    var valid = {};
+    panels.forEach(function(p, pi){ boardLinesOf(p).forEach(function(_, li){ valid[pi + ':' + li] = true; }); });
+    Object.keys(boardSel).forEach(function(k){ if(!valid[k]) delete boardSel[k]; });
+    var maxL = Math.max(1, parseInt(maxLinesInput.value, 10) || 3);
+    boardUndoBtn.disabled = !boardUndoStack.length;
+    boardEl.innerHTML = '';
+    panels.forEach(function(p, pi){
+      var lines = boardLinesOf(p);
+      var box = document.createElement('div'); box.className = 'bpanel'; box.dataset.p = pi;
+      var head = document.createElement('div'); head.className = 'bhead';
+      var title = document.createElement('span'); title.textContent = 'パネル ' + (pi + 1);
+      var cnt = document.createElement('span'); cnt.className = 'cnt' + (lines.length > maxL ? ' warn' : ''); cnt.textContent = lines.length + '行';
+      head.appendChild(title); head.appendChild(cnt); box.appendChild(head);
+      lines.forEach(function(text, li){
+        var chip = document.createElement('div'); chip.className = 'bline' + (text.trim() ? '' : ' empty');
+        chip.draggable = true; chip.dataset.p = pi; chip.dataset.l = li;
+        if(text.trim()) chip.innerHTML = renderRubyText(text); else chip.textContent = '（空行）';
+        chip.addEventListener('click', function(e){
+          var key = pi + ':' + li;
+          if(e.shiftKey && boardLast){
+            var flat = boardFlat(), a = -1, b = -1;
+            flat.forEach(function(f, i){ if(f[0] === boardLast[0] && f[1] === boardLast[1]) a = i; if(f[0] === pi && f[1] === li) b = i; });
+            if(a >= 0 && b >= 0){
+              for(var i2 = Math.min(a, b); i2 <= Math.max(a, b); i2++){ boardSel[flat[i2][0] + ':' + flat[i2][1]] = true; }
+            }
+          } else if(boardSel[key]){ delete boardSel[key]; }
+          else { boardSel[key] = true; }
+          boardLast = [pi, li];
+          boardPaintSel();
+        });
+        chip.addEventListener('dragstart', function(e){
+          var key = pi + ':' + li;
+          if(!boardSel[key]){ boardSel = {}; boardSel[key] = true; boardPaintSel(); }
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', 'lines');
+        });
+        chip.addEventListener('dragend', function(){ boardClearDropMarks(); });
+        chip.addEventListener('dragover', function(e){
+          e.preventDefault(); e.stopPropagation();
+          var r = chip.getBoundingClientRect(), after = (e.clientY - r.top) > r.height / 2;
+          boardClearDropMarks();
+          chip.classList.add(after ? 'dropafter' : 'dropbefore');
+          boardDrop = {p: pi, idx: li + (after ? 1 : 0)};
+        });
+        chip.addEventListener('drop', function(e){
+          e.preventDefault(); e.stopPropagation();
+          var r = chip.getBoundingClientRect(), after = (e.clientY - r.top) > r.height / 2;
+          boardClearDropMarks();
+          boardMove(pi, li + (after ? 1 : 0));
+        });
+        box.appendChild(chip);
+      });
+      box.addEventListener('dragover', function(e){
+        e.preventDefault();
+        boardClearDropMarks(); box.classList.add('over');
+        boardDrop = {p: pi, idx: lines.length};
+      });
+      box.addEventListener('dragleave', function(e){ if(e.target === box) box.classList.remove('over'); });
+      box.addEventListener('drop', function(e){
+        e.preventDefault(); boardClearDropMarks();
+        boardMove(pi, lines.length);
+      });
+      boardEl.appendChild(box);
+    });
+    boardPaintSel();
+  }
+
+  document.getElementById('boardClearSel').addEventListener('click', function(){ boardSel = {}; boardLast = null; boardPaintSel(); });
+  boardUndoBtn.addEventListener('click', function(){
+    var snap = boardUndoStack.pop();
+    if(!snap) return;
+    snap.forEach(function(t, i){ if(panels[i]) panels[i].text = t; });
+    boardSel = {}; boardLast = null;
+    renderPanelEditor(); renderSheets();
+  });
+
   function renderSheets(){
+    renderBoard();
     var panelW = parseFloat(panelWidthInput.value) || 6.8;
     var marginTop = parseFloat(marginTopInput.value) || 0;
     var marginBottom = parseFloat(marginBottomInput.value) || 0;
